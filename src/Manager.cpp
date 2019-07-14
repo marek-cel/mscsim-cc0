@@ -1,0 +1,393 @@
+/****************************************************************************//*
+ * Copyright (C) 2019 Marek M. Cel
+ *
+ * Creative Commons Legal Code
+ *
+ * CC0 1.0 Universal
+ *
+ *     CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE
+ *     LEGAL SERVICES. DISTRIBUTION OF THIS DOCUMENT DOES NOT CREATE AN
+ *     ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS
+ *     INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES
+ *     REGARDING THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS
+ *     PROVIDED HEREUNDER, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM
+ *     THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS PROVIDED
+ *     HEREUNDER.
+ *
+ * Statement of Purpose
+ *
+ * The laws of most jurisdictions throughout the world automatically confer
+ * exclusive Copyright and Related Rights (defined below) upon the creator
+ * and subsequent owner(s) (each and all, an "owner") of an original work of
+ * authorship and/or a database (each, a "Work").
+ *
+ * Certain owners wish to permanently relinquish those rights to a Work for
+ * the purpose of contributing to a commons of creative, cultural and
+ * scientific works ("Commons") that the public can reliably and without fear
+ * of later claims of infringement build upon, modify, incorporate in other
+ * works, reuse and redistribute as freely as possible in any form whatsoever
+ * and for any purposes, including without limitation commercial purposes.
+ * These owners may contribute to the Commons to promote the ideal of a free
+ * culture and the further production of creative, cultural and scientific
+ * works, or to gain reputation or greater distribution for their Work in
+ * part through the use and efforts of others.
+ *
+ * For these and/or other purposes and motivations, and without any
+ * expectation of additional consideration or compensation, the person
+ * associating CC0 with a Work (the "Affirmer"), to the extent that he or she
+ * is an owner of Copyright and Related Rights in the Work, voluntarily
+ * elects to apply CC0 to the Work and publicly distribute the Work under its
+ * terms, with knowledge of his or her Copyright and Related Rights in the
+ * Work and the meaning and intended legal effect of CC0 on those rights.
+ *
+ * 1. Copyright and Related Rights. A Work made available under CC0 may be
+ * protected by copyright and related or neighboring rights ("Copyright and
+ * Related Rights"). Copyright and Related Rights include, but are not
+ * limited to, the following:
+ *
+ *   i. the right to reproduce, adapt, distribute, perform, display,
+ *      communicate, and translate a Work;
+ *  ii. moral rights retained by the original author(s) and/or performer(s);
+ * iii. publicity and privacy rights pertaining to a person's image or
+ *      likeness depicted in a Work;
+ *  iv. rights protecting against unfair competition in regards to a Work,
+ *      subject to the limitations in paragraph 4(a), below;
+ *   v. rights protecting the extraction, dissemination, use and reuse of data
+ *      in a Work;
+ *  vi. database rights (such as those arising under Directive 96/9/EC of the
+ *      European Parliament and of the Council of 11 March 1996 on the legal
+ *      protection of databases, and under any national implementation
+ *      thereof, including any amended or successor version of such
+ *      directive); and
+ * vii. other similar, equivalent or corresponding rights throughout the
+ *      world based on applicable law or treaty, and any national
+ *      implementations thereof.
+ *
+ * 2. Waiver. To the greatest extent permitted by, but not in contravention
+ * of, applicable law, Affirmer hereby overtly, fully, permanently,
+ * irrevocably and unconditionally waives, abandons, and surrenders all of
+ * Affirmer's Copyright and Related Rights and associated claims and causes
+ * of action, whether now known or unknown (including existing as well as
+ * future claims and causes of action), in the Work (i) in all territories
+ * worldwide, (ii) for the maximum duration provided by applicable law or
+ * treaty (including future time extensions), (iii) in any current or future
+ * medium and for any number of copies, and (iv) for any purpose whatsoever,
+ * including without limitation commercial, advertising or promotional
+ * purposes (the "Waiver"). Affirmer makes the Waiver for the benefit of each
+ * member of the public at large and to the detriment of Affirmer's heirs and
+ * successors, fully intending that such Waiver shall not be subject to
+ * revocation, rescission, cancellation, termination, or any other legal or
+ * equitable action to disrupt the quiet enjoyment of the Work by the public
+ * as contemplated by Affirmer's express Statement of Purpose.
+ *
+ * 3. Public License Fallback. Should any part of the Waiver for any reason
+ * be judged legally invalid or ineffective under applicable law, then the
+ * Waiver shall be preserved to the maximum extent permitted taking into
+ * account Affirmer's express Statement of Purpose. In addition, to the
+ * extent the Waiver is so judged Affirmer hereby grants to each affected
+ * person a royalty-free, non transferable, non sublicensable, non exclusive,
+ * irrevocable and unconditional license to exercise Affirmer's Copyright and
+ * Related Rights in the Work (i) in all territories worldwide, (ii) for the
+ * maximum duration provided by applicable law or treaty (including future
+ * time extensions), (iii) in any current or future medium and for any number
+ * of copies, and (iv) for any purpose whatsoever, including without
+ * limitation commercial, advertising or promotional purposes (the
+ * "License"). The License shall be deemed effective as of the date CC0 was
+ * applied by Affirmer to the Work. Should any part of the License for any
+ * reason be judged legally invalid or ineffective under applicable law, such
+ * partial invalidity or ineffectiveness shall not invalidate the remainder
+ * of the License, and in such case Affirmer hereby affirms that he or she
+ * will not (i) exercise any of his or her remaining Copyright and Related
+ * Rights in the Work or (ii) assert any associated claims and causes of
+ * action with respect to the Work, in either case contrary to Affirmer's
+ * express Statement of Purpose.
+ *
+ * 4. Limitations and Disclaimers.
+ *
+ *  a. No trademark or patent rights held by Affirmer are waived, abandoned,
+ *     surrendered, licensed or otherwise affected by this document.
+ *  b. Affirmer offers the Work as-is and makes no representations or
+ *     warranties of any kind concerning the Work, express, implied,
+ *     statutory or otherwise, including without limitation warranties of
+ *     title, merchantability, fitness for a particular purpose, non
+ *     infringement, or the absence of latent or other defects, accuracy, or
+ *     the present or absence of errors, whether or not discoverable, all to
+ *     the greatest extent permissible under applicable law.
+ *  c. Affirmer disclaims responsibility for clearing rights of other persons
+ *     that may apply to the Work or any use thereof, including without
+ *     limitation any person's Copyright and Related Rights in the Work.
+ *     Further, Affirmer disclaims responsibility for obtaining any necessary
+ *     consents, permissions or other rights required for any use of the
+ *     Work.
+ *  d. Affirmer understands and acknowledges that Creative Commons is not a
+ *     party to this document and has no duty or obligation with respect to
+ *     this CC0 or use of the Work.
+ *
+ ******************************************************************************/
+
+#include <Manager.h>
+#include <Data.h>
+
+#include <hid/hid_Manager.h>
+
+////////////////////////////////////////////////////////////////////////////////
+
+Data::DataBuf Data::m_data;
+
+////////////////////////////////////////////////////////////////////////////////
+
+Manager::Manager() :
+    QObject( 0 ),
+
+    m_nav ( 0 ),
+    m_sim ( 0 ),
+    m_win ( 0 ),
+
+    m_timer ( 0 ),
+    m_timerId ( 0 ),
+    m_timeStep ( 0.0 )
+{
+    m_nav = new Navigation();
+    m_sim = new Simulation();
+    m_win = new MainWindow();
+
+    m_timer = new QElapsedTimer();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Manager::~Manager()
+{
+    if ( m_timerId != 0 ) killTimer( m_timerId );
+
+    if ( m_timer ) delete m_timer;
+    m_timer = 0;
+
+    if ( m_nav ) delete m_nav;
+    m_nav = 0;
+
+    if ( m_sim )
+    {
+        while ( m_sim->isRunning() )
+        {
+            m_sim->quit();
+        }
+
+        delete m_sim;
+    }
+    m_sim = 0;
+
+    if ( m_win ) delete m_win;
+    m_win = 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Manager::init()
+{
+    qRegisterMetaType< Data::DataBuf >( "Data::DataBuf" );
+    qRegisterMetaType< fdm::DataOut  >( "fdm::DataOut"  );
+
+    connect( this  , SIGNAL(dataInpUpdated(const Data::DataBuf *)) , m_sim , SLOT(onDataInpUpdated(const Data::DataBuf *)) );
+    connect( m_sim , SIGNAL(dataOutUpdated(const fdm::DataOut &))  , this  , SLOT(onDataOutUpdated(const fdm::DataOut &))  );
+
+    hid::Manager::instance()->init();
+
+    m_sim->init();
+
+    m_win->show();
+    m_win->init();
+
+    m_timerId = startTimer( 1000 * FDM_TIME_STEP );
+
+    m_timer->start();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Manager::timerEvent( QTimerEvent *event )
+{
+    /////////////////////////////
+    QObject::timerEvent( event );
+    /////////////////////////////
+
+    m_timeStep = Data::get()->timeCoef * (double)m_timer->restart() / 1000.0;
+
+    if ( Data::get()->phaseInp == fdm::DataInp::Idle )
+    {
+        hid::Manager::instance()->reset( Data::get()->initial.altitude_agl < FDM_MIN_INIT_ALTITUDE );
+    }
+    else if ( Data::get()->phaseInp == fdm::DataInp::Work )
+    {
+        // TODO
+    }
+
+    hid::Manager::instance()->update( m_timeStep );
+    m_nav->update();
+
+    // controls
+    Data::get()->controls.roll         = -hid::Manager::instance()->getCtrlRoll();
+    Data::get()->controls.pitch        = -hid::Manager::instance()->getCtrlPitch();
+    Data::get()->controls.yaw          = -hid::Manager::instance()->getCtrlYaw();
+    Data::get()->controls.trim_roll    = -hid::Manager::instance()->getTrimRoll();
+    Data::get()->controls.trim_pitch   = -hid::Manager::instance()->getTrimPitch();
+    Data::get()->controls.trim_yaw     = -hid::Manager::instance()->getTrimYaw();
+    Data::get()->controls.brake_l      =  hid::Manager::instance()->getBrakeLeft();
+    Data::get()->controls.brake_r      =  hid::Manager::instance()->getBrakeRight();
+    Data::get()->controls.landing_gear =  hid::Manager::instance()->getLandingGear();
+    Data::get()->controls.nose_wheel   =  hid::Manager::instance()->getCtrlYaw();
+    Data::get()->controls.flaps        =  hid::Manager::instance()->getFlaps();
+    Data::get()->controls.airbrake     =  hid::Manager::instance()->getAirbrake();
+    Data::get()->controls.spoilers     =  hid::Manager::instance()->getSpoilers();
+    Data::get()->controls.collective   =  hid::Manager::instance()->getCollective();
+    Data::get()->controls.lg_handle    =  hid::Manager::instance()->isLgHandleDown();
+    Data::get()->controls.nw_steering  =  true; // TODO
+    Data::get()->controls.antiskid     =  true; // TODO
+
+    // engines
+    for ( unsigned int i = 0; i < FDM_MAX_ENGINES; i++ )
+    {
+        Data::get()->propulsion.engine[ i ].throttle  = hid::Manager::instance()->getThrottle( i );
+        Data::get()->propulsion.engine[ i ].mixture   = hid::Manager::instance()->getMixture( i );
+        Data::get()->propulsion.engine[ i ].propeller = hid::Manager::instance()->getPropeller( i );
+    }
+
+    ///////////////////////////////////
+    emit dataInpUpdated( Data::get() );
+    ///////////////////////////////////
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Manager::onDataOutUpdated( const fdm::DataOut &dataOut )
+{
+    // hud
+    Data::get()->hud.roll    = dataOut.flight.roll;
+    Data::get()->hud.pitch   = dataOut.flight.pitch;
+    Data::get()->hud.heading = dataOut.flight.heading;
+
+    Data::get()->hud.angleOfAttack = dataOut.flight.angleOfAttack;
+    Data::get()->hud.sideslipAngle = dataOut.flight.sideslipAngle;
+
+    Data::get()->hud.altitude  = dataOut.flight.altitude_asl;
+    Data::get()->hud.climbRate = dataOut.flight.climbRate;
+    Data::get()->hud.radioAlt  = dataOut.flight.altitude_agl;
+
+    Data::get()->hud.airspeed   = dataOut.flight.airspeed;
+    Data::get()->hud.machNumber = dataOut.flight.machNumber;
+    Data::get()->hud.g_force    = dataOut.flight.g_force_z;
+
+    Data::get()->hud.ils_visible      = Data::get()->navigation.ils_visible;
+    Data::get()->hud.ils_gs_deviation = Data::get()->navigation.ils_gs_deviation;
+    Data::get()->hud.ils_lc_deviation = Data::get()->navigation.ils_lc_deviation;
+
+    Data::get()->hud.stall = dataOut.flight.stall;
+
+    // ownship
+    Data::get()->ownship.latitude  = dataOut.flight.latitude;
+    Data::get()->ownship.longitude = dataOut.flight.longitude;
+
+    Data::get()->ownship.altitude_asl = dataOut.flight.altitude_asl;
+    Data::get()->ownship.altitude_agl = dataOut.flight.altitude_agl;
+
+    Data::get()->ownship.roll    = dataOut.flight.roll;
+    Data::get()->ownship.pitch   = dataOut.flight.pitch;
+    Data::get()->ownship.heading = dataOut.flight.heading;
+
+    Data::get()->ownship.angleOfAttack = dataOut.flight.angleOfAttack;
+    Data::get()->ownship.sideslipAngle = dataOut.flight.sideslipAngle;
+
+    Data::get()->ownship.course    = dataOut.flight.course;
+    Data::get()->ownship.pathAngle = dataOut.flight.pathAngle;
+
+    Data::get()->ownship.slipSkidAngle = dataOut.flight.slipSkidAngle;
+
+    Data::get()->ownship.airspeed   = dataOut.flight.airspeed;
+    Data::get()->ownship.machNumber = dataOut.flight.machNumber;
+    Data::get()->ownship.climbRate  = dataOut.flight.climbRate;
+
+    Data::get()->ownship.rollRate  = dataOut.flight.rollRate;
+    Data::get()->ownship.pitchRate = dataOut.flight.pitchRate;
+    Data::get()->ownship.yawRate   = dataOut.flight.yawRate;
+    Data::get()->ownship.turnRate  = dataOut.flight.turnRate;
+
+    Data::get()->ownship.g_force_x = dataOut.flight.g_force_x;
+    Data::get()->ownship.g_force_y = dataOut.flight.g_force_y;
+    Data::get()->ownship.g_force_z = dataOut.flight.g_force_z;
+
+    Data::get()->ownship.pos_x_wgs = dataOut.flight.pos_x_wgs;
+    Data::get()->ownship.pos_y_wgs = dataOut.flight.pos_y_wgs;
+    Data::get()->ownship.pos_z_wgs = dataOut.flight.pos_z_wgs;
+
+    Data::get()->ownship.att_e0_wgs = dataOut.flight.att_e0_wgs;
+    Data::get()->ownship.att_ex_wgs = dataOut.flight.att_ex_wgs;
+    Data::get()->ownship.att_ey_wgs = dataOut.flight.att_ey_wgs;
+    Data::get()->ownship.att_ez_wgs = dataOut.flight.att_ez_wgs;
+
+    Data::get()->ownship.ailerons    = dataOut.controls.ailerons;
+    Data::get()->ownship.elevator    = dataOut.controls.elevator;
+    Data::get()->ownship.elevons     = dataOut.controls.elevons;
+    Data::get()->ownship.rudder      = dataOut.controls.rudder;
+    Data::get()->ownship.flaps       = dataOut.controls.flaps;
+    Data::get()->ownship.flaperons   = dataOut.controls.flaperons;
+    Data::get()->ownship.lef         = dataOut.controls.lef;
+    Data::get()->ownship.airbrake    = dataOut.controls.airbrake;
+    Data::get()->ownship.landingGear =  hid::Manager::instance()->getLandingGear();
+
+    if ( dataOut.stateOut == fdm::DataOut::Working )
+    {
+        for ( signed int i = 0; i < FDM_MAX_ENGINES; i++ )
+        {
+            Data::get()->ownship.propeller[ i ] += m_timeStep * M_PI * dataOut.engine[ i ].rpm / 30.0;
+
+            while ( Data::get()->ownship.propeller[ i ] > 2.0f * M_PI )
+            {
+                Data::get()->ownship.propeller[ i ] -= (float)( 2.0f * M_PI );
+            }
+        }
+    }
+    else if ( dataOut.stateOut == fdm::DataOut::Idle )
+    {
+        for ( signed int i = 0; i < FDM_MAX_ENGINES; i++ )
+        {
+            Data::get()->ownship.propeller[ i ] = 0.0;
+        }
+    }
+
+    Data::get()->ownship.mainRotor_azimuth     = dataOut.rotor.mainRotor_azimuth;
+    Data::get()->ownship.mainRotor_coningAngle = dataOut.rotor.mainRotor_coningAngle;
+    Data::get()->ownship.mainRotor_diskRoll    = dataOut.rotor.mainRotor_diskRoll;
+    Data::get()->ownship.mainRotor_diskPitch   = dataOut.rotor.mainRotor_diskPitch;
+    Data::get()->ownship.mainRotor_collective  = dataOut.rotor.mainRotor_collective;
+    Data::get()->ownship.mainRotor_cyclicLon   = dataOut.rotor.mainRotor_cyclicLon;
+    Data::get()->ownship.mainRotor_cyclicLat   = dataOut.rotor.mainRotor_cyclicLat;
+    Data::get()->ownship.tailRotor_azimuth     = dataOut.rotor.tailRotor_azimuth;
+
+    Data::get()->ownship.onGround = dataOut.flight.onGround;
+    Data::get()->ownship.stall = dataOut.flight.stall;
+
+    for ( int i = 0; i < FDM_MAX_ENGINES; i++ )
+    {
+        Data::get()->propulsion.engine[ i ].state       = dataOut.engine[ i ].state;
+        Data::get()->propulsion.engine[ i ].afterburner = dataOut.engine[ i ].afterburner;
+
+        Data::get()->propulsion.engine[ i ].rpm  = dataOut.engine[ i ].rpm;
+        Data::get()->propulsion.engine[ i ].prop = dataOut.engine[ i ].prop;
+        Data::get()->propulsion.engine[ i ].ng   = dataOut.engine[ i ].ng;
+        Data::get()->propulsion.engine[ i ].n1   = dataOut.engine[ i ].n1;
+        Data::get()->propulsion.engine[ i ].n2   = dataOut.engine[ i ].n2;
+        Data::get()->propulsion.engine[ i ].trq  = dataOut.engine[ i ].trq;
+        Data::get()->propulsion.engine[ i ].epr  = dataOut.engine[ i ].epr;
+        Data::get()->propulsion.engine[ i ].map  = dataOut.engine[ i ].map;
+        Data::get()->propulsion.engine[ i ].egt  = dataOut.engine[ i ].egt;
+        Data::get()->propulsion.engine[ i ].itt  = dataOut.engine[ i ].itt;
+        Data::get()->propulsion.engine[ i ].tit  = dataOut.engine[ i ].tit;
+        Data::get()->propulsion.engine[ i ].ff   = dataOut.engine[ i ].ff;
+    }
+
+    // output state
+    Data::get()->stateOut = dataOut.stateOut;
+
+    // time step
+    Data::get()->timeStep = m_timeStep;
+}
