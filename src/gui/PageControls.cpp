@@ -501,7 +501,7 @@ void PageControls::initDefaultAssignments()
 {
     if ( !m_defaultAssignmentsInited )
     {
-        QSettings settings( GUI_ORG_NAME, GUI_APP_NAME );
+        QSettings settings( SIM_ORG_NAME, SIM_APP_NAME );
 
         settings.beginGroup( "page_controls" );
         {
@@ -512,7 +512,7 @@ void PageControls::initDefaultAssignments()
 
     if ( !m_defaultAssignmentsInited )
     {
-        QSettings settings( GUI_ORG_NAME, GUI_APP_NAME );
+        QSettings settings( SIM_ORG_NAME, SIM_APP_NAME );
 
         settings.beginGroup( "page_controls" );
         {
@@ -672,7 +672,7 @@ void PageControls::assignmentsSave()
 
 void PageControls::assignmentRead( hid::Assignment &assignment, hid::Assignment::Action action )
 {
-    QSettings settings( GUI_ORG_NAME, GUI_APP_NAME );
+    QSettings settings( SIM_ORG_NAME, SIM_APP_NAME );
 
     settings.beginGroup( "page_controls" );
     {
@@ -743,7 +743,7 @@ void PageControls::assignmentRead( hid::Assignment &assignment, hid::Assignment:
 
 void PageControls::assignmentSave( hid::Assignment &assignment, hid::Assignment::Action action )
 {
-    QSettings settings( GUI_ORG_NAME, GUI_APP_NAME );
+    QSettings settings( SIM_ORG_NAME, SIM_APP_NAME );
 
     settings.beginGroup( "page_controls" );
     {

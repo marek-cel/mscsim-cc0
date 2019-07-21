@@ -140,7 +140,7 @@ namespace fdm
  * @brief First-order low-pass filter (LPF) class.
  *
  * Transfer function:
- * G(s)  =  1 / ( Tc*s + 1 )  =  1 / ( s/omega + 1 )
+ * G(s)  =  1 / ( Tc*s + 1 )  =  omega / ( s + omega )  =  1 / ( s/omega + 1 )
  *
  * First-order low-pass filter is a first-order lag element.
  */

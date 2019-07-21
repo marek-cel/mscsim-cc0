@@ -138,7 +138,9 @@ namespace fdm
 
 /**
  * @brief Second-order lag class.
- * Transfer function: G(s) = 1 / ( 1 + s*Tc1 )( 1 + s*Tc2 )
+ *
+ * Transfer function:
+ * G(s)  =  1 / ( Tc1*s + 1 )( Tc2*s + 1 )
  */
 class FDMEXPORT Lag2
 {
@@ -158,7 +160,7 @@ public:
 
     void update( double u, double dt );
 
-private:
+protected:
 
     Lag *m_lag1;
 

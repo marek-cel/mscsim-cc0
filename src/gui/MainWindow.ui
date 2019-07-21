@@ -101,6 +101,7 @@
     <addaction name="actionDockData"/>
     <addaction name="actionDockEFIS"/>
     <addaction name="actionDockMain"/>
+    <addaction name="actionDockMap"/>
     <addaction name="actionDockProp"/>
     <addaction name="separator"/>
    </widget>
@@ -198,7 +199,7 @@
   </action>
   <action name="actionDockMain">
    <property name="checkable">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Main</string>
@@ -209,7 +210,7 @@
   </action>
   <action name="actionDockData">
    <property name="checkable">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Data</string>
@@ -220,10 +221,10 @@
   </action>
   <action name="actionViewPilot">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="checked">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Pilot View</string>
@@ -234,7 +235,7 @@
   </action>
   <action name="actionViewOrbit">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Orbit View</string>
@@ -245,7 +246,7 @@
   </action>
   <action name="actionDockEFIS">
    <property name="checkable">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="checked">
     <bool>false</bool>
@@ -259,10 +260,10 @@
   </action>
   <action name="actionPhaseInpIdle">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="checked">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Idle</string>
@@ -273,7 +274,7 @@
   </action>
   <action name="actionPhaseInpInit">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Initialize</string>
@@ -284,7 +285,7 @@
   </action>
   <action name="actionPhaseInpWork">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Run</string>
@@ -295,7 +296,7 @@
   </action>
   <action name="actionPhaseInpPause">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Pause</string>
@@ -306,7 +307,7 @@
   </action>
   <action name="actionPhaseInpStop">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="checked">
     <bool>false</bool>
@@ -320,7 +321,7 @@
   </action>
   <action name="actionViewWorld">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>World View</string>
@@ -331,7 +332,7 @@
   </action>
   <action name="actionDockCtrl">
    <property name="checkable">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Controls</string>
@@ -342,7 +343,7 @@
   </action>
   <action name="actionDockProp">
    <property name="checkable">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Propulsion</string>
@@ -454,7 +455,7 @@
   </action>
   <action name="actionViewChase">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Chase View</string>
@@ -466,6 +467,14 @@
    </property>
    <property name="text">
     <string>Autopilot</string>
+   </property>
+  </action>
+  <action name="actionDockMap">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Map</string>
    </property>
   </action>
  </widget>

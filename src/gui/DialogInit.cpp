@@ -224,7 +224,7 @@ void DialogInit::saveData()
 
 void DialogInit::settingsRead()
 {
-    QSettings settings( GUI_ORG_NAME, GUI_APP_NAME );
+    QSettings settings( SIM_ORG_NAME, SIM_APP_NAME );
 
     settings.beginGroup( "dialog_init" );
 
@@ -313,7 +313,7 @@ void DialogInit::settingsRead_UnitCombos( QSettings &settings )
 
 void DialogInit::settingsSave()
 {
-    QSettings settings( GUI_ORG_NAME, GUI_APP_NAME );
+    QSettings settings( SIM_ORG_NAME, SIM_APP_NAME );
 
     settings.beginGroup( "dialog_init" );
 

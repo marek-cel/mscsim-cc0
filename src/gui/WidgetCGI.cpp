@@ -129,7 +129,6 @@
 
 #include <osg/PositionAttitudeTransform>
 #include <osgDB/ReadFile>
-#include <osgGA/TrackballManipulator>
 #include <osgViewer/ViewerEventHandlers>
 
 #include <fdm/utils/fdm_WGS84.h>
@@ -149,11 +148,8 @@ const double WidgetCGI::m_zFar  = CGI_SKYDOME_RADIUS + 0.1f * CGI_SKYDOME_RADIUS
 
 WidgetCGI::WidgetCGI( QWidget *parent ) :
     QWidget ( parent ),
-
     m_gridLayout ( 0 ),
-
     m_timerId ( 0 ),
-
     m_camManipulatorInited ( false )
 {
 #   ifdef SIM_OSGDEBUGINFO
@@ -164,8 +160,8 @@ WidgetCGI::WidgetCGI( QWidget *parent ) :
 
     cgi::Manager::instance()->setCameraManipulatorPilot();
 
-    //setThreadingModel( osgViewer::ViewerBase::SingleThreaded );
-    setThreadingModel( osgViewer::ViewerBase::ThreadPerContext );
+    setThreadingModel( osgViewer::ViewerBase::SingleThreaded );
+    //setThreadingModel( osgViewer::ViewerBase::ThreadPerContext );
 
     m_graphicsWindow = createGraphicsWindow( x(), y(), width(), height() );
 
@@ -303,7 +299,8 @@ void WidgetCGI::timerEvent( QTimerEvent *event )
         m_camManipulatorInited = true;
     }
 
-    cgi::Manager::instance()->update();
+    cgi::Manager::instance()->updateHUD();
+    cgi::Manager::instance()->updateOTW();
 
     m_keyHandler->update();
 }

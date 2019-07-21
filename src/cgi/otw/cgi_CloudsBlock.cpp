@@ -125,142 +125,244 @@
  *
  ******************************************************************************/
 
-#include <gui/GraphicsEADI.h>
+#include <cgi/otw/cgi_CloudsBlock.h>
 
-#ifdef WIN32
-#   include <float.h>
-#endif
+#include <osg/AlphaFunc>
+#include <osg/Billboard>
+#include <osg/BlendFunc>
+#include <osg/Geometry>
+#include <osg/Material>
 
-#include <math.h>
-#include <stdio.h>
+#include <Data.h>
+
+#include <fdm/utils/fdm_Random.h>
+
+#include <cgi/cgi_Defines.h>
+#include <cgi/cgi_Geometry.h>
+#include <cgi/cgi_WGS84.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GraphicsEADI::HDG::HDG( QGraphicsScene *scene ) :
-    m_scene ( scene ),
+using namespace cgi;
 
-    m_itemBack      ( 0 ),
-    m_itemFace      ( 0 ),
-    m_itemMarks     ( 0 ),
-    m_itemFrameText ( 0 ),
+////////////////////////////////////////////////////////////////////////////////
 
-    m_frameTextColor ( 255, 255, 255 ),
-
-    m_heading  ( 0.0f ),
-
-    m_scaleX ( 1.0f ),
-    m_scaleY ( 1.0f ),
-
-    m_originalHsiCtr       ( 150.0f , 345.0f ),
-    m_originalBackPos      (  60.0f,  240.0f ),
-    m_originalFacePos      (  45.0f , 240.0f ),
-    m_originalMarksPos     ( 134.0f , 219.0f ),
-    m_originalFrameTextCtr ( 149.5f , 227.5f ),
-
-    m_backZ      (  80 ),
-    m_faceZ      (  90 ),
-    m_marksZ     ( 110 ),
-    m_frameTextZ ( 120 )
+CloudsBlock::CloudsBlock( Module *parent ) :
+    Module( parent ),
+    m_framesCounter ( 0 ),
+    m_created ( false ),
+    m_count ( 0 ),
+    m_base_asl ( 0.0 ),
+    m_thickness ( 0.0 )
 {
-    m_frameTextFont.setFamily( "Courier" );
-    m_frameTextFont.setPointSizeF( 10.0 );
-    m_frameTextFont.setStretch( QFont::Condensed );
-    m_frameTextFont.setWeight( QFont::Bold );
-
-    reset();
+    m_textures.push_back( Textures::get( "data/cgi/textures/cloud_cu_1.png" ) );
+    m_textures.push_back( Textures::get( "data/cgi/textures/cloud_cu_2.png" ) );
+    m_textures.push_back( Textures::get( "data/cgi/textures/cloud_cu_3.png" ) );
+    m_textures.push_back( Textures::get( "data/cgi/textures/cloud_cu_4.png" ) );
+    m_textures.push_back( Textures::get( "data/cgi/textures/cloud_cu_5.png" ) );
+    m_textures.push_back( Textures::get( "data/cgi/textures/cloud_cu_6.png" ) );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsEADI::HDG::init( float scaleX, float scaleY )
-{
-    m_scaleX = scaleX;
-    m_scaleY = scaleY;
-
-    reset();
-
-    m_itemBack = new QGraphicsSvgItem( ":/gui/images/efis/eadi/eadi_hsi_back.svg" );
-    m_itemBack->setCacheMode( QGraphicsItem::NoCache );
-    m_itemBack->setZValue( m_backZ );
-    m_itemBack->setTransform( QTransform::fromScale( m_scaleX, m_scaleY ), true );
-    m_itemBack->moveBy( m_scaleX * m_originalBackPos.x(), m_scaleY * m_originalBackPos.y() );
-    m_scene->addItem( m_itemBack );
-
-    m_itemFace = new QGraphicsSvgItem( ":/gui/images/efis/eadi/eadi_hsi_face.svg" );
-    m_itemFace->setCacheMode( QGraphicsItem::NoCache );
-    m_itemFace->setZValue( m_faceZ );
-    m_itemFace->setTransform( QTransform::fromScale( m_scaleX, m_scaleY ), true );
-    m_itemFace->setTransformOriginPoint( m_originalHsiCtr - m_originalFacePos );
-    m_itemFace->moveBy( m_scaleX * m_originalFacePos.x(), m_scaleY * m_originalFacePos.y() );
-    m_scene->addItem( m_itemFace );
-
-    m_itemMarks = new QGraphicsSvgItem( ":/gui/images/efis/eadi/eadi_hsi_marks.svg" );
-    m_itemMarks->setCacheMode( QGraphicsItem::NoCache );
-    m_itemMarks->setZValue( m_marksZ );
-    m_itemMarks->setTransform( QTransform::fromScale( m_scaleX, m_scaleY ), true );
-    m_itemMarks->moveBy( m_scaleX * m_originalMarksPos.x(), m_scaleY * m_originalMarksPos.y() );
-    m_scene->addItem( m_itemMarks );
-
-    m_itemFrameText = new QGraphicsTextItem( QString( "000" ) );
-    m_itemFrameText->setCacheMode( QGraphicsItem::NoCache );
-    m_itemFrameText->setZValue( m_frameTextZ );
-    m_itemFrameText->setTextInteractionFlags( Qt::NoTextInteraction );
-    m_itemFrameText->setDefaultTextColor( m_frameTextColor );
-    m_itemFrameText->setFont( m_frameTextFont );
-    m_itemFrameText->setTransform( QTransform::fromScale( m_scaleX, m_scaleY ), true );
-    m_itemFrameText->moveBy( m_scaleX * ( m_originalFrameTextCtr.x() - m_itemFrameText->boundingRect().width()  / 2.0f ),
-                             m_scaleY * ( m_originalFrameTextCtr.y() - m_itemFrameText->boundingRect().height() / 2.0f ) );
-    m_scene->addItem( m_itemFrameText );
-
-    update( scaleX, scaleY );
-}
+CloudsBlock::~CloudsBlock() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsEADI::HDG::update( float scaleX, float scaleY )
+void CloudsBlock::update()
 {
-    m_scaleX = scaleX;
-    m_scaleY = scaleY;
+    /////////////////
+    Module::update();
+    /////////////////
 
-    updateHeading();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GraphicsEADI::HDG::setHeading( float heading )
-{
-    m_heading = heading;
-
-    while ( m_heading < 0.0f )
+    if ( Data::get()->environment.clouds.type == Data::Environment::Clouds::Block )
     {
-        m_heading += 360.0f;
+        if ( m_framesCounter % 10 == 0 )
+        {
+            m_framesCounter = 0;
+
+            float lat = Data::get()->camera.latitude;
+            float lon = Data::get()->camera.longitude;
+            float alt = m_base_asl;
+
+            WGS84 wgs_cam( lat, lon, alt );
+
+            float radius2 = CGI_SKYDOME_RADIUS * CGI_SKYDOME_RADIUS;
+
+            if ( ( m_pos_wgs - wgs_cam.getPosition() ).length2() > 0.01 * radius2
+              || !m_created || m_count != Data::get()->environment.clouds.data.block.count
+              || m_base_asl != Data::get()->environment.clouds.data.block.base_asl
+              || m_thickness != Data::get()->environment.clouds.data.block.thickness )
+            {
+                m_count = Data::get()->environment.clouds.data.block.count;
+                m_base_asl = Data::get()->environment.clouds.data.block.base_asl;
+                m_thickness = Data::get()->environment.clouds.data.block.thickness;
+
+                create();
+            }
+            else
+            {
+                float azim = 0.0f;
+                float dist = 0.0f;
+
+                for ( unsigned int i = 0; i < m_patClouds.size(); i++ )
+                {
+                    osg::Vec3 pos_wgs = m_patClouds[ i ]->getPosition();
+
+                    if ( ( wgs_cam.getPosition() - pos_wgs ).length2() > radius2 )
+                    {
+                        azim = fdm::Random::get( 0.0f, 2.0f * M_PI );
+                        dist = 0.95f * CGI_SKYDOME_RADIUS;
+
+                        osg::Vec3 pos_ned( dist * cos( azim ), dist * sin( azim ), 0.0f );
+
+                        pos_wgs = wgs_cam.getPosition() + wgs_cam.getAttitude() * pos_ned;
+
+                        WGS84 wgs_new( pos_wgs );
+                        wgs_new = WGS84( wgs_new.getLat(), wgs_new.getLon(), alt );
+
+                        m_patClouds[ i ]->setPosition( wgs_new.getPosition() );
+                        m_patClouds[ i ]->setAttitude( wgs_new.getAttitude() );
+                    }
+                }
+            }
+
+            m_pos_wgs = wgs_cam.getPosition();
+        }
+
+        m_framesCounter++;
+    }
+    else
+    {
+        remove();
+
+        m_framesCounter = 0;
+        m_count = 0;
+        m_base_asl = 0.0;
+        m_thickness = 0.0;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void CloudsBlock::create()
+{
+    remove();
+
+    m_created = true;
+
+    float lat = Data::get()->camera.latitude;
+    float lon = Data::get()->camera.longitude;
+    float alt = m_base_asl;
+    float ang = CGI_SKYDOME_RADIUS / 1852.0f / 60.0f;
+
+    int cloudsNumber = m_count;
+    cloudsNumber = std::min( std::max( cloudsNumber, 0 ), CGI_CLOUDS_MAX_COUNT );
+
+    for ( int i = 0; i < cloudsNumber; i++ )
+    {
+        osg::ref_ptr< osg::PositionAttitudeTransform > pat = new osg::PositionAttitudeTransform();
+        m_root->addChild( pat.get() );
+        m_patClouds.push_back( pat );
+
+        createBlock( pat.get() );
+
+        float d_lat = osg::DegreesToRadians( fdm::Random::get( -ang, ang ) );
+        float d_lon = osg::DegreesToRadians( fdm::Random::get( -ang, ang ) );
+
+        WGS84 wgs( lat + d_lat, lon + d_lon, alt );
+
+        pat->setPosition( wgs.getPosition() );
+        pat->setAttitude( wgs.getAttitude() );
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void CloudsBlock::createBlock( osg::Group *parent )
+{
+    int spritesNumber = fdm::Random::get( 2, 5 );
+    spritesNumber = std::min( std::max( spritesNumber, 0 ), CGI_CLOUDS_MAX_SPRITES );
+
+    for ( int i = 0; i < spritesNumber; i++ )
+    {
+        osg::ref_ptr<osg::PositionAttitudeTransform> pat = new osg::PositionAttitudeTransform();
+        parent->addChild( pat.get() );
+
+        createSprite( pat.get() );
+
+        double scale = m_thickness * fdm::Random::get( 0.6f, 1.0f );
+
+        osg::Vec3 pos( m_thickness * fdm::Random::get( 0.1f, 1.0f ),
+                       m_thickness * fdm::Random::get( 0.1f, 1.0f ),
+                       0.0 );
+
+        pat->setScale( osg::Vec3( scale, scale, scale ) );
+        pat->setPosition( pos );
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void CloudsBlock::createSprite( osg::Group *parent )
+{
+    osg::ref_ptr<osg::Billboard> billboard = new osg::Billboard();
+    parent->addChild( billboard.get() );
+
+    billboard->setMode( osg::Billboard::AXIAL_ROT );
+    billboard->setNormal( osg::Vec3f( 0.0f, 1.0f, 0.0f ) );
+
+    osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry();
+    billboard->addDrawable( geometry.get(), osg::Vec3( 0.0, 0.0, 0.0 ) );
+
+    osg::ref_ptr<osg::Vec3Array> v = new osg::Vec3Array();
+
+    v->push_back( osg::Vec3f( -1.0f, 0.0f,  0.0f ) );
+    v->push_back( osg::Vec3f(  1.0f, 0.0f,  0.0f ) );
+    v->push_back( osg::Vec3f(  1.0f, 0.0f, -1.0f ) );
+    v->push_back( osg::Vec3f( -1.0f, 0.0f, -1.0f ) );
+
+    Geometry::createQuad( geometry.get(), v.get(), true );
+
+    osg::ref_ptr<osg::StateSet> billboardStateSet = billboard->getOrCreateStateSet();
+
+    // texture
+    int i_tex = fdm::Random::get( 0, m_textures.size() - 1 );
+    billboardStateSet->setTextureAttributeAndModes( 0, m_textures.at( i_tex ).get(), osg::StateAttribute::ON );
+
+    // material
+    osg::ref_ptr<osg::Material> material = new osg::Material();
+    material->setColorMode( osg::Material::AMBIENT_AND_DIFFUSE );
+    material->setAmbient( osg::Material::FRONT, osg::Vec4f( 0.8f, 0.8f, 0.8f, 1.0f ) );
+    material->setDiffuse( osg::Material::FRONT, osg::Vec4f( 1.0f, 1.0f, 1.0f, 1.0f ) );
+    billboardStateSet->setAttribute( material.get() );
+
+    // alpha blending
+    osg::ref_ptr<osg::AlphaFunc> alphaFunc = new osg::AlphaFunc();
+    osg::ref_ptr<osg::BlendFunc> blendFunc = new osg::BlendFunc();
+    alphaFunc->setFunction( osg::AlphaFunc::GEQUAL, 0.05 );
+    billboardStateSet->setRenderingHint( osg::StateSet::TRANSPARENT_BIN );
+    billboardStateSet->setAttributeAndModes( blendFunc.get(), osg::StateAttribute::ON );
+    billboardStateSet->setAttributeAndModes( alphaFunc.get(), osg::StateAttribute::ON );
+    billboardStateSet->setMode( GL_BLEND, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE );
+    billboardStateSet->setRenderBinDetails( CGI_DEPTH_SORTED_BIN_CLOUDS, "DepthSortedBin" );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void CloudsBlock::remove()
+{
+    m_created = false;
+
+    if ( m_root->getNumChildren() > 0 )
+    {
+        m_root->removeChildren( 0, m_root->getNumChildren() );
     }
 
-    while ( m_heading > 360.0f )
+    for ( unsigned int i = 0; i < m_patClouds.size(); i++ )
     {
-        m_heading -= 360.0f;
+        m_patClouds[ i ] = 0;
     }
-}
 
-////////////////////////////////////////////////////////////////////////////////
-
-void GraphicsEADI::HDG::reset()
-{
-    m_itemBack      = 0;
-    m_itemFace      = 0;
-    m_itemMarks     = 0;
-    m_itemFrameText = 0;
-
-    m_heading  = 0.0f;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GraphicsEADI::HDG::updateHeading()
-{
-    m_itemFace->setRotation( - m_heading );
-
-    float fHeading = floor( m_heading + 0.5f );
-
-    m_itemFrameText->setPlainText( QString("%1").arg(fHeading, 3, 'f', 0, QChar('0')) );
+    m_patClouds.clear();
 }

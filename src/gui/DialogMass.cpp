@@ -279,7 +279,7 @@ void DialogMass::setAircraftType( int type )
 
 void DialogMass::settingsRead()
 {
-    QSettings settings( GUI_ORG_NAME, GUI_APP_NAME );
+    QSettings settings( SIM_ORG_NAME, SIM_APP_NAME );
 
     settings.beginGroup( "dialog_mass" );
 
@@ -337,7 +337,7 @@ void DialogMass::settingsRead_UnitCombos( QSettings &settings )
 
 void DialogMass::settingsSave()
 {
-    QSettings settings( GUI_ORG_NAME, GUI_APP_NAME );
+    QSettings settings( SIM_ORG_NAME, SIM_APP_NAME );
 
     settings.beginGroup( "dialog_mass" );
 

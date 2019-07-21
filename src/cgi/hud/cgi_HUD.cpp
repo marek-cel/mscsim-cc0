@@ -125,7 +125,7 @@
  *
  ******************************************************************************/
 
-#include <cgi/cgi_HUD.h>
+#include <cgi/hud/cgi_HUD.h>
 
 #include <sstream>
 

@@ -135,6 +135,8 @@
 #include <QShortcut>
 #include <QTimer>
 
+#include <Data.h>
+
 #include "DialogConf.h"
 #include "DialogEnvr.h"
 #include "DialogInit.h"
@@ -144,8 +146,9 @@
 #include "DockWidgetCtrl.h"
 #include "DockWidgetData.h"
 #include "DockWidgetEFIS.h"
-#include "DockWidgetProp.h"
 #include "DockWidgetMain.h"
+#include "DockWidgetMap.h"
+#include "DockWidgetProp.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -190,6 +193,8 @@ protected:
 
 private:
 
+    typedef Data::Camera::ViewType ViewType;
+
     Ui::MainWindow *m_ui;
 
     QDateTime m_dateTime;           ///< current date and time (initial date and time incremented every step)
@@ -205,15 +210,13 @@ private:
     DockWidgetData *m_dockData;     ///<
     DockWidgetEFIS *m_dockEFIS;     ///<
     DockWidgetMain *m_dockMain;     ///<
+    DockWidgetMap  *m_dockMap;      ///<
     DockWidgetProp *m_dockProp;     ///<
 
     QShortcut *m_scTimeFaster;      ///<
     QShortcut *m_scTimeSlower;      ///<
 
-    bool m_viewChase;               ///<
-    bool m_viewOrbit;               ///<
-    bool m_viewPilot;               ///<
-    bool m_viewWorld;               ///<
+    ViewType m_viewType;            ///<
     bool m_showHUD;                 ///<
 
     double m_timeCoef;              ///<
@@ -267,12 +270,13 @@ private slots:
     void on_actionDialogInit_triggered();
     void on_actionDialogMass_triggered();
 
-    void on_actionDockAuto_triggered();
-    void on_actionDockCtrl_triggered();
-    void on_actionDockData_triggered();
-    void on_actionDockEFIS_triggered();
-    void on_actionDockMain_triggered();
-    void on_actionDockProp_triggered();
+    void on_actionDockAuto_toggled( bool checked );
+    void on_actionDockCtrl_toggled( bool checked );
+    void on_actionDockData_toggled( bool checked );
+    void on_actionDockEFIS_toggled( bool checked );
+    void on_actionDockMain_toggled( bool checked );
+    void on_actionDockMap_toggled( bool checked );
+    void on_actionDockProp_toggled( bool checked );
 
     void on_actionPhaseInpIdle_triggered();
     void on_actionPhaseInpInit_triggered();
@@ -294,6 +298,14 @@ private slots:
 
     void dialogInit_typeIndexChanged( int typeIndex );
     void dockMain_phaseInpChanged( fdm::DataInp::PhaseInp phaseInp );
+
+    void dockAuto_closed();
+    void dockCtrl_closed();
+    void dockData_closed();
+    void dockEFIS_closed();
+    void dockMain_closed();
+    void dockMap_closed();
+    void dockProp_closed();
 };
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -129,8 +129,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <osg/Quat>
-#include <osg/Vec3>
+#include <osg/CoordinateSystemNode>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -143,6 +142,8 @@ namespace cgi
 class WGS84
 {
 public:
+
+    static const osg::EllipsoidModel em;
 
     static const osg::Quat m_enu2ned;
 

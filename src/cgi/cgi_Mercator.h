@@ -124,35 +124,40 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <cgi/cgi_OTW.h>
-
-#include <cgi/cgi_FogScene.h>
-#include <cgi/cgi_SkyDome.h>
+#ifndef CGI_MERCATOR_H
+#define CGI_MERCATOR_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using namespace cgi;
-
-////////////////////////////////////////////////////////////////////////////////
-
-OTW::OTW( Module *parent ) :
-    Module( parent )
+namespace cgi
 {
-    osg::ref_ptr<osg::StateSet> stateSet = m_root->getOrCreateStateSet();
 
-    stateSet->setMode( GL_RESCALE_NORMAL , osg::StateAttribute::ON  );
-    stateSet->setMode( GL_LIGHTING       , osg::StateAttribute::ON  );
-    stateSet->setMode( GL_LIGHT0         , osg::StateAttribute::ON  );
-    stateSet->setMode( GL_BLEND          , osg::StateAttribute::ON  );
-    stateSet->setMode( GL_ALPHA_TEST     , osg::StateAttribute::ON  );
-    stateSet->setMode( GL_DEPTH_TEST     , osg::StateAttribute::ON  );
-    stateSet->setMode( GL_DITHER         , osg::StateAttribute::OFF );
+/**
+ * @brief Mercator class.
+ */
+class Mercator
+{
+public:
 
-    addChild( new FogScene( this ) );
-    addChild( new SkyDome( this ) );
-}
+    static const double maxX;   ///< [m] maximum Mercator x-coordinate for longitude 180 deg
+    static const double maxY;   ///< [m] maximum Mercator y-coordinate for latitude 85 deg
+
+    static double getLat( double y );
+    static double getLon( double x );
+
+    static double getX( double lon );
+    static double getY( double lat );
+
+    /** Constructor. */
+    Mercator();
+
+    /** Destructor. */
+    virtual ~Mercator();
+
+};
+
+} // end of cgi namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-OTW::~OTW() {}
+#endif // CGI_MERCATOR_H

@@ -156,6 +156,14 @@ public:
     /** Destructor. */
     virtual ~DockWidgetAuto();
 
+signals:
+
+    void closed();
+
+protected:
+
+    void closeEvent( QCloseEvent *event );
+
 private:
 
     Ui::DockWidgetAuto *m_ui;

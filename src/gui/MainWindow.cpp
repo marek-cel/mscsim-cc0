@@ -134,8 +134,6 @@
 
 #include <fdm/utils/fdm_Units.h>
 
-#include <Data.h>
-
 #include <gui/Aircrafts.h>
 
 #include <hid/hid_Manager.h>
@@ -161,16 +159,14 @@ MainWindow::MainWindow( QWidget *parent ) :
     m_dockData ( 0 ),
     m_dockEFIS ( 0 ),
     m_dockMain ( 0 ),
+    m_dockMap  ( 0 ),
     m_dockProp ( 0 ),
 
     m_scTimeFaster ( 0 ),
     m_scTimeSlower ( 0 ),
 
-    m_viewChase ( false ),
-    m_viewOrbit ( false ),
-    m_viewPilot ( true  ),
-    m_viewWorld ( false ),
-    m_showHUD   ( true  ),
+    m_viewType ( Data::Camera::ViewPilot ),
+    m_showHUD ( true ),
 
     m_timeCoef ( 1.0 ),
 
@@ -195,12 +191,15 @@ MainWindow::MainWindow( QWidget *parent ) :
     m_dockData = new DockWidgetData( this );
     m_dockEFIS = new DockWidgetEFIS( this );
     m_dockMain = new DockWidgetMain( this );
+    m_dockMap  = new DockWidgetMap( this );
     m_dockProp = new DockWidgetProp( this );
 
+    m_dockAuto->setObjectName( "DockAuto" );
     m_dockCtrl->setObjectName( "DockCtrl" );
     m_dockData->setObjectName( "DockData" );
     m_dockEFIS->setObjectName( "DockEFIS" );
     m_dockMain->setObjectName( "DockMain" );
+    m_dockMap->setObjectName( "DockMap" );
     m_dockProp->setObjectName( "DockProp" );
 
     addDockWidget( Qt::BottomDockWidgetArea , m_dockAuto );
@@ -208,12 +207,15 @@ MainWindow::MainWindow( QWidget *parent ) :
     addDockWidget( Qt::RightDockWidgetArea  , m_dockData );
     addDockWidget( Qt::BottomDockWidgetArea , m_dockEFIS );
     addDockWidget( Qt::LeftDockWidgetArea   , m_dockMain );
+    addDockWidget( Qt::BottomDockWidgetArea , m_dockMap  );
     addDockWidget( Qt::LeftDockWidgetArea   , m_dockProp );
 
+    m_dockAuto->setVisible( false );
     m_dockCtrl->setVisible( false );
     m_dockData->setVisible( false );
     m_dockEFIS->setVisible( false );
     m_dockMain->setVisible( false );
+    m_dockMap->setVisible( false );
     m_dockProp->setVisible( false );
 
     m_scTimeFaster = new QShortcut( QKeySequence(Qt::CTRL + Qt::Key_Equal), this, SLOT(on_actionTimeFaster_triggered()) );
@@ -221,6 +223,14 @@ MainWindow::MainWindow( QWidget *parent ) :
 
     connect( m_dialogInit, SIGNAL(typeIndexChanged(int)), this, SLOT(dialogInit_typeIndexChanged(int)) );
     connect( m_dockMain, SIGNAL(phaseInpChanged(fdm::DataInp::PhaseInp)), this, SLOT(dockMain_phaseInpChanged(fdm::DataInp::PhaseInp)) );
+
+    connect( m_dockAuto , SIGNAL(closed()), this, SLOT(dockAuto_closed()) );
+    connect( m_dockCtrl , SIGNAL(closed()), this, SLOT(dockCtrl_closed()) );
+    connect( m_dockData , SIGNAL(closed()), this, SLOT(dockData_closed()) );
+    connect( m_dockEFIS , SIGNAL(closed()), this, SLOT(dockEFIS_closed()) );
+    connect( m_dockMain , SIGNAL(closed()), this, SLOT(dockMain_closed()) );
+    connect( m_dockMap  , SIGNAL(closed()), this, SLOT(dockMap_closed())  );
+    connect( m_dockProp , SIGNAL(closed()), this, SLOT(dockProp_closed()) );
 
     settingsRead();
 
@@ -263,6 +273,9 @@ MainWindow::~MainWindow()
 
     if ( m_dockMain ) delete m_dockMain;
     m_dockMain = 0;
+
+    if ( m_dockMap ) delete m_dockMap;
+    m_dockMap = 0;
 
     if ( m_dockProp ) delete m_dockProp;
     m_dockProp = 0;
@@ -380,26 +393,16 @@ void MainWindow::timerEvent( QTimerEvent *event )
 
 void MainWindow::setPhaseIdle()
 {
-    m_ui->actionPhaseInpIdle->setChecked( true );
-    m_ui->actionPhaseInpInit->setChecked( false );
-    m_ui->actionPhaseInpWork->setChecked( false );
-    m_ui->actionPhaseInpPause->setChecked( false );
-    m_ui->actionPhaseInpStop->setChecked( false );
-
     m_phaseInp = fdm::DataInp::Idle;
     m_dockMain->setPhaseInp( m_phaseInp );
+
+    m_timeCoef = 1.0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void MainWindow::setPhaseInit()
 {
-    m_ui->actionPhaseInpIdle->setChecked( false );
-    m_ui->actionPhaseInpInit->setChecked( true );
-    m_ui->actionPhaseInpWork->setChecked( false );
-    m_ui->actionPhaseInpPause->setChecked( false );
-    m_ui->actionPhaseInpStop->setChecked( false );
-
     m_phaseInp = fdm::DataInp::Init;
     m_dockMain->setPhaseInp( m_phaseInp );
 }
@@ -408,12 +411,6 @@ void MainWindow::setPhaseInit()
 
 void MainWindow::setPhaseWork()
 {
-    m_ui->actionPhaseInpIdle->setChecked( false );
-    m_ui->actionPhaseInpInit->setChecked( false );
-    m_ui->actionPhaseInpWork->setChecked( true );
-    m_ui->actionPhaseInpPause->setChecked( false );
-    m_ui->actionPhaseInpStop->setChecked( false );
-
     m_phaseInp = fdm::DataInp::Work;
     m_dockMain->setPhaseInp( m_phaseInp );
 }
@@ -422,12 +419,6 @@ void MainWindow::setPhaseWork()
 
 void MainWindow::setPhasePause()
 {
-    m_ui->actionPhaseInpIdle->setChecked( false );
-    m_ui->actionPhaseInpInit->setChecked( false );
-    m_ui->actionPhaseInpWork->setChecked( false );
-    m_ui->actionPhaseInpPause->setChecked( true );
-    m_ui->actionPhaseInpStop->setChecked( false );
-
     m_phaseInp = fdm::DataInp::Pause;
     m_dockMain->setPhaseInp( m_phaseInp );
 }
@@ -436,12 +427,6 @@ void MainWindow::setPhasePause()
 
 void MainWindow::setPhaseStop()
 {
-    m_ui->actionPhaseInpIdle->setChecked( false );
-    m_ui->actionPhaseInpInit->setChecked( false );
-    m_ui->actionPhaseInpWork->setChecked( false );
-    m_ui->actionPhaseInpPause->setChecked( false );
-    m_ui->actionPhaseInpStop->setChecked( true );
-
     m_phaseInp = fdm::DataInp::Stop;
     m_dockMain->setPhaseInp( m_phaseInp );
 }
@@ -499,12 +484,28 @@ void MainWindow::setWidescreenDockLayout( bool enabled )
 
 void MainWindow::settingsRead()
 {
-    QSettings settings( GUI_ORG_NAME, GUI_APP_NAME );
+    QSettings settings( SIM_ORG_NAME, SIM_APP_NAME );
     
     settings.beginGroup( "main_window" );
 
     restoreState( settings.value( "state" ).toByteArray() );
     restoreGeometry( settings.value( "geometry" ).toByteArray() );
+
+    bool visibleAuto = settings.value( "dock_auto_visible" , 0 ).toBool();
+    bool visibleCtrl = settings.value( "dock_ctrl_visible" , 0 ).toBool();
+    bool visibleData = settings.value( "dock_data_visible" , 0 ).toBool();
+    bool visibleEFIS = settings.value( "dock_efis_visible" , 0 ).toBool();
+    bool visibleMain = settings.value( "dock_main_visible" , 0 ).toBool();
+    bool visibleMap  = settings.value( "dock_map_visible"  , 0 ).toBool();
+    bool visibleProp = settings.value( "dock_prop_visible" , 0 ).toBool();
+
+    m_ui->actionDockAuto->setChecked( visibleAuto );
+    m_ui->actionDockCtrl->setChecked( visibleCtrl );
+    m_ui->actionDockData->setChecked( visibleData );
+    m_ui->actionDockEFIS->setChecked( visibleEFIS );
+    m_ui->actionDockMain->setChecked( visibleMain );
+    m_ui->actionDockMap->setChecked( visibleMap );
+    m_ui->actionDockProp->setChecked( visibleProp );
 
     settingsRead_Airport( settings );
     settingsRead_View( settings );
@@ -549,63 +550,33 @@ void MainWindow::settingsRead_View( QSettings &settings )
 {
     settings.beginGroup( "view" );
 
-    m_viewChase = settings.value( "view_chase", 0 ).toInt();
-    m_viewOrbit = settings.value( "view_orbit", 0 ).toInt();
-    m_viewPilot = settings.value( "view_pilot", 1 ).toInt();
-    m_viewWorld = settings.value( "view_world", 0 ).toInt();
+    int viewType = settings.value( "view_type", Data::Camera::ViewPilot ).toInt();
+
+    switch ( viewType )
+    {
+    case Data::Camera::ViewChase:
+        m_viewType = Data::Camera::ViewChase;
+        m_ui->widgetCGI->setCameraManipulatorChase();
+        break;
+
+    default:
+    case Data::Camera::ViewPilot:
+        m_viewType = Data::Camera::ViewPilot;
+        m_ui->widgetCGI->setCameraManipulatorPilot();
+        break;
+
+    case Data::Camera::ViewOrbit:
+        m_viewType = Data::Camera::ViewOrbit;
+        m_ui->widgetCGI->setCameraManipulatorOrbit();
+        break;
+
+    case Data::Camera::ViewWorld:
+        m_viewType = Data::Camera::ViewWorld;
+        m_ui->widgetCGI->setCameraManipulatorWorld();
+        break;
+    }
 
     m_showHUD = settings.value( "show_hud", 1 ).toInt();
-
-    if ( m_viewChase || m_viewOrbit || m_viewPilot || m_viewWorld )
-    {
-        m_ui->stackedMain->setCurrentIndex( 1 );
-
-        if ( m_viewChase )
-        {
-            m_viewOrbit = false;
-            m_viewPilot = false;
-            m_viewWorld = false;
-
-            m_ui->widgetCGI->setCameraManipulatorChase();
-        }
-        else if ( m_viewOrbit )
-        {
-            m_viewChase = false;
-            m_viewPilot = false;
-            m_viewWorld = false;
-
-            m_ui->widgetCGI->setCameraManipulatorOrbit();
-        }
-        else if ( m_viewPilot )
-        {
-            m_viewChase = false;
-            m_viewOrbit = false;
-            m_viewWorld = false;
-
-            m_ui->widgetCGI->setCameraManipulatorPilot();
-        }
-        else if ( m_viewWorld )
-        {
-            m_viewChase = false;
-            m_viewOrbit = false;
-            m_viewPilot = false;
-
-            m_ui->widgetCGI->setCameraManipulatorWorld();
-        }
-    }
-    else
-    {
-        m_viewOrbit = false;
-        m_viewPilot = true;
-        m_viewWorld = false;
-
-        m_ui->widgetCGI->setCameraManipulatorPilot();
-    }
-
-    m_ui->actionViewChase->setChecked( m_viewChase );
-    m_ui->actionViewOrbit->setChecked( m_viewOrbit );
-    m_ui->actionViewPilot->setChecked( m_viewPilot );
-    m_ui->actionViewWorld->setChecked( m_viewWorld );
 
     m_ui->actionShowHUD->setChecked( m_showHUD );
 
@@ -616,7 +587,7 @@ void MainWindow::settingsRead_View( QSettings &settings )
 
 void MainWindow::settingsSave()
 {
-    QSettings settings( GUI_ORG_NAME, GUI_APP_NAME );
+    QSettings settings( SIM_ORG_NAME, SIM_APP_NAME );
     
     settings.beginGroup( "main_window" );
 
@@ -625,6 +596,14 @@ void MainWindow::settingsSave()
 
     settingsSave_Airport( settings );
     settingsSave_View( settings );
+
+    settings.setValue( "dock_auto_visible" , m_ui->actionDockAuto->isChecked() ? 1 : 0 );
+    settings.setValue( "dock_ctrl_visible" , m_ui->actionDockCtrl->isChecked() ? 1 : 0 );
+    settings.setValue( "dock_data_visible" , m_ui->actionDockData->isChecked() ? 1 : 0 );
+    settings.setValue( "dock_efis_visible" , m_ui->actionDockEFIS->isChecked() ? 1 : 0 );
+    settings.setValue( "dock_main_visible" , m_ui->actionDockMain->isChecked() ? 1 : 0 );
+    settings.setValue( "dock_map_visible"  , m_ui->actionDockMap->isChecked()  ? 1 : 0 );
+    settings.setValue( "dock_prop_visible" , m_ui->actionDockProp->isChecked() ? 1 : 0 );
 
     settings.endGroup();
 }
@@ -655,11 +634,7 @@ void MainWindow::settingsSave_View( QSettings &settings )
 {
     settings.beginGroup( "view" );
 
-    settings.setValue( "view_chase", (int)m_viewChase );
-    settings.setValue( "view_orbit", (int)m_viewOrbit );
-    settings.setValue( "view_pilot", (int)m_viewPilot );
-    settings.setValue( "view_world", (int)m_viewWorld );
-
+    settings.setValue( "view_type", (int)m_viewType );
     settings.setValue( "show_hud", (int)m_showHUD );
 
     settings.endGroup();
@@ -950,6 +925,16 @@ void MainWindow::updateOutputData()
     Data::get()->dateTime.second = (unsigned short)m_dateTime.time().second();
 
     // environment
+    Data::get()->environment.clouds.type = m_dialogEnvr->getCloudsType();
+    if ( m_dialogEnvr->getCloudsType() == Data::Environment::Clouds::Block )
+    {
+        Data::get()->environment.clouds.data.block = m_dialogEnvr->getBlockClouds();
+    }
+    else if ( m_dialogEnvr->getCloudsType() == Data::Environment::Clouds::Layer )
+    {
+        Data::get()->environment.clouds.data.layer = m_dialogEnvr->getLayerClouds();
+    }
+
     Data::get()->environment.visibility     = m_dialogEnvr->getVisibility();
     Data::get()->environment.temperature_0  = m_dialogEnvr->getTemperatureSL();
     Data::get()->environment.pressure_0     = m_dialogEnvr->getPressureSL();
@@ -1077,44 +1062,51 @@ void MainWindow::on_actionDialogMass_triggered()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void MainWindow::on_actionDockAuto_triggered()
+void MainWindow::on_actionDockAuto_toggled( bool checked )
 {
-    m_dockAuto->setVisible( true );
+    m_dockAuto->setVisible( checked );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void MainWindow::on_actionDockCtrl_triggered()
+void MainWindow::on_actionDockCtrl_toggled( bool checked )
 {
-    m_dockCtrl->setVisible( true );
+    m_dockCtrl->setVisible( checked );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void MainWindow::on_actionDockData_triggered()
+void MainWindow::on_actionDockData_toggled( bool checked )
 {
-    m_dockData->setVisible( true );
+    m_dockData->setVisible( checked );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void MainWindow::on_actionDockEFIS_triggered()
+void MainWindow::on_actionDockEFIS_toggled( bool checked )
 {
-    m_dockEFIS->setVisible( true );
+    m_dockEFIS->setVisible( checked );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void MainWindow::on_actionDockMain_triggered()
+void MainWindow::on_actionDockMain_toggled( bool checked )
 {
-    m_dockMain->setVisible( true );
+    m_dockMain->setVisible( checked );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void MainWindow::on_actionDockProp_triggered()
+void MainWindow::on_actionDockMap_toggled( bool checked )
 {
-    m_dockProp->setVisible( true );
+    m_dockMap->setVisible( checked );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::on_actionDockProp_toggled( bool checked )
+{
+    m_dockProp->setVisible( checked );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1163,18 +1155,8 @@ void MainWindow::on_actionQuit_triggered()
 
 void MainWindow::on_actionViewChase_triggered()
 {
-    m_viewChase = true;
-    m_viewOrbit = false;
-    m_viewPilot = false;
-    m_viewWorld = false;
-
-    m_ui->actionViewChase->setChecked( true  );
-    m_ui->actionViewOrbit->setChecked( false );
-    m_ui->actionViewPilot->setChecked( false );
-    m_ui->actionViewWorld->setChecked( false );
-
+    m_viewType = Data::Camera::ViewChase;
     m_ui->stackedMain->setCurrentIndex( 1 );
-
     m_ui->widgetCGI->setCameraManipulatorChase();
     m_ui->widgetCGI->setDistanceDef( Aircrafts::instance()->getAircraft( m_typeIndex ).distance_def );
 }
@@ -1183,18 +1165,8 @@ void MainWindow::on_actionViewChase_triggered()
 
 void MainWindow::on_actionViewOrbit_triggered()
 {
-    m_viewChase = false;
-    m_viewOrbit = true;
-    m_viewPilot = false;
-    m_viewWorld = false;
-
-    m_ui->actionViewChase->setChecked( false );
-    m_ui->actionViewOrbit->setChecked( true  );
-    m_ui->actionViewPilot->setChecked( false );
-    m_ui->actionViewWorld->setChecked( false );
-
+    m_viewType = Data::Camera::ViewOrbit;
     m_ui->stackedMain->setCurrentIndex( 1 );
-
     m_ui->widgetCGI->setCameraManipulatorOrbit();
     m_ui->widgetCGI->setDistanceDef( Aircrafts::instance()->getAircraft( m_typeIndex ).distance_def );
 }
@@ -1203,18 +1175,8 @@ void MainWindow::on_actionViewOrbit_triggered()
 
 void MainWindow::on_actionViewPilot_triggered()
 {
-    m_viewChase = false;
-    m_viewOrbit = false;
-    m_viewPilot = true;
-    m_viewWorld = false;
-
-    m_ui->actionViewChase->setChecked( false );
-    m_ui->actionViewOrbit->setChecked( false );
-    m_ui->actionViewPilot->setChecked( true  );
-    m_ui->actionViewWorld->setChecked( false );
-
+    m_viewType = Data::Camera::ViewPilot;
     m_ui->stackedMain->setCurrentIndex( 1 );
-
     m_ui->widgetCGI->setCameraManipulatorPilot();
 }
 
@@ -1222,18 +1184,8 @@ void MainWindow::on_actionViewPilot_triggered()
 
 void MainWindow::on_actionViewWorld_triggered()
 {
-    m_viewChase = false;
-    m_viewOrbit = false;
-    m_viewPilot = false;
-    m_viewWorld = true;
-
-    m_ui->actionViewChase->setChecked( false );
-    m_ui->actionViewOrbit->setChecked( false );
-    m_ui->actionViewPilot->setChecked( false );
-    m_ui->actionViewWorld->setChecked( true  );
-
+    m_viewType = Data::Camera::ViewWorld;
     m_ui->stackedMain->setCurrentIndex( 1 );
-
     m_ui->widgetCGI->setCameraManipulatorWorld();
 }
 
@@ -1248,46 +1200,62 @@ void MainWindow::on_actionShowHUD_triggered( bool checked )
 
 void MainWindow::on_actionTimeFaster_triggered()
 {
-    if ( m_timeCoef > 0.9 )
+    int timeCoef10 = floor( 10.0 * m_timeCoef + 0.5 );
+
+    if ( timeCoef10 > 9 )
     {
-        if ( m_timeCoef < 10.0 )
+        if ( timeCoef10 < 20 )
         {
-            m_timeCoef += 1.0;
+            timeCoef10 += 5;
+        }
+        else if ( timeCoef10 < 100 )
+        {
+            timeCoef10 += 10;
         }
         else
         {
-            m_timeCoef = 10.0;
+            timeCoef10 = 100;
         }
     }
     else
     {
-        m_timeCoef += 0.1;
+        timeCoef10 += 1;
     }
 
-    if ( m_timeCoef > 10.0 ) m_timeCoef = 10.0;
+    if ( timeCoef10 > 100 ) timeCoef10 = 100;
+
+    m_timeCoef = 0.1 * (double)timeCoef10;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void MainWindow::on_actionTimeSlower_triggered()
 {
-    if ( m_timeCoef > 1.0 )
+    int timeCoef10 = floor( 10.0 * m_timeCoef + 0.5 );
+
+    if ( timeCoef10 > 20 )
     {
-        m_timeCoef -= 1.0;
+        timeCoef10 -= 10;
+    }
+    else if ( timeCoef10 > 10 )
+    {
+        timeCoef10 -= 5;
     }
     else
     {
-        if ( m_timeCoef > 0.1 )
+        if ( timeCoef10 > 1 )
         {
-            m_timeCoef -= 0.1;
+            timeCoef10 -= 1;
         }
         else
         {
-            m_timeCoef = 0.0;
+            timeCoef10 = 0;
         }
     }
 
-    if ( m_timeCoef < 0.1 ) m_timeCoef = 0.1;
+    if ( timeCoef10 < 1 ) timeCoef10 = 1;
+
+    m_timeCoef = 0.1 * (double)timeCoef10;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1309,4 +1277,53 @@ void MainWindow::dockMain_phaseInpChanged( fdm::DataInp::PhaseInp phaseInp )
         case fdm::DataInp::Pause: setPhasePause(); break;
         case fdm::DataInp::Stop:  setPhaseStop();  break;
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::dockAuto_closed()
+{
+    m_ui->actionDockAuto->setChecked( false );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::dockCtrl_closed()
+{
+    m_ui->actionDockCtrl->setChecked( false );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::dockData_closed()
+{
+    m_ui->actionDockData->setChecked( false );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::dockEFIS_closed()
+{
+    m_ui->actionDockEFIS->setChecked( false );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::dockMain_closed()
+{
+    m_ui->actionDockMain->setChecked( false );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::dockMap_closed()
+{
+    m_ui->actionDockMap->setChecked( false );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::dockProp_closed()
+{
+    m_ui->actionDockProp->setChecked( false );
 }

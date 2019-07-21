@@ -124,142 +124,55 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <cgi/cgi_Airport.h>
-
-#include <Data.h>
-
-#include <cgi/cgi_FindNode.h>
-#include <cgi/cgi_Models.h>
-#include <cgi/cgi_WGS84.h>
+#ifndef DOCKWIDGETMAP_H
+#define DOCKWIDGETMAP_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using namespace cgi;
+#include <QDockWidget>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Airport::Airport( const std::string &file, double lat, double lon, double alt,
-                  Module *parent ) :
-    Module( parent )
+namespace Ui
 {
-    m_pat = new osg::PositionAttitudeTransform();
-    m_root->addChild( m_pat.get() );
-
-    osg::ref_ptr<osg::Node> airportNode = Models::get( file );
-
-    if ( airportNode.valid() )
-    {
-        m_pat->addChild( airportNode.get() );
-
-        // position
-        WGS84 wgs( lat, lon, alt );
-
-        m_pat->setPosition( wgs.getPosition() );
-        m_pat->setAttitude( wgs.getAttitude() );
-
-        m_switchLightsHELI = dynamic_cast<osg::Switch*>( FindNode::findFirst( airportNode, "HELI" ) );
-        m_switchLightsRALS = dynamic_cast<osg::Switch*>( FindNode::findFirst( airportNode, "RALS" ) );
-        m_switchLightsRCLS = dynamic_cast<osg::Switch*>( FindNode::findFirst( airportNode, "RCLS" ) );
-        m_switchLightsRELS = dynamic_cast<osg::Switch*>( FindNode::findFirst( airportNode, "RELS" ) );
-        m_switchLightsTDZL = dynamic_cast<osg::Switch*>( FindNode::findFirst( airportNode, "TDZL" ) );
-        m_switchLightsTELS = dynamic_cast<osg::Switch*>( FindNode::findFirst( airportNode, "TELS" ) );
-        m_switchLightsTWRL = dynamic_cast<osg::Switch*>( FindNode::findFirst( airportNode, "TWRL" ) );
-        m_switchLightsVGSI = dynamic_cast<osg::Switch*>( FindNode::findFirst( airportNode, "VGSI" ) );
-        m_switchGatesRwy18 = dynamic_cast<osg::Switch*>( FindNode::findFirst( airportNode, "ApproachGates18" ) );
-        m_switchGatesRwy36 = dynamic_cast<osg::Switch*>( FindNode::findFirst( airportNode, "ApproachGates36" ) );
-    }
+    class DockWidgetMap;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Airport::~Airport() {}
+/**
+ * @brief Map dock widget class.
+ */
+class DockWidgetMap : public QDockWidget
+{
+    Q_OBJECT
+
+public:
+
+    /** Constructor. */
+    explicit DockWidgetMap( QWidget *parent = 0 );
+
+    /** Destructor. */
+    virtual ~DockWidgetMap();
+
+signals:
+
+    void closed();
+
+protected:
+
+    /** */
+    void closeEvent( QCloseEvent *event );
+
+private:
+
+    Ui::DockWidgetMap *m_ui;
+
+private slots:
+
+    void on_widgetMap_positionChanged( double lat, double lon );
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Airport::update()
-{
-    /////////////////
-    Module::update();
-    /////////////////
-
-    if ( m_switchLightsHELI.valid() )
-    {
-        if ( Data::get()->airport.lightsHELI )
-            m_switchLightsHELI->setAllChildrenOn();
-        else
-            m_switchLightsHELI->setAllChildrenOff();
-    }
-
-    if ( m_switchLightsRALS.valid() )
-    {
-        if ( Data::get()->airport.lightsRALS )
-            m_switchLightsRALS->setAllChildrenOn();
-        else
-            m_switchLightsRALS->setAllChildrenOff();
-    }
-
-    if ( m_switchLightsRCLS.valid() )
-    {
-        if ( Data::get()->airport.lightsRCLS )
-            m_switchLightsRCLS->setAllChildrenOn();
-        else
-            m_switchLightsRCLS->setAllChildrenOff();
-    }
-
-    if ( m_switchLightsRELS.valid() )
-    {
-        if ( Data::get()->airport.lightsRELS )
-            m_switchLightsRELS->setAllChildrenOn();
-        else
-            m_switchLightsRELS->setAllChildrenOff();
-    }
-
-    if ( m_switchLightsTDZL.valid() )
-    {
-        if ( Data::get()->airport.lightsTDZL )
-            m_switchLightsTDZL->setAllChildrenOn();
-        else
-            m_switchLightsTDZL->setAllChildrenOff();
-    }
-
-    if ( m_switchLightsTELS.valid() )
-    {
-        if ( Data::get()->airport.lightsTELS )
-            m_switchLightsTELS->setAllChildrenOn();
-        else
-            m_switchLightsTELS->setAllChildrenOff();
-    }
-
-    if ( m_switchLightsTWRL.valid() )
-    {
-        if ( Data::get()->airport.lightsTWRL )
-            m_switchLightsTWRL->setAllChildrenOn();
-        else
-            m_switchLightsTWRL->setAllChildrenOff();
-    }
-
-    if ( m_switchLightsVGSI.valid() )
-    {
-        if ( Data::get()->airport.lightsVGSI )
-            m_switchLightsVGSI->setAllChildrenOn();
-        else
-            m_switchLightsVGSI->setAllChildrenOff();
-    }
-
-    if ( m_switchGatesRwy18.valid() )
-    {
-        if ( Data::get()->airport.gatesRwy18 )
-            m_switchGatesRwy18->setAllChildrenOn();
-        else
-            m_switchGatesRwy18->setAllChildrenOff();
-    }
-
-    if ( m_switchGatesRwy36.valid() )
-    {
-        if ( Data::get()->airport.gatesRwy36 )
-            m_switchGatesRwy36->setAllChildrenOn();
-        else
-            m_switchGatesRwy36->setAllChildrenOff();
-    }
-}
+#endif // DOCKWIDGETMAP_H

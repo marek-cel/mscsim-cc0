@@ -195,7 +195,7 @@ void PageGeneral::setFrameHudColor( const QColor &color )
 
 void PageGeneral::settingsRead()
 {
-    QSettings settings( GUI_ORG_NAME, GUI_APP_NAME );
+    QSettings settings( SIM_ORG_NAME, SIM_APP_NAME );
 
     settings.beginGroup( "page_general" );
     {
@@ -216,7 +216,7 @@ void PageGeneral::settingsRead()
 
 void PageGeneral::settingsSave()
 {
-    QSettings settings( GUI_ORG_NAME, GUI_APP_NAME );
+    QSettings settings( SIM_ORG_NAME, SIM_APP_NAME );
 
     settings.beginGroup( "page_general" );
     {

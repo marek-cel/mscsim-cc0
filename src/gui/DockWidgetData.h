@@ -183,6 +183,14 @@ public:
     void setGy( double Gy );
     void setGz( double Gz );
 
+signals:
+
+    void closed();
+
+protected:
+
+    void closeEvent( QCloseEvent *event );
+
 private:
 
     Ui::DockWidgetData *m_ui;

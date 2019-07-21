@@ -124,134 +124,74 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <gui/GraphicsEADI.h>
-
-#ifdef WIN32
-#   include <float.h>
-#endif
-
-#include <math.h>
+#ifndef WIDGETMAP_H
+#define WIDGETMAP_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GraphicsEADI::VSI::VSI( QGraphicsScene *scene ) :
-    m_scene ( scene ),
+#include <QDateTime>
+#include <QGridLayout>
+#include <QWidget>
 
-    m_itemScale  ( 0 ),
-    m_itemMarker ( 0 ),
+#include <osgViewer/Viewer>
+#include <osgQt/GraphicsWindowQt>
 
-    m_climbRate ( 0.0f ),
-
-    m_scaleX ( 1.0f ),
-    m_scaleY ( 1.0f ),
-
-    m_originalMarkeWidth (  4.0f ),
-    m_originalPixPerSpd1 ( 30.0f ),
-    m_originalPixPerSpd2 ( 20.0f ),
-    m_originalPixPerSpd4 (  5.0f ),
-
-    m_originalScalePos  ( 275.0f ,  50.0f ),
-    m_originalMarkerPos ( 285.0f , 124.5f ),
-
-    m_markerBrush ( QColor( 0xff, 0xff, 0xff ), Qt::SolidPattern ),
-    m_markerPen ( m_markerBrush, 0 ),
-
-    m_scaleZ  ( 70 ),
-    m_markerZ ( 8000 )
-{
-    reset();
-}
+#include <cgi/cgi_ManipulatorMap.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsEADI::VSI::init( float scaleX, float scaleY )
+/**
+ * @brief Map widget class.
+ */
+class WidgetMap : public QWidget, public osgViewer::Viewer
 {
-    m_scaleX = scaleX;
-    m_scaleY = scaleY;
+    Q_OBJECT
 
-    reset();
+public:
 
-    m_itemScale = new QGraphicsSvgItem( ":/gui/images/efis/eadi/eadi_vsi_scale.svg" );
-    m_itemScale->setCacheMode( QGraphicsItem::NoCache );
-    m_itemScale->setZValue( m_scaleZ );
-    m_itemScale->setTransform( QTransform::fromScale( m_scaleX, m_scaleY ), true );
-    m_itemScale->moveBy( m_scaleX * m_originalScalePos.x(), m_scaleY * m_originalScalePos.y() );
-    m_scene->addItem( m_itemScale );
+    /** Constructor. */
+    WidgetMap( QWidget *parent = 0 );
 
-    m_itemMarker = m_scene->addRect( m_scaleX * m_originalMarkerPos.x(),
-                                     m_scaleY * m_originalMarkerPos.y(),
-                                     m_scaleX * m_originalMarkeWidth,
-                                     m_scaleY * 10,
-                                     m_markerPen, m_markerBrush );
-    m_itemMarker->setZValue( m_markerZ );
+    /** Destructor. */
+    virtual ~WidgetMap();
 
-    update( scaleX, scaleY );
-}
+signals:
+
+    void positionChanged( double lat, double lon );
+
+protected:
+
+    bool event( QEvent *event );
+
+    /** */
+    void paintEvent( QPaintEvent *event );
+
+    /** */
+    void timerEvent( QTimerEvent *event );
+
+private:
+
+    QGridLayout *m_gridLayout;
+
+    osg::ref_ptr<osgQt::GraphicsWindowQt> m_graphicsWindow;
+
+    osg::ref_ptr<cgi::ManipulatorMap> m_manipulator;
+
+    int m_timerId;                  ///< timer ID
+
+    bool m_camManipulatorInited;
+
+    /** */
+    QWidget* addViewWidget();
+
+    void createCameraMap();
+
+    /** */
+    osg::ref_ptr<osgQt::GraphicsWindowQt> createGraphicsWindow( int x, int y, int w, int h,
+                                                                const std::string &name = "",
+                                                                bool windowDecoration = false );
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsEADI::VSI::update( float scaleX, float scaleY )
-{
-    m_scaleX = scaleX;
-    m_scaleY = scaleY;
-
-    updateVSI();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GraphicsEADI::VSI::setClimbRate( float climbRate )
-{
-    m_climbRate = climbRate;
-
-    if      ( m_climbRate >  6.3f ) m_climbRate =  6.3f;
-    else if ( m_climbRate < -6.3f ) m_climbRate = -6.3f;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GraphicsEADI::VSI::reset()
-{
-    m_itemScale = 0;
-
-    m_climbRate = 0.0;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GraphicsEADI::VSI::updateVSI()
-{
-    //m_scene->clear();
-
-    float climbRateAbs = fabs( m_climbRate );
-    float arrowDeltaY = 0.0;
-
-    if ( climbRateAbs <= 1.0f )
-    {
-        arrowDeltaY = m_originalPixPerSpd1 * climbRateAbs;
-    }
-    else if ( climbRateAbs <= 2.0f )
-    {
-        arrowDeltaY = m_originalPixPerSpd1 + m_originalPixPerSpd2 * ( climbRateAbs - 1.0f );
-    }
-    else
-    {
-        arrowDeltaY = m_originalPixPerSpd1 + m_originalPixPerSpd2 + m_originalPixPerSpd4 * ( climbRateAbs - 2.0f );
-    }
-
-    if ( m_climbRate > 0.0f )
-    {
-        m_itemMarker->setRect( m_scaleX * m_originalMarkerPos.x(),
-                               m_scaleY * m_originalMarkerPos.y() - m_scaleY * arrowDeltaY,
-                               m_scaleX * m_originalMarkeWidth,
-                               m_scaleY * arrowDeltaY );
-    }
-    else
-    {
-        m_itemMarker->setRect( m_scaleX * m_originalMarkerPos.x(),
-                               m_scaleY * m_originalMarkerPos.y(),
-                               m_scaleX * m_originalMarkeWidth,
-                               m_scaleY * arrowDeltaY );
-    }
-}
+#endif // WIDGETMAP_H
