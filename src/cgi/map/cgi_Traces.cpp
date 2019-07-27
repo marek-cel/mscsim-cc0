@@ -125,18 +125,16 @@
  *
  ******************************************************************************/
 
-#include <cgi/map/cgi_Icons.h>
+#include <cgi/map/cgi_Traces.h>
 
-#include <osg/LineWidth>
-#include <osg/Material>
+#include <osg/Geode>
+#include <osg/Geometry>
 
-#include <Data.h>
-
-#include <cgi/cgi_Geometry.h>
 #include <cgi/cgi_Mercator.h>
-#include <cgi/cgi_Textures.h>
 
 #include <cgi/map/cgi_Map.h>
+
+#include <Data.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -144,127 +142,100 @@ using namespace cgi;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Icons::Icons( Module *parent ) :
-    Module( parent )
+Traces::Traces( Module *parent ) :
+    Module( parent ),
+    m_positions ( new osg::Vec3dArray() ),
+    m_visible ( true ),
+    m_counter ( 0 )
 {
-    m_pat = new osg::PositionAttitudeTransform();
-    m_root->addChild( m_pat.get() );
-
-    m_speedLeader = new osg::Group();
-    m_pat->addChild( m_speedLeader.get() );
-
-    createIcon();
-    setScale( 1.0 );
+    m_switch = new osg::Switch();
+    m_root->addChild( m_switch.get() );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Icons::~Icons() {}
+Traces::~Traces() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Icons::update()
+void Traces::update()
 {
-    m_pat->setPosition( osg::Vec3( Mercator::getX( Data::get()->ownship.longitude ),
-                                   Mercator::getY( Data::get()->ownship.latitude ),
-                                   0.0f ) );
-
-    if ( m_speedLeader->getNumChildren() > 0 )
+    if ( Data::get()->stateOut == fdm::DataOut::Working )
     {
-        m_speedLeader->removeChildren( 0, m_speedLeader->getNumChildren() );
+        m_positions->push_back( osg::Vec3d( Mercator::getX( Data::get()->ownship.longitude ),
+                                            Mercator::getY( Data::get()->ownship.latitude ),
+                                            Map::zTraces ) );
+
+        if ( m_visible && m_counter % 10 == 0 )
+        {
+            m_counter = 0;
+
+            if ( m_switch->getNumChildren() > 0 )
+            {
+                m_switch->removeChildren( 0, m_switch->getNumChildren() );
+            }
+
+            osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+            m_switch->addChild( geode.get() );
+
+            osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry();
+
+            osg::ref_ptr<osg::Vec3Array> n = new osg::Vec3Array();  // normals
+            osg::ref_ptr<osg::Vec4Array> c = new osg::Vec4Array();  // colors
+
+            n->push_back( osg::Vec3( 0.0f, 0.0f, 1.0f ) );
+            c->push_back( osg::Vec4( 0.0f, 0.0f, 0.0f, 1.0f ) );
+
+            geometry->setVertexArray( m_positions.get() );
+            geometry->addPrimitiveSet( new osg::DrawArrays( osg::PrimitiveSet::LINE_STRIP, 0, m_positions->size() ) );
+            geometry->setNormalArray( n.get() );
+            geometry->setNormalBinding( osg::Geometry::BIND_OVERALL );
+            geometry->setColorArray( c.get() );
+            geometry->setColorBinding( osg::Geometry::BIND_OVERALL );
+
+            geode->addDrawable( geometry.get() );
+        }
+
+        m_counter++;
     }
-
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-    m_speedLeader->addChild( geode.get() );
-
-    osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry();
-
-    osg::ref_ptr<osg::Vec3Array> n = new osg::Vec3Array();  // normals
-    osg::ref_ptr<osg::Vec4Array> c = new osg::Vec4Array();  // colors
-    osg::ref_ptr<osg::Vec3Array> v = new osg::Vec3Array();
-
-    n->push_back( osg::Vec3( 0.0f, 0.0f, 1.0f ) );
-    c->push_back( osg::Vec4( 0.0f, 0.0f, 0.0f, 1.0f ) );
-
-    const float coef = 1.0f / 50.0f; // 180 km/h
-    osg::Vec3 vel_ned( coef * Data::get()->ownship.vel_east,
-                       coef * Data::get()->ownship.vel_north,
-                       Map::zSpeedLeader );
-
-    if ( vel_ned.length2() > 1.0f )
+    else if ( Data::get()->stateOut == fdm::DataOut::Idle )
     {
-        vel_ned.normalize();
+        reset();
     }
-
-    v->push_back( osg::Vec3( 0.0f, 0.0f, Map::zSpeedLeader ) );
-    v->push_back( vel_ned );
-
-    geometry->setVertexArray( v.get() );
-    geometry->addPrimitiveSet( new osg::DrawArrays( osg::PrimitiveSet::LINES, 0, v->size() ) );
-    geometry->setNormalArray( n.get() );
-    geometry->setNormalBinding( osg::Geometry::BIND_OVERALL );
-    geometry->setColorArray( c.get() );
-    geometry->setColorBinding( osg::Geometry::BIND_OVERALL );
-
-    geode->addDrawable( geometry.get() );
-
-    ////////////////////
-
-    osg::ref_ptr<osg::StateSet> stateSet = geode->getOrCreateStateSet();
-
-    osg::ref_ptr<osg::LineWidth> lineWidth = new osg::LineWidth();
-    lineWidth->setWidth( 1.25f );
-
-    stateSet->setAttributeAndModes( lineWidth, osg::StateAttribute::ON );
-    stateSet->setMode( GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Icons::setScale( double scale )
+void Traces::reset()
 {
-    double s = 1.5 * 1.0e6 * scale;
-    m_pat->setScale( osg::Vec3d( s, s, 1.0 ) );
+    m_positions->clear();
+
+    m_counter = 0;
+
+    if ( m_switch->getNumChildren() > 0 )
+    {
+        m_switch->removeChildren( 0, m_switch->getNumChildren() );
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Icons::createIcon()
+void Traces::setVisibility( bool visible )
 {
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-    m_pat->addChild( geode.get() );
+    m_visible = visible;
 
-    osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry();
-    geode->addDrawable( geometry.get() );
-
-    osg::ref_ptr<osg::Vec3Array> v = new osg::Vec3Array();  // vertices
-
-    v->push_back( osg::Vec3( -0.5f, -0.5f, Map::zIconsFill ) );
-    v->push_back( osg::Vec3(  0.5f, -0.5f, Map::zIconsFill ) );
-    v->push_back( osg::Vec3(  0.5f,  0.5f, Map::zIconsFill ) );
-    v->push_back( osg::Vec3( -0.5f,  0.5f, Map::zIconsFill ) );
-
-    Geometry::createQuad( geometry.get(), v.get(), true, true );
-
-    osg::ref_ptr<osg::StateSet> stateSet = geode->getOrCreateStateSet();
-    stateSet->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
-
-    // texture
-    osg::ref_ptr<osg::Texture2D> texture = Textures::get( "data/map/icons/air_friend.png" );
-
-    if ( texture.valid() )
+    if ( visible )
     {
-        stateSet->setMode( GL_BLEND, osg::StateAttribute::ON );
-        stateSet->setRenderingHint( osg::StateSet::TRANSPARENT_BIN );
-        stateSet->setTextureAttributeAndModes( 0, texture, osg::StateAttribute::ON );
+        m_counter = 0;
+        m_switch->setAllChildrenOn();
     }
+    else
+    {
+        m_switch->setAllChildrenOff();
 
-    // material
-    osg::ref_ptr<osg::Material> material = new osg::Material();
-
-    material->setColorMode( osg::Material::AMBIENT_AND_DIFFUSE );
-    material->setAmbient( osg::Material::FRONT, osg::Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
-    material->setDiffuse( osg::Material::FRONT, osg::Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
-
-    stateSet->setAttribute( material.get() );
+        if ( m_switch->getNumChildren() > 0 )
+        {
+            m_switch->removeChildren( 0, m_switch->getNumChildren() );
+        }
+    }
 }

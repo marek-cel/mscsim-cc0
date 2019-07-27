@@ -141,6 +141,8 @@ namespace cgi
  */
 class ManipulatorMap : public osgGA::CameraManipulator
 {
+    typedef osgGA::CameraManipulator inherited;
+
 public:
 
     /** Constructor. */

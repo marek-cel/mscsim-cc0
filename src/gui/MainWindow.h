@@ -213,6 +213,7 @@ private:
     DockWidgetMap  *m_dockMap;      ///<
     DockWidgetProp *m_dockProp;     ///<
 
+    QShortcut *m_scFullScreen;      ///<
     QShortcut *m_scTimeFaster;      ///<
     QShortcut *m_scTimeSlower;      ///<
 
@@ -295,6 +296,8 @@ private slots:
 
     void on_actionTimeFaster_triggered();
     void on_actionTimeSlower_triggered();
+
+    void on_shorcutFullScreen_triggered();
 
     void dialogInit_typeIndexChanged( int typeIndex );
     void dockMain_phaseInpChanged( fdm::DataInp::PhaseInp phaseInp );

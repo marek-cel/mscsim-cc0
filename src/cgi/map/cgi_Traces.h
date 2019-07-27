@@ -124,147 +124,52 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <cgi/map/cgi_Icons.h>
-
-#include <osg/LineWidth>
-#include <osg/Material>
-
-#include <Data.h>
-
-#include <cgi/cgi_Geometry.h>
-#include <cgi/cgi_Mercator.h>
-#include <cgi/cgi_Textures.h>
-
-#include <cgi/map/cgi_Map.h>
+#ifndef CGI_TRACES_H
+#define CGI_TRACES_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using namespace cgi;
+#include <osg/Switch>
+
+#include <cgi/cgi_Module.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Icons::Icons( Module *parent ) :
-    Module( parent )
+namespace cgi
 {
-    m_pat = new osg::PositionAttitudeTransform();
-    m_root->addChild( m_pat.get() );
 
-    m_speedLeader = new osg::Group();
-    m_pat->addChild( m_speedLeader.get() );
-
-    createIcon();
-    setScale( 1.0 );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-Icons::~Icons() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void Icons::update()
+/** */
+class Traces : public Module
 {
-    m_pat->setPosition( osg::Vec3( Mercator::getX( Data::get()->ownship.longitude ),
-                                   Mercator::getY( Data::get()->ownship.latitude ),
-                                   0.0f ) );
+public:
 
-    if ( m_speedLeader->getNumChildren() > 0 )
-    {
-        m_speedLeader->removeChildren( 0, m_speedLeader->getNumChildren() );
-    }
+    /** Constructor. */
+    Traces( Module *parent = 0 );
 
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-    m_speedLeader->addChild( geode.get() );
+    /** Destructor. */
+    virtual ~Traces();
 
-    osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry();
+    /** */
+    void update();
 
-    osg::ref_ptr<osg::Vec3Array> n = new osg::Vec3Array();  // normals
-    osg::ref_ptr<osg::Vec4Array> c = new osg::Vec4Array();  // colors
-    osg::ref_ptr<osg::Vec3Array> v = new osg::Vec3Array();
+    void reset();
 
-    n->push_back( osg::Vec3( 0.0f, 0.0f, 1.0f ) );
-    c->push_back( osg::Vec4( 0.0f, 0.0f, 0.0f, 1.0f ) );
+    void setVisibility( bool visible );
 
-    const float coef = 1.0f / 50.0f; // 180 km/h
-    osg::Vec3 vel_ned( coef * Data::get()->ownship.vel_east,
-                       coef * Data::get()->ownship.vel_north,
-                       Map::zSpeedLeader );
+private:
 
-    if ( vel_ned.length2() > 1.0f )
-    {
-        vel_ned.normalize();
-    }
+    osg::ref_ptr<osg::Switch> m_switch;
 
-    v->push_back( osg::Vec3( 0.0f, 0.0f, Map::zSpeedLeader ) );
-    v->push_back( vel_ned );
+    osg::ref_ptr<osg::Vec3dArray> m_positions;
 
-    geometry->setVertexArray( v.get() );
-    geometry->addPrimitiveSet( new osg::DrawArrays( osg::PrimitiveSet::LINES, 0, v->size() ) );
-    geometry->setNormalArray( n.get() );
-    geometry->setNormalBinding( osg::Geometry::BIND_OVERALL );
-    geometry->setColorArray( c.get() );
-    geometry->setColorBinding( osg::Geometry::BIND_OVERALL );
+    bool m_visible;
 
-    geode->addDrawable( geometry.get() );
+    unsigned int m_counter;
 
-    ////////////////////
+};
 
-    osg::ref_ptr<osg::StateSet> stateSet = geode->getOrCreateStateSet();
-
-    osg::ref_ptr<osg::LineWidth> lineWidth = new osg::LineWidth();
-    lineWidth->setWidth( 1.25f );
-
-    stateSet->setAttributeAndModes( lineWidth, osg::StateAttribute::ON );
-    stateSet->setMode( GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE );
-}
+} // end of cgi namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Icons::setScale( double scale )
-{
-    double s = 1.5 * 1.0e6 * scale;
-    m_pat->setScale( osg::Vec3d( s, s, 1.0 ) );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void Icons::createIcon()
-{
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-    m_pat->addChild( geode.get() );
-
-    osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry();
-    geode->addDrawable( geometry.get() );
-
-    osg::ref_ptr<osg::Vec3Array> v = new osg::Vec3Array();  // vertices
-
-    v->push_back( osg::Vec3( -0.5f, -0.5f, Map::zIconsFill ) );
-    v->push_back( osg::Vec3(  0.5f, -0.5f, Map::zIconsFill ) );
-    v->push_back( osg::Vec3(  0.5f,  0.5f, Map::zIconsFill ) );
-    v->push_back( osg::Vec3( -0.5f,  0.5f, Map::zIconsFill ) );
-
-    Geometry::createQuad( geometry.get(), v.get(), true, true );
-
-    osg::ref_ptr<osg::StateSet> stateSet = geode->getOrCreateStateSet();
-    stateSet->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
-
-    // texture
-    osg::ref_ptr<osg::Texture2D> texture = Textures::get( "data/map/icons/air_friend.png" );
-
-    if ( texture.valid() )
-    {
-        stateSet->setMode( GL_BLEND, osg::StateAttribute::ON );
-        stateSet->setRenderingHint( osg::StateSet::TRANSPARENT_BIN );
-        stateSet->setTextureAttributeAndModes( 0, texture, osg::StateAttribute::ON );
-    }
-
-    // material
-    osg::ref_ptr<osg::Material> material = new osg::Material();
-
-    material->setColorMode( osg::Material::AMBIENT_AND_DIFFUSE );
-    material->setAmbient( osg::Material::FRONT, osg::Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
-    material->setDiffuse( osg::Material::FRONT, osg::Vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
-
-    stateSet->setAttribute( material.get() );
-}
+#endif // CGI_TRACES_H

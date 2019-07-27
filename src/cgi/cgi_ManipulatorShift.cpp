@@ -135,7 +135,9 @@ using namespace cgi;
 
 ManipulatorShift::ManipulatorShift() :
     inherited(),
-    m_distance_min ( 5.0 )
+    m_distance ( 5.0 ),
+    m_distance_min ( 5.0 ),
+    m_distance_max ( 5000.0 )
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -145,7 +147,9 @@ ManipulatorShift::ManipulatorShift( const ManipulatorShift &cmi,
     osg::Object( cmi, copyOp ),
     inherited( cmi, copyOp ),
     m_matrix( cmi.m_matrix ),
-    m_distance_min ( 5.0 )
+    m_distance ( cmi.m_distance ),
+    m_distance_min ( cmi.m_distance_min ),
+    m_distance_max ( cmi.m_distance_max )
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -208,9 +212,9 @@ bool ManipulatorShift::handle( const osgGA::GUIEventAdapter &ea, osgGA::GUIActio
 
 void ManipulatorShift::setDistance( double distance )
 {
-    if ( distance > 5000.0 )
+    if ( distance > m_distance_max )
     {
-        m_distance = 5000.0;
+        m_distance = m_distance_max;
     }
     else if ( distance < m_distance_min )
     {
@@ -226,13 +230,40 @@ void ManipulatorShift::setDistance( double distance )
 
 void ManipulatorShift::setDistanceMin( double distance_min )
 {
-    if ( distance_min > 0.0 )
+    if ( distance_min > 0.0 && distance_min < m_distance_max )
     {
         m_distance_min = distance_min;
     }
 
-    setDistance( m_distance );
+    boundDistance();
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+void ManipulatorShift::setDistanceMax( double distance_max )
+{
+    if ( distance_max > 0.0 && distance_max > m_distance_min )
+    {
+        m_distance_max = distance_max;
+    }
+
+    boundDistance();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void ManipulatorShift::boundDistance()
+{
+    if ( getDistance() > m_distance_max )
+    {
+        setDistance( m_distance_max );
+    }
+    else if ( getDistance() < m_distance_min )
+    {
+        setDistance( m_distance_min );
+    }
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 

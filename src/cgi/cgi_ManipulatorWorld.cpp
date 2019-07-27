@@ -136,7 +136,7 @@ using namespace cgi;
 ////////////////////////////////////////////////////////////////////////////////
 
 ManipulatorWorld::ManipulatorWorld() :
-    osgGA::TerrainManipulator()
+    inherited()
 {
     setWheelZoomFactor( -getWheelZoomFactor() );
 }
@@ -145,9 +145,9 @@ ManipulatorWorld::ManipulatorWorld() :
 
 bool ManipulatorWorld::handleFrame( const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &us )
 {
-    ///////////////////////////////////////////////////////////////
-    bool result = osgGA::TerrainManipulator::handleFrame( ea, us );
-    ///////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////
+    bool result = inherited::handleFrame( ea, us );
+    ///////////////////////////////////////////////
 
     boundDistance();
 
@@ -165,8 +165,10 @@ bool ManipulatorWorld::performMovementRightMouseButton( const double /*eventTime
 
 void ManipulatorWorld::boundDistance()
 {
-    if ( getDistance() > 0.8 * CGI_SKYDOME_RADIUS )
+    static const double distance_max = 0.8 * CGI_SKYDOME_RADIUS;
+
+    if ( getDistance() > distance_max )
     {
-        setDistance( 0.8 * CGI_SKYDOME_RADIUS );
+        setDistance( distance_max );
     }
 }

@@ -129,7 +129,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <Data.h>
+
 #include <cgi/cgi_Module.h>
+#include <cgi/cgi_Textures.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -141,6 +144,8 @@ class CloudsLayer : public Module
 {
 public:
 
+    typedef Data::Environment::Clouds::Data::Layer::Cover Cover;
+
     /** Constructor. */
     CloudsLayer( Module *parent = 0 );
 
@@ -149,6 +154,21 @@ public:
 
     /** Updates clouds. */
     void update();
+
+private:
+
+    Textures::List m_textures;  ///<
+
+    Cover m_cover;              ///< cover
+    float m_base_asl;           ///< [m] clouds base above mean sea level
+
+    short m_framesCounter;      ///<
+    bool m_created;             ///<
+
+    void create();
+    void createLayer( osg::Group *parent, double lat, double lon, double alt );
+
+    void remove();
 };
 
 } // end of cgi namespace
