@@ -448,14 +448,12 @@ bool ManipulatorMap::handleMouseRelease( const osgGA::GUIEventAdapter &ea, osgGA
 {
     if ( ea.getButtonMask() == 0 )
     {
-
         double timeSinceLastRecordEvent = m_ga_t0.valid() ? ( ea.getTime() - m_ga_t0->getTime() ) : DBL_MAX;
 
         if( timeSinceLastRecordEvent > 0.02 ) flushMouseEventStack();
 
         if ( isMouseMoving() )
         {
-
             if ( performMovement() && m_allowThrow )
             {
                 us.requestRedraw();
@@ -513,7 +511,7 @@ bool ManipulatorMap::performMovement()
         float dx = m_ga_t0->getXnormalized() - m_ga_t1->getXnormalized();
         float dy = m_ga_t0->getYnormalized() - m_ga_t1->getYnormalized();
 
-        if ( m_ga_t1->getButtonMask() == osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON )
+        if ( m_ga_t1->getButtonMask() & osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON ) // due to contex menu issues
         {
             return performMovementLeftMouseButton( delta_t, dx, dy );
         }
