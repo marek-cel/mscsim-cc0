@@ -188,15 +188,6 @@ void ManipulatorMap::init( const osgGA::GUIEventAdapter &/*ea*/, osgGA::GUIActio
 
 bool ManipulatorMap::handle( const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &us )
 {
-    double y_norm = std::max( 0.0f, std::min( 1.0f, ea.getY() / ea.getWindowHeight() ) );
-    double x_norm = std::max( 0.0f, std::min( 1.0f, ea.getX() / ea.getWindowWidth()  ) );
-
-    double y_merc = ( m_map_top - m_map_bottom ) * y_norm + m_map_bottom;
-    double x_merc = ( m_map_right - m_map_left ) * x_norm + m_map_left;
-
-    m_mouse_lat = Mercator::getLat( y_merc );
-    m_mouse_lon = Mercator::getLon( x_merc );
-
     switch ( ea.getEventType() )
     {
 
@@ -248,18 +239,7 @@ void ManipulatorMap::updateCamera( osg::Camera &camera )
     double w2h = (double)(camera.getGraphicsContext()->getTraits()->width)
                / (double)(camera.getGraphicsContext()->getTraits()->height);
 
-    double delta_y_2 = 0.5 * m_map_height * m_scale;
-    double delta_x_2 = delta_y_2 * w2h;
-
-    if ( m_center.x() - delta_x_2 < m_map_min_x ) m_center.x() = m_map_min_x + delta_x_2;
-    if ( m_center.x() + delta_x_2 > m_map_max_x ) m_center.x() = m_map_max_x - delta_x_2;
-    if ( m_center.y() - delta_y_2 < m_map_min_y ) m_center.y() = m_map_min_y + delta_y_2;
-    if ( m_center.y() + delta_y_2 > m_map_max_y ) m_center.y() = m_map_max_y - delta_y_2;
-
-    m_map_left   = m_center.x() - delta_x_2;
-    m_map_right  = m_center.x() + delta_x_2;
-    m_map_bottom = m_center.y() - delta_y_2;
-    m_map_top    = m_center.y() + delta_y_2;
+    updateCenterAndEdges( w2h );
 
     camera.setProjectionMatrixAsOrtho2D( m_map_left, m_map_right,
                                          m_map_bottom, m_map_top );
@@ -354,6 +334,21 @@ void ManipulatorMap::setMapMaxY( double max )
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void ManipulatorMap::setScale( double scale )
+{
+    m_scale = scale;
+
+    if ( m_scale > m_scale_max ) m_scale = m_scale_max;
+    if ( m_scale < m_scale_min ) m_scale = m_scale_min;
+
+    if ( m_scaleChangeCallback )
+    {
+        (*m_scaleChangeCallback)( m_scale );
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void ManipulatorMap::setScaleMin( double min )
 {
     if ( min >= 0.0 && min < m_scale_max )
@@ -408,8 +403,9 @@ bool ManipulatorMap::handleResize( const osgGA::GUIEventAdapter &ea, osgGA::GUIA
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool ManipulatorMap::handleMouseMove( const osgGA::GUIEventAdapter &/*ea*/, osgGA::GUIActionAdapter &/*us*/ )
+bool ManipulatorMap::handleMouseMove( const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &/*us*/ )
 {
+    updateMousePosition( ea );
     return false;
 }
 
@@ -417,6 +413,7 @@ bool ManipulatorMap::handleMouseMove( const osgGA::GUIEventAdapter &/*ea*/, osgG
 
 bool ManipulatorMap::handleMouseDrag( const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &us )
 {
+    updateMousePosition( ea );
     addMouseEvent( ea );
 
     if ( performMovement() ) us.requestRedraw();
@@ -431,6 +428,7 @@ bool ManipulatorMap::handleMouseDrag( const osgGA::GUIEventAdapter &ea, osgGA::G
 
 bool ManipulatorMap::handleMousePush( const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &us )
 {
+    updateMousePosition( ea );
     flushMouseEventStack();
     addMouseEvent( ea );
 
@@ -446,6 +444,8 @@ bool ManipulatorMap::handleMousePush( const osgGA::GUIEventAdapter &ea, osgGA::G
 
 bool ManipulatorMap::handleMouseRelease( const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &us )
 {
+    updateMousePosition( ea );
+
     if ( ea.getButtonMask() == 0 )
     {
         double timeSinceLastRecordEvent = m_ga_t0.valid() ? ( ea.getTime() - m_ga_t0->getTime() ) : DBL_MAX;
@@ -480,6 +480,8 @@ bool ManipulatorMap::handleMouseRelease( const osgGA::GUIEventAdapter &ea, osgGA
 
 bool ManipulatorMap::handleMouseWheel( const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &us )
 {
+    updateMousePosition( ea );
+
     osgGA::GUIEventAdapter::ScrollingMotion sm = ea.getScrollingMotion();
 
     switch ( sm )
@@ -545,15 +547,7 @@ void ManipulatorMap::panModel( float dx, float dy, float dz )
 
 void ManipulatorMap::zoomModel( const float dy )
 {
-    m_scale *= 1.0 + dy;
-
-    if ( m_scale > m_scale_max ) m_scale = m_scale_max;
-    if ( m_scale < m_scale_min ) m_scale = m_scale_min;
-
-    if ( m_scaleChangeCallback )
-    {
-        (*m_scaleChangeCallback)( m_scale );
-    }
+    setScale( m_scale * ( 1.0 + dy ) );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -606,4 +600,55 @@ float ManipulatorMap::getThrowScale( double delta_t ) const
     }
 
     return 1.0f;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void ManipulatorMap::updateCenterAndEdges( double w2h )
+{
+    double delta_y_2 = 0.5 * m_map_height * m_scale;
+    double delta_x_2 = delta_y_2 * w2h;
+
+    if ( m_center.x() - delta_x_2 < m_map_min_x )
+    {
+        m_thrown = false;
+        m_center.x() = m_map_min_x + delta_x_2;
+    }
+
+    if ( m_center.x() + delta_x_2 > m_map_max_x )
+    {
+        m_thrown = false;
+        m_center.x() = m_map_max_x - delta_x_2;
+    }
+
+    if ( m_center.y() - delta_y_2 < m_map_min_y )
+    {
+        m_thrown = false;
+        m_center.y() = m_map_min_y + delta_y_2;
+    }
+
+    if ( m_center.y() + delta_y_2 > m_map_max_y )
+    {
+        m_thrown = false;
+        m_center.y() = m_map_max_y - delta_y_2;
+    }
+
+    m_map_left   = m_center.x() - delta_x_2;
+    m_map_right  = m_center.x() + delta_x_2;
+    m_map_bottom = m_center.y() - delta_y_2;
+    m_map_top    = m_center.y() + delta_y_2;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void ManipulatorMap::updateMousePosition( const osgGA::GUIEventAdapter &ea )
+{
+    double x_norm = std::max( 0.0f, std::min( 1.0f, ea.getX() / ea.getWindowWidth()  ) );
+    double y_norm = std::max( 0.0f, std::min( 1.0f, ea.getY() / ea.getWindowHeight() ) );
+
+    double x_merc = ( m_map_right - m_map_left ) * x_norm + m_map_left;
+    double y_merc = ( m_map_top - m_map_bottom ) * y_norm + m_map_bottom;
+
+    m_mouse_lat = Mercator::lat( y_merc );
+    m_mouse_lon = Mercator::lon( x_merc );
 }

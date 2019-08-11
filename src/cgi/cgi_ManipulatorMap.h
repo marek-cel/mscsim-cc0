@@ -173,6 +173,7 @@ public:
     void setMapMaxX( double max );
     void setMapMaxY( double max );
 
+    void setScale( double scale );
     void setScaleMin( double min );
     void setScaleMax( double max );
 
@@ -234,6 +235,9 @@ protected:
 
     bool isMouseMoving() const;
     float getThrowScale( double delta_t ) const;
+
+    void updateCenterAndEdges( double w2h );
+    void updateMousePosition( const osgGA::GUIEventAdapter &ea );
 };
 
 } // end of cgi namespace

@@ -157,7 +157,7 @@ public:
 
 signals:
 
-    void positionChanged( double lat, double lon );
+    void mouseMoveGeoPosition( const QString & );
 
 protected:
 
@@ -180,6 +180,8 @@ private:
     osg::ref_ptr<osgQt::GraphicsWindowQt> m_graphicsWindow;
 
     osg::ref_ptr<cgi::ManipulatorMap> m_manipulator;
+
+    QString m_mouseGeoPositionStr;
 
     int m_timerId;                  ///< timer ID
 
@@ -206,6 +208,8 @@ private:
     osg::ref_ptr<osgQt::GraphicsWindowQt> createGraphicsWindow( int x, int y, int w, int h,
                                                                 const std::string &name = "",
                                                                 bool windowDecoration = false );
+
+    void updateMouseGeoPositionStr( double lat, double lon );
 
     void settingsRead();
     void settingsSave();

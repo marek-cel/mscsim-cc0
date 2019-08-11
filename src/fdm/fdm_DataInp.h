@@ -147,7 +147,8 @@ struct DataInp
         C130 = 0,                       ///< C-130
         C172 = 1,                       ///< Cessna 172
         F16  = 2,                       ///< F-16
-        UH60 = 3                        ///< UH-60
+        P51  = 3,                       ///< P-51
+        UH60 = 4                        ///< UH-60
 
     };
 
@@ -164,8 +165,8 @@ struct DataInp
     /** Initial conditions. */
     struct Initial
     {
-        double latitude;                ///< [rad] geographic latitude (positive north)
-        double longitude;               ///< [rad] geographic longitude (positive east)
+        double latitude;                ///< [rad] geodetic latitude (positive north)
+        double longitude;               ///< [rad] geodetic longitude (positive east)
         double altitude_agl;            ///< [m] altitude above ground level
         double heading;                 ///< [rad] true heading
         double airspeed;                ///< [m/s] airspeed

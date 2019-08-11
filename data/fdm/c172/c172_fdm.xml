@@ -761,7 +761,7 @@
     
     <!-- propeller -->
     <propeller>
-      <position>  1.8  0.0  0.0  </position>  <!-- [m] propeller position expressed in BAS -->
+      <position>  2.06  0.0  0.0  </position> <!-- [m] propeller position expressed in BAS -->
 
       <gear_ratio>  1.0  </gear_ratio>        <!-- [-] gear ratio (propeller rpm / engine rpm - sic!) -->
       <diameter> 1.93 </diameter>             <!-- [m] propeller diameter -->

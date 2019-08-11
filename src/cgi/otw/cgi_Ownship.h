@@ -130,6 +130,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <fdm/utils/fdm_Table.h>
+#include <fdm/xml/fdm_XmlNode.h>
 
 #include <cgi/cgi_Module.h>
 
@@ -147,10 +148,17 @@ public:
 
     struct LandingGearElementData
     {
-        double input_min;
-        double input_max;
-        double angle_min;   ///< [rad]
-        double angle_max;   ///< [rad]
+        struct AxisData
+        {
+            double input_min;
+            double input_max;
+            double angle_min;   ///< [rad]
+            double angle_max;   ///< [rad]
+        };
+
+        AxisData x;
+        AxisData y;
+        AxisData z;
     };
 
     typedef std::vector< osg::ref_ptr<osg::PositionAttitudeTransform> > Blades;
@@ -207,7 +215,14 @@ private:
 
     LandingGearElementsData m_landingGearElementsData;
 
+    double getAngle( double input, LandingGearElementData::AxisData *axisData );
+
     void loadModel( const std::string &modelFile );
+
+    void readLandingGearElementsData( const fdm::XmlNode &rootNode,
+                                      LandingGearElementsData *landingGearElementsData );
+    void readLandingGearElementAxisData( const fdm::XmlNode &node,
+                                         LandingGearElementData::AxisData *axisData );
 
     void reload();
     void reset();

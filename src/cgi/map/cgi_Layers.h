@@ -176,6 +176,7 @@ private:
 
     osg::ref_ptr<osg::PositionAttitudeTransform> m_oceans;
     osg::ref_ptr<osg::PositionAttitudeTransform> m_landmass;
+    osg::ref_ptr<osg::PositionAttitudeTransform> m_coastline;
     osg::ref_ptr<osg::PositionAttitudeTransform> m_crops;
     osg::ref_ptr<osg::PositionAttitudeTransform> m_grassland;
     osg::ref_ptr<osg::PositionAttitudeTransform> m_woodland;
@@ -183,13 +184,14 @@ private:
     osg::ref_ptr<osg::PositionAttitudeTransform> m_railroads;
     osg::ref_ptr<osg::PositionAttitudeTransform> m_roads;
     osg::ref_ptr<osg::PositionAttitudeTransform> m_airports;
-    osg::ref_ptr<osg::PositionAttitudeTransform> m_water;
+    osg::ref_ptr<osg::PositionAttitudeTransform> m_water_course;
+    osg::ref_ptr<osg::PositionAttitudeTransform> m_water_inland;
     osg::ref_ptr<osg::PositionAttitudeTransform> m_satellite;
     osg::ref_ptr<osg::PositionAttitudeTransform> m_borders;
 
     void createOcean();
 
-    void initLayer( osg::Node* layer, osg::Vec3 color );
+    void initLayer( osg::Node* layer, osg::Vec3 color, float width = 1.0f );
 
     void readLayers();
     void readLayer( const fdm::XmlNode &node, osg::Group *parent );

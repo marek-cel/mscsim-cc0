@@ -131,6 +131,8 @@
 
 #include <osg/Switch>
 
+#include <fdm/fdm_DataOut.h>
+
 #include <cgi/cgi_Module.h>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -165,6 +167,8 @@ private:
     bool m_visible;
 
     unsigned int m_counter;
+
+    fdm::DataOut::StateOut m_prevState;
 
 };
 

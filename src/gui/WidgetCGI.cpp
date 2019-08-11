@@ -152,7 +152,7 @@ WidgetCGI::WidgetCGI( QWidget *parent ) :
     m_timerId ( 0 ),
     m_camManipulatorInited ( false )
 {
-#   ifdef SIM_OSGDEBUGINFO
+#   ifdef SIM_OSG_DEBUG_INFO
     osg::setNotifyLevel( osg::DEBUG_INFO );
 #   else
     osg::setNotifyLevel( osg::WARN );

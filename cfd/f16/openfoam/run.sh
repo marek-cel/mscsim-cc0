@@ -9,26 +9,26 @@ export EXEC_DIR=$(pwd)
 
 ################################################################################
 
-export MODEL_NAME=f16_half
-export MODEL_FILE=$EXEC_DIR/models/stl/$MODEL_NAME.stl
-./iterateAngleOfAttack.sh
-
-cd $EXEC_DIR
-export MODEL_NAME=f16_flaps_half
-export MODEL_FILE=$EXEC_DIR/models/stl/$MODEL_NAME.stl
-./iterateAngleOfAttack.sh
-
-cd $EXEC_DIR
-export MODEL_NAME=f16_gear_half
-export MODEL_FILE=$EXEC_DIR/models/stl/$MODEL_NAME.stl
-./iterateAngleOfAttack.sh
+# export MODEL_NAME=f16_half
+# export MODEL_FILE=$EXEC_DIR/models/stl/$MODEL_NAME.stl
+# ./iterateAngleOfAttack.sh
+# 
+# cd $EXEC_DIR
+# export MODEL_NAME=f16_flaps_half
+# export MODEL_FILE=$EXEC_DIR/models/stl/$MODEL_NAME.stl
+# ./iterateAngleOfAttack.sh
+# 
+# cd $EXEC_DIR
+# export MODEL_NAME=f16_gear_half
+# export MODEL_FILE=$EXEC_DIR/models/stl/$MODEL_NAME.stl
+# ./iterateAngleOfAttack.sh
 
 ################################################################################
 
-# cd $EXEC_DIR
-# export MODEL_NAME=bullet_half
-# export MODEL_FILE=$EXEC_DIR/models/stl/$MODEL_NAME.stl
-# ./iterateMachNumber.sh
+cd $EXEC_DIR
+export MODEL_NAME=bullet_half
+export MODEL_FILE=$EXEC_DIR/models/stl/$MODEL_NAME.stl
+./iterateMachNumber.sh
 
 ################################################################################
 

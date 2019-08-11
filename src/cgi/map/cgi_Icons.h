@@ -143,6 +143,14 @@ class Icons : public Module
 {
 public:
 
+    struct Ownship
+    {
+        osg::ref_ptr<osg::PositionAttitudeTransform> pat;
+        osg::ref_ptr<osg::Group> speedLeader;
+    };
+
+    typedef std::vector< osg::ref_ptr<osg::PositionAttitudeTransform> > Aerodromes;
+
     /** Constructor. */
     Icons( Module *parent = 0 );
 
@@ -157,10 +165,21 @@ public:
 
 private:
 
-    osg::ref_ptr<osg::PositionAttitudeTransform> m_pat;
-    osg::ref_ptr<osg::Group> m_speedLeader;
+    Ownship m_ownship;
+    Aerodromes m_aerodromes;
 
-    void createIcon();
+    osg::ref_ptr<osg::Geode> m_symbolAerodrome;
+
+    void createIcon( osg::Group *parent, float z,
+                     const std::string &textureFile );
+
+    void createOwnship();
+
+    void createSymbolAerodrome();
+
+    void initAerodromes();
+
+    void updateOwnship();
 };
 
 } // end of cgi namespace

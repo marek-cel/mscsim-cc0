@@ -129,7 +129,7 @@
 
 #include <QApplication>
 
-#ifndef SIM_CONSOLEOUTPUT
+#ifndef SIM_CONSOLE_OUTPUT
 #   ifdef WIN32
 #		include <QDir>
 #	endif
@@ -149,7 +149,7 @@ int main( int argc, char *argv[] )
     setenv( "LC_NUMERIC", "en_US", 1 );
 #   endif
 
-#   ifndef SIM_CONSOLEOUTPUT
+#   ifndef SIM_CONSOLE_OUTPUT
 
 #   ifdef _LINUX_
     std::string log_file = "/tmp/";
@@ -184,7 +184,7 @@ int main( int argc, char *argv[] )
     delete mgr; mgr = 0;
     delete app; app = 0;
 
-#   ifndef SIM_CONSOLEOUTPUT
+#   ifndef SIM_CONSOLE_OUTPUT
     std::cerr.rdbuf( strbuf );
     if ( out.is_open() )
     {
