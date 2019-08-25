@@ -163,6 +163,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+//#warning TEST! TEST! TEST!
+//#define FDM_MIN_INIT_ALTITUDE 0.0
 #define FDM_MIN_INIT_ALTITUDE 30.0
 #define FDM_MAX_INIT_STEPS 20000
 
