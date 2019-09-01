@@ -161,8 +161,8 @@ protected:
 
 private:
 
-    double m_distance_min;  ///< [m]
-    double m_distance_max;  ///< [m]
+    double _distance_min;   ///< [m]
+    double _distance_max;   ///< [m]
 
     /** */
     void boundDistance();

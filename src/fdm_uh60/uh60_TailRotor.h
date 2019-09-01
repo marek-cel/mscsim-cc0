@@ -124,18 +124,12 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_TURBOFANAB_H
-#define FDM_TURBOFANAB_H
+#ifndef UH60_TAILROTOR_H
+#define UH60_TAILROTOR_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/models/fdm_Engine.h>
-
-#include <fdm/utils/fdm_Table.h>
-#include <fdm/utils/fdm_Table2D.h>
-#include <fdm/utils/fdm_Vector3.h>
-
-#include <fdm/xml/fdm_XmlNode.h>
+#include <fdm/models/fdm_TailRotor.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -143,222 +137,21 @@ namespace fdm
 {
 
 /**
- * @brief Twin-spool low by-pass ratio afterburning turbofan engine class.
- *
- * @see Nguyen L., et al.: Simulator Study of Stall/Post-Stall Characteristics of a Fighter Airplane With Relaxed Longitudinal Static Stability, NASA-TP-1538
- * @see Gilbert W., et al.: Simulator Study of the Effectiveness of an Automatic Control System Designed to Improve the High-Angle-of-Attack Characteristics of a Fighter Airplane, NASA-TN-D-8176
- *
- * <h5>XML configuration file format:</h5>
- * @code
- * <turbofan_ab>
- *   <position> { [m] x-coordinate } { [m] y-coordinate } { [m] z-coordinate } </position>
- *   <thrust_mil> { [N] maximum military thrust } </thrust_mil>
- *   <thrust_ab> { [N] maximum afterburner thrust } </thrust_ab>
- *   <ab_threshold> { afterburner throttle threshold } </ab_threshold>
- *   <time_constant_n1>
- *     { [-] difference of N1 setpoint and N1 } { [s] N1 time constant }
- *     ... { more entries }
- *   </time_constant_n1>
- *   <time_constant_n2>
- *     { [-] difference of N2 setpoint and N2 } { [s] N2 time constant }
- *     ... { more entries }
- *   </time_constant_n2>
- *   <time_constant_thrust>
- *     { [-] difference of normalized engine power command and engine power } { [s] thrust time constant }
- *     ... { more entries }
- *   </time_constant_thrust>
- *   <time_constant_tit> { TIT time constant } </time_constant_tit>
- *   <n1_throttle>
- *     { throttle position } { N1 }
- *     ... { more entries }
- *   </n1_throttle>
- *   <n2_throttle>
- *     { throttle position } { N2 }
- *     ... { more entries }
- *   </n2_throttle>
- *   <tit_n2>
- *     { N2 } { [deg C] TIT }
- *     ... { more entries }
- *   </tit_n2>
- *   <tsfc> { [kg/(N*s)] thrust specific fuel consumption } </tsfc>
- *   <tsfc_ab> { [kg/(N*s)] thrust specific fuel consumption (afterburner) } </tsfc_ab>
- *   <thrust_factor_idle>
- *     { [kg/m^3] air density } ... { more values of air density }
- *     { [-] Mach number } { [-] thrust factor } ... { more values of thrust }
- *     ... { more entries }
- *   </thrust_factor_idle>
- *   <thrust_factor_mil>
- *     { [kg/m^3] air density } ... { more values of air density }
- *     { [-] Mach number } { [-] thrust factor } ... { more values of thrust }
- *     ... { more entries }
- *   </thrust_factor_mil>
- *   <thrust_factor_ab>
- *     { [kg/m^3] air density } ... { more values of air density }
- *     { [-] Mach number } { [-] thrust factor } ... { more values of thrust }
- *     ... { more entries }
- *   </thrust_factor_ab>
- * </turbofan_ab>
- * @endcode
+ * @brief UH-60 tail rotor base class.
  */
-class FDMEXPORT TurbofanAB : public Engine
+class UH60_TailRotor : public TailRotor
 {
 public:
 
     /** Constructor. */
-    TurbofanAB();
+    UH60_TailRotor();
 
     /** Destructor. */
-    virtual ~TurbofanAB();
-
-    /**
-     * Reads data.
-     * @param dataNode XML node
-     */
-    virtual void readData( XmlNode &dataNode );
-
-    /** */
-    virtual void initialize( bool engineOn );
-
-    /**
-     * Computes thrust.
-     * @param machNumber [-] Mach number
-     * @param densityAltitude [m] air density altitude
-     */
-    virtual void computeThrust( double machNumber, double densityAltitude );
-
-    /**
-     * Integrates model.
-     * @param timeStep [s] time step
-     */
-    virtual void integrate( double timeStep );
-
-    /**
-     * Updates engine.
-     * @param throttle [0.0,1.0] throttle lever position
-     * @param temperature [deg C] air temperature
-     * @param machNumber [-] Mach number
-     * @param densityAltitude [m] air density altitude
-     * @param fuel specifies if fuel is provided
-     * @param starter specifies if starter is enabled
-     */
-    virtual void update( double throttle, double temperature,
-                         double machNumber, double densityAltitude,
-                         bool fuel, bool starter );
-
-    /**
-     * Returns propeller position expressed in BAS.
-     * @return [m] propeller position expressed in BAS
-     */
-    inline const Vector3& getPos_BAS() const
-    {
-        return m_pos_bas;
-    }
-
-    /**
-     * Returns engine fuel consumption.
-     * @return [kg/s] engine fuel consumption
-     */
-    inline double getFuelFlow() const
-    {
-        return m_fuelFlow;
-    }
-
-    /** */
-    inline double getN1() const
-    {
-        return m_n1;
-    }
-
-    /** */
-    inline double getN2() const
-    {
-        return m_n2;
-    }
-
-    /** */
-    inline double getTIT() const
-    {
-        return m_tit;
-    }
-
-    /**
-     * Returns engine thrust.
-     * @return [N] propeller thrust
-     */
-    inline double getThrust() const
-    {
-        return m_thrust;
-    }
-
-    /** */
-    inline bool getAfterburner() const
-    {
-        return m_afterburner;
-    }
-
-protected:
-
-    Vector3 m_pos_bas;      ///< [m] nozzle position expressed in BAS
-
-    Table m_n1_throttle;    ///< low  pressure compressor rpm vs throttle position
-    Table m_n2_throttle;    ///< high pressure compressor rpm vs throttle position
-
-    Table m_tit_n2;         ///< turbine inlet temperature (TIT) vs high pressure compressor rpm
-
-    Table2D m_tf_idle;      ///< [-] idle thrust factor
-    Table2D m_tf_mil;       ///< [-] military thrust factor
-    Table2D m_tf_ab;        ///< [-] afterburner thrust factor
-
-    Table m_tc_n1;
-    Table m_tc_n2;
-
-    Table m_tc_thrust;      ///< thrust time constant [s] vs difference of normalized engine power command and engine power [-]
-
-    double m_thrust_mil;    ///< [N] specific maximum military thrust
-    double m_thrust_ab;     ///< [N] specific maximum afterburner thrust
-
-    double m_ab_threshold;  ///< [-] throttle afterburner threshold
-
-    double m_tc_tit;        ///< [s] turbine inlet temperature (TIT) time constant
-
-    double m_tsfc;          ///< [kg/(N*s)] thrust specific fuel consumption
-    double m_tsfc_ab;       ///< [kg/(N*s)] thrust specific fuel consumption (afterburner)
-
-    double m_n1_idle;       ///< low  pressure compressor idle rpm
-    double m_n2_idle;       ///< high pressure compressor idle rpm
-    double m_n1_ab;         ///< low  pressure compressor afterburner rpm
-    double m_n2_ab;         ///< high pressure compressor afterburner rpm
-    double m_n1_max;        ///< low  pressure compressor max rpm
-    double m_n2_max;        ///< high pressure compressor max rpm
-
-    double m_n1_setpoint;   ///< low  pressure compressor rpm setpoint
-    double m_n2_setpoint;   ///< high pressure compressor rpm setpoint
-
-    double m_tit_setpoint;  ///< turbine inlet temperature (TIT) setpoint
-
-    double m_pow_command;   ///< <0.0;1.0> normalized engine power command
-    double m_pow;           ///< <0.0;1.0> normalized engine power
-
-    double m_thrust_tc_inv; ///< [1/s] inverse of thrust time constant
-    double m_tit_tc_actual; ///< [s] actual turbine inlet temperature (TIT) time constant
-
-    double m_temperature;   ///< [deg C] air temperature
-
-    // output
-
-    double m_n1;            ///< low  pressure compressor rpm
-    double m_n2;            ///< high pressure compressor rpm
-    double m_tit;           ///< [deg C] turbine inlet temperature (TIT)
-    double m_fuelFlow;      ///< [kg/s] fuel flow
-    double m_thrust;        ///< [N] thrust
-
-    bool m_afterburner;     ///< specifies if afterburner is engaged
-
-    double getTimeConstant( double delta_n, double n_max, double tc );
+    ~UH60_TailRotor();
 };
 
 } // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // FDM_TURBOFANAB_H
+#endif // UH60_TAILROTOR_H

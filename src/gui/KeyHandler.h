@@ -158,9 +158,9 @@ public:
 
 private:
 
-    WidgetCGI *m_widgetCGI;
+    WidgetCGI *_widgetCGI;
 
-    bool m_keysState[ HID_MAX_KEYS ];
+    bool _keysState[ HID_MAX_KEYS ];
 
     bool handleKeyDn( const osgGA::GUIEventAdapter &ea );
     bool handleKeyUp( const osgGA::GUIEventAdapter &ea );

@@ -152,8 +152,8 @@ class WidgetCGI : public QWidget, public osgViewer::Viewer
 
 public:
 
-    static const double m_zNear;
-    static const double m_zFar;
+    static const double _zNear;
+    static const double _zFar;
 
     /** Constructor. */
     WidgetCGI( QWidget *parent = 0 );
@@ -161,8 +161,8 @@ public:
     /** Destructor. */
     virtual ~WidgetCGI();
 
-    inline void keyDn( hid::Assignment::Key key ) { m_keyHandler->keyDn( key ); }
-    inline void keyUp( hid::Assignment::Key key ) { m_keyHandler->keyUp( key ); }
+    inline void keyDn( hid::Assignment::Key key ) { _keyHandler->keyDn( key ); }
+    inline void keyUp( hid::Assignment::Key key ) { _keyHandler->keyUp( key ); }
 
     /** */
     void setCameraManipulatorChase();
@@ -192,14 +192,14 @@ protected:
 
 private:
 
-    QGridLayout *m_gridLayout;
+    QGridLayout *_gridLayout;
 
-    osg::ref_ptr<osgQt::GraphicsWindowQt> m_graphicsWindow;
-    osg::ref_ptr<KeyHandler> m_keyHandler;
+    osg::ref_ptr<osgQt::GraphicsWindowQt> _graphicsWindow;
+    osg::ref_ptr<KeyHandler> _keyHandler;
 
-    int m_timerId;                  ///< timer ID
+    int _timerId;                   ///< timer ID
 
-    bool m_camManipulatorInited;
+    bool _camManipulatorInited;
 
     /** */
     QWidget* addViewWidget();

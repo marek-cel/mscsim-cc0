@@ -148,30 +148,30 @@ public:
 
     /** Constructor. */
     Matrix() :
-        m_rows ( ROWS ),
-        m_cols ( COLS ),
-        m_size ( ROWS * COLS )
+        _rows ( ROWS ),
+        _cols ( COLS ),
+        _size ( ROWS * COLS )
     {
-        for ( unsigned int i = 0; i < m_size; i++ )
+        for ( unsigned int i = 0; i < _size; i++ )
         {
-            m_items[ i ] = 0.0;
+            _items[ i ] = 0.0;
         }
     }
 
     /** Copy constructor. */
     Matrix( const Matrix< ROWS, COLS > &mtrx ) :
-        m_rows ( ROWS ),
-        m_cols ( COLS ),
-        m_size ( ROWS * COLS )
+        _rows ( ROWS ),
+        _cols ( COLS ),
+        _size ( ROWS * COLS )
     {
-        setArray( mtrx.m_items );
+        setArray( mtrx._items );
     }
 
     /** Constructor. */
     Matrix( const double items[] ) :
-        m_rows ( ROWS ),
-        m_cols ( COLS ),
-        m_size ( ROWS * COLS )
+        _rows ( ROWS ),
+        _cols ( COLS ),
+        _size ( ROWS * COLS )
     {
         setArray( items );
     }
@@ -179,15 +179,15 @@ public:
     /** @return "true" if all items are valid */
     virtual bool isValid() const
     {
-        return Misc::isValid( m_items, m_size );
+        return Misc::isValid( _items, _size );
     }
 
     /** Puts matrix items into given array. */
     virtual void getArray( double items[] ) const
     {
-        for ( unsigned int i = 0; i < m_size; i++ )
+        for ( unsigned int i = 0; i < _size; i++ )
         {
-            items[ i ] = m_items[ i ];
+            items[ i ] = _items[ i ];
         }
     }
 
@@ -198,9 +198,9 @@ public:
      */
     virtual double getItem( unsigned int row, unsigned int col ) const
     {
-        if ( ( row < m_rows ) && ( col < m_cols ) )
+        if ( ( row < _rows ) && ( col < _cols ) )
         {
-            return m_items[ row * m_cols + col ];
+            return _items[ row * _cols + col ];
         }
         else
         {
@@ -218,9 +218,9 @@ public:
     /** Sets matrix items from given array. */
     virtual void setArray( const double items[] )
     {
-        for ( unsigned int i = 0; i < m_size; i++ )
+        for ( unsigned int i = 0; i < _size; i++ )
         {
-            m_items[ i ] = items[ i ];
+            _items[ i ] = items[ i ];
         }
     }
 
@@ -231,9 +231,9 @@ public:
      */
     virtual void setItem( unsigned int row, unsigned int col, double value )
     {
-        if ( ( row < m_rows ) && ( col < m_cols ) )
+        if ( ( row < _rows ) && ( col < _cols ) )
         {
-            m_items[ row * m_cols + col ] = value;
+            _items[ row * _cols + col ] = value;
         }
         else
         {
@@ -249,15 +249,15 @@ public:
     /** Swaps matrix rows. */
     virtual void swapRows( unsigned int row1, unsigned int row2 )
     {
-        if ( ( row1 < m_rows ) && ( row2 < m_rows ) )
+        if ( ( row1 < _rows ) && ( row2 < _rows ) )
         {
             double temp[ COLS ];
 
             for ( unsigned int c = 0; c < COLS; c++ )
             {
-                temp[ c ] = m_items[ row1 * m_cols + c ];
-                m_items[ row1 * m_cols + c ] = m_items[ row2 * m_cols + c ];
-                m_items[ row2 * m_cols + c ] = temp[ c ];
+                temp[ c ] = _items[ row1 * _cols + c ];
+                _items[ row1 * _cols + c ] = _items[ row2 * _cols + c ];
+                _items[ row2 * _cols + c ] = temp[ c ];
             }
         }
         else
@@ -276,11 +276,11 @@ public:
     {
         std::stringstream ss;
 
-        for ( unsigned int r = 0; r < m_rows; r++ )
+        for ( unsigned int r = 0; r < _rows; r++ )
         {
-            for ( unsigned int c = 0; c < m_cols; c++ )
+            for ( unsigned int c = 0; c < _cols; c++ )
             {
-                ss << m_items[ r * m_cols + c ] << ",";
+                ss << _items[ r * _cols + c ] << ",";
             }
 
             ss << std::endl;
@@ -297,7 +297,7 @@ public:
     inline double operator() ( unsigned int row, unsigned int col ) const
     {
 #       ifdef _DEBUG
-        if ( ( row >= m_rows ) || ( col >= m_cols ) )
+        if ( ( row >= _rows ) || ( col >= _cols ) )
         {
             Exception e;
 
@@ -310,7 +310,7 @@ public:
         }
 #       endif
 
-        return m_items[ row * m_cols + col ];
+        return _items[ row * _cols + col ];
     }
 
     /**
@@ -321,7 +321,7 @@ public:
     inline double& operator() ( unsigned int row, unsigned int col )
     {
 #       ifdef _DEBUG
-        if ( ( row >= m_rows ) || ( col >= m_cols ) )
+        if ( ( row >= _rows ) || ( col >= _cols ) )
         {
             Exception e;
 
@@ -334,13 +334,13 @@ public:
         }
 #       endif
 
-        return m_items[ row * m_cols + col ];
+        return _items[ row * _cols + col ];
     }
 
     /** Assignment operator. */
     const Matrix< ROWS, COLS >& operator= ( const Matrix< ROWS, COLS > &mtrx )
     {
-        setArray( mtrx.m_items );
+        setArray( mtrx._items );
 
         return (*this);
     }
@@ -350,9 +350,9 @@ public:
     {
         Matrix< ROWS, COLS > result;
         
-        for ( unsigned int i = 0; i < m_size; i++ )
+        for ( unsigned int i = 0; i < _size; i++ )
         {
-            result.m_items[ i ] = m_items[ i ] + mtrx.m_items[ i ];
+            result._items[ i ] = _items[ i ] + mtrx._items[ i ];
         }
 
         return result;
@@ -363,9 +363,9 @@ public:
     {
         Matrix< ROWS, COLS > result;
 
-        for ( unsigned int i = 0; i < m_size; i++ )
+        for ( unsigned int i = 0; i < _size; i++ )
         {
-            result.m_items[ i ] = m_items[ i ] - mtrx.m_items[ i ];
+            result._items[ i ] = _items[ i ] - mtrx._items[ i ];
         }
 
         return result;
@@ -376,9 +376,9 @@ public:
     {
         Matrix< ROWS, COLS > result;
 
-        for ( unsigned int i = 0; i < m_size; i++ )
+        for ( unsigned int i = 0; i < _size; i++ )
         {
-            result.m_items[ i ] = m_items[ i ] * value;
+            result._items[ i ] = _items[ i ] * value;
         }
 
         return result;
@@ -389,15 +389,15 @@ public:
     {
         Matrix< ROWS, COLS > result;
 
-        for ( unsigned int r = 0; r < m_rows; r++ )
+        for ( unsigned int r = 0; r < _rows; r++ )
         {
-            for ( unsigned int c = 0; c < m_cols; c++ )
+            for ( unsigned int c = 0; c < _cols; c++ )
             {
                 result(r,c) = 0.0;
 
-                for ( unsigned int i = 0; i < m_cols; i++ )
+                for ( unsigned int i = 0; i < _cols; i++ )
                 {
-                    result(r,c) += ( m_items[ r*m_cols + i ] * mtrx(i,c) );
+                    result(r,c) += ( _items[ r*_cols + i ] * mtrx(i,c) );
                 }
             }
         }
@@ -410,13 +410,13 @@ public:
     {
         Vector<ROWS> result;
 
-        for ( unsigned int r = 0; r < m_rows; r++ )
+        for ( unsigned int r = 0; r < _rows; r++ )
         {
             result(r) = 0.0;
 
-            for ( unsigned int c = 0; c < m_cols; c++ )
+            for ( unsigned int c = 0; c < _cols; c++ )
             {
-                result(r) += ( m_items[ r*m_cols + c ] * vect(c) );
+                result(r) += ( _items[ r*_cols + c ] * vect(c) );
             }
         }
 
@@ -428,9 +428,9 @@ public:
     {
         Matrix< ROWS, COLS > result;
 
-        for ( unsigned int i = 0; i < m_size; i++ )
+        for ( unsigned int i = 0; i < _size; i++ )
         {
-            result.m_items[ i ] = m_items[ i ] / value;
+            result._items[ i ] = _items[ i ] / value;
         }
 
         return result;
@@ -439,9 +439,9 @@ public:
     /** Unary addition operator. */
     Matrix< ROWS, COLS >& operator+= ( const Matrix< ROWS, COLS > &mtrx )
     {
-        for ( unsigned int i = 0; i < m_size; i++ )
+        for ( unsigned int i = 0; i < _size; i++ )
         {
-            m_items[ i ] += mtrx.m_items[ i ];
+            _items[ i ] += mtrx._items[ i ];
         }
 
         return (*this);
@@ -450,9 +450,9 @@ public:
     /** Unary subtraction operator. */
     Matrix< ROWS, COLS >& operator-= ( const Matrix< ROWS, COLS > &mtrx )
     {
-        for ( unsigned int i = 0; i < m_size; i++ )
+        for ( unsigned int i = 0; i < _size; i++ )
         {
-            m_items[ i ] -= mtrx.m_items[ i ];
+            _items[ i ] -= mtrx._items[ i ];
         }
 
         return (*this);
@@ -461,9 +461,9 @@ public:
     /** Unary multiplication operator (by scalar). */
     Matrix< ROWS, COLS >& operator*= ( double value )
     {
-        for ( unsigned int i = 0; i < m_size; i++ )
+        for ( unsigned int i = 0; i < _size; i++ )
         {
-            m_items[ i ] *= value;
+            _items[ i ] *= value;
         }
 
         return (*this);
@@ -472,9 +472,9 @@ public:
     /** Unary division operator (by scalar). */
     Matrix< ROWS, COLS >& operator/= ( double value )
     {
-        for ( unsigned int i = 0; i < m_size; i++ )
+        for ( unsigned int i = 0; i < _size; i++ )
         {
-            m_items[ i ] /= value;
+            _items[ i ] /= value;
         }
 
         return (*this);
@@ -485,9 +485,9 @@ public:
     {
         bool result = true;
 
-        for ( unsigned int i = 0; i < m_size; i++ )
+        for ( unsigned int i = 0; i < _size; i++ )
         {
-            result = result && ( m_items[ i ] == mtrx.m_items[ i ] );
+            result = result && ( _items[ i ] == mtrx._items[ i ] );
         }
 
         return result;
@@ -501,11 +501,11 @@ public:
 
 protected:
 
-    double m_items[ ROWS * COLS ];  ///< matrix items
+    double _items[ ROWS * COLS ];   ///< matrix items
 
-    const unsigned int m_rows;      ///< number of rows
-    const unsigned int m_cols;      ///< number of columns
-    const unsigned int m_size;      ///< matrix size
+    const unsigned int _rows;       ///< number of rows
+    const unsigned int _cols;       ///< number of columns
+    const unsigned int _size;       ///< matrix size
 };
 
 } // end of fdm namespace

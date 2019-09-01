@@ -146,7 +146,7 @@ public:
     /** Destructor. */
     virtual ~SpinBoxHighlight();
 
-    inline bool isHighlighted() const { return m_highlighted; }
+    inline bool isHighlighted() const { return _highlighted; }
 
     void setHighlighted( bool highlighted );
 
@@ -154,7 +154,7 @@ public:
 
 protected:
 
-    bool m_highlighted;
+    bool _highlighted;
 
     bool eventFilter( QObject *, QEvent *event );
 };

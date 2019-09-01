@@ -166,7 +166,7 @@ Vector4 Vector4::getNormalized() const
 
 const Vector4& Vector4::operator= ( const Vector4 &vect )
 {
-    setArray( vect.m_items );
+    setArray( vect._items );
 
     return (*this);
 }
@@ -177,9 +177,9 @@ Vector4 Vector4::operator+ ( const Vector4 &vect ) const
 {
     Vector4 result;
 
-    for ( unsigned int i = 0; i < m_size; i++ )
+    for ( unsigned int i = 0; i < _size; i++ )
     {
-        result.m_items[ i ] = m_items[ i ] + vect.m_items[ i ];
+        result._items[ i ] = _items[ i ] + vect._items[ i ];
     }
 
     return result;
@@ -191,9 +191,9 @@ Vector4 Vector4::operator- () const
 {
     Vector4 result;
 
-    for ( unsigned int i = 0; i < m_size; i++ )
+    for ( unsigned int i = 0; i < _size; i++ )
     {
-        result.m_items[ i ] = -m_items[ i ];
+        result._items[ i ] = -_items[ i ];
     }
 
     return result;
@@ -205,9 +205,9 @@ Vector4 Vector4::operator- ( const Vector4 &vect ) const
 {
     Vector4 result;
 
-    for ( unsigned int i = 0; i < m_size; i++ )
+    for ( unsigned int i = 0; i < _size; i++ )
     {
-        result.m_items[ i ] = m_items[ i ] - vect.m_items[ i ];
+        result._items[ i ] = _items[ i ] - vect._items[ i ];
     }
 
     return result;
@@ -219,9 +219,9 @@ Vector4 Vector4::operator* ( double val ) const
 {
     Vector4 result;
 
-    for ( unsigned int i = 0; i < m_size; i++ )
+    for ( unsigned int i = 0; i < _size; i++ )
     {
-        result.m_items[ i ] = m_items[ i ] * val;
+        result._items[ i ] = _items[ i ] * val;
     }
 
     return result;
@@ -233,9 +233,9 @@ Vector4 Vector4::operator/ ( double val ) const
 {
     Vector4 result;
 
-    for ( unsigned int i = 0; i < m_size; i++ )
+    for ( unsigned int i = 0; i < _size; i++ )
     {
-        result.m_items[ i ] = m_items[ i ] / val;
+        result._items[ i ] = _items[ i ] / val;
     }
 
     return result;
@@ -245,9 +245,9 @@ Vector4 Vector4::operator/ ( double val ) const
 
 Vector4& Vector4::operator+= ( const Vector4 &vect )
 {
-    for ( unsigned int i = 0; i < m_size; i++ )
+    for ( unsigned int i = 0; i < _size; i++ )
     {
-        m_items[ i ] += vect.m_items[ i ];
+        _items[ i ] += vect._items[ i ];
     }
 
     return (*this);
@@ -257,9 +257,9 @@ Vector4& Vector4::operator+= ( const Vector4 &vect )
 
 Vector4& Vector4::operator-= ( const Vector4 &vect )
 {
-    for ( unsigned int i = 0; i < m_size; i++ )
+    for ( unsigned int i = 0; i < _size; i++ )
     {
-        m_items[ i ] -= vect.m_items[ i ];
+        _items[ i ] -= vect._items[ i ];
     }
 
     return (*this);
@@ -269,9 +269,9 @@ Vector4& Vector4::operator-= ( const Vector4 &vect )
 
 Vector4& Vector4::operator*= ( double val )
 {
-    for ( unsigned int i = 0; i < m_size; i++ )
+    for ( unsigned int i = 0; i < _size; i++ )
     {
-        m_items[ i ] *= val;
+        _items[ i ] *= val;
     }
 
     return (*this);
@@ -281,9 +281,9 @@ Vector4& Vector4::operator*= ( double val )
 
 Vector4& Vector4::operator/= ( double val )
 {
-    for ( unsigned int i = 0; i < m_size; i++ )
+    for ( unsigned int i = 0; i < _size; i++ )
     {
-        m_items[ i ] /= val;
+        _items[ i ] /= val;
     }
 
     return (*this);

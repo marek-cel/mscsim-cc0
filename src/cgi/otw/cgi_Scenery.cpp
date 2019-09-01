@@ -145,7 +145,7 @@ using namespace cgi;
 Scenery::Scenery( Module *parent ) :
     Module( parent )
 {
-    m_root->setName( "Scenery" );
+    _root->setName( "Scenery" );
 
     fdm::XmlDoc doc( fdm::Path::get( "data/cgi/scenery/scenery.xml" ) );
 
@@ -163,7 +163,7 @@ Scenery::Scenery( Module *parent ) :
         }
     }
 
-    Intersections::instance()->setScenery( m_root.get() );
+    Intersections::instance()->setScenery( _root.get() );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

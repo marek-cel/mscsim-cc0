@@ -152,7 +152,7 @@ public:
     };
 
     /** Constructor. */
-    Engine() : m_state ( Stopped ) {}
+    Engine() : _state ( Stopped ) {}
 
     /** Constructor. */
     virtual ~Engine() {}
@@ -163,12 +163,12 @@ public:
      */
     inline State getState() const
     {
-        return m_state;
+        return _state;
     }
 
 protected:
 
-    State m_state;              ///< engine state
+    State _state;               ///< engine state
 };
 
 } // end of fdm namespace

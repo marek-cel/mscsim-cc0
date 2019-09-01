@@ -216,7 +216,7 @@ protected:
 
 private:
 
-    Ui::DockWidgetCtrl *m_ui;
+    Ui::DockWidgetCtrl *_ui;        ///<
 };
 
 ////////////////////////////////////////////////////////////////////////////////

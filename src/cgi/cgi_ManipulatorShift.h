@@ -159,7 +159,7 @@ public:
 
     bool handle( const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &us );
 
-    inline double getDistance() const { return m_distance; }
+    inline double getDistance() const { return _distance; }
 
     void setDistance( double distance );
 
@@ -168,11 +168,11 @@ public:
 
 private:
 
-    osg::Matrixd m_matrix;  ///<
+    osg::Matrixd _matrix;   ///<
 
-    double m_distance;      ///< [m]
-    double m_distance_min;  ///< [m]
-    double m_distance_max;  ///< [m]
+    double _distance;       ///< [m]
+    double _distance_min;   ///< [m]
+    double _distance_max;   ///< [m]
 
     /** */
     void boundDistance();

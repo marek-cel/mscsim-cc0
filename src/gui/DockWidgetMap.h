@@ -166,7 +166,7 @@ protected:
 
 private:
 
-    Ui::DockWidgetMap *m_ui;
+    Ui::DockWidgetMap *_ui;         ///<
 
 private slots:
 

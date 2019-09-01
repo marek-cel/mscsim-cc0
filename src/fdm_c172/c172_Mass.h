@@ -156,7 +156,7 @@ public:
 
 private:
 
-    const C172_Aircraft *m_aircraft;    ///< aircraft model main object
+    const C172_Aircraft *_aircraft;     ///< aircraft model main object
 };
 
 } // end of fdm namespace

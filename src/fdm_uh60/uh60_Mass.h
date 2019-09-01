@@ -156,7 +156,7 @@ public:
 
 private:
 
-    const UH60_Aircraft *m_aircraft;    ///< aircraft model main object
+    const UH60_Aircraft *_aircraft;     ///< aircraft model main object
 };
 
 } // end of fdm namespace

@@ -168,11 +168,14 @@ public:
 
     int getHudOpacity() const;
 
+    double getHudFactorAlt() const;
+    double getHudFactorVel() const;
+
     bool getWidescreen() const;
     
 private:
 
-    Ui::DialogConf *m_ui;
+    Ui::DialogConf *_ui;
 
     void initDefaultAssignments();
 

@@ -166,7 +166,7 @@ protected:
 
 private:
 
-    Ui::DockWidgetAuto *m_ui;
+    Ui::DockWidgetAuto *_ui;        ///<
 };
 
 ////////////////////////////////////////////////////////////////////////////////

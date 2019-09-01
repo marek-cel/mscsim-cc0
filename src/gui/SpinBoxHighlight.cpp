@@ -134,7 +134,7 @@
 
 SpinBoxHighlight::SpinBoxHighlight( QWidget *parent ) :
     QDoubleSpinBox ( parent ),
-    m_highlighted ( false )
+    _highlighted ( false )
 {
     installEventFilter( this );
 
@@ -159,9 +159,9 @@ SpinBoxHighlight::~SpinBoxHighlight() {}
 
 void SpinBoxHighlight::setHighlighted( bool highlighted )
 {
-    m_highlighted = highlighted;
+    _highlighted = highlighted;
 
-    if ( m_highlighted )
+    if ( _highlighted )
     {
         setStyleSheet( "QDoubleSpinBox { background-color: #ff9; }" );
     }
@@ -175,7 +175,7 @@ void SpinBoxHighlight::setHighlighted( bool highlighted )
 
 void SpinBoxHighlight::toggleHighlight()
 {
-    setHighlighted( !m_highlighted );
+    setHighlighted( !_highlighted );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
