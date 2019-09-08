@@ -124,131 +124,28 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm_c172/c172_Propulsion.h>
-#include <fdm_c172/c172_Aircraft.h>
-
-#include <fdm/xml/fdm_XmlUtils.h>
+#ifndef C172_ENGINE_H
+#define C172_ENGINE_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using namespace fdm;
+#include <fdm/models/fdm_PistonEngine.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-C172_Propulsion::C172_Propulsion( const C172_Aircraft *aircraft ) :
-    Propulsion( aircraft ),
-    _aircraft ( aircraft ),
-
-    _engine ( 0 ),
-    _propeller ( 0 )
+namespace fdm
 {
-    _engine    = new C172_Engine();
-    _propeller = new C172_Propeller();
-}
+
+/**
+ * @brief Cessna 172 engine class.
+ */
+class C172_Engine : public PistonEngine
+{
+
+};
+
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-C172_Propulsion::~C172_Propulsion()
-{
-    if ( _engine ) delete _engine;
-    _engine = 0;
-
-    if ( _propeller ) delete _propeller;
-    _propeller = 0;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void C172_Propulsion::init( bool engineOn )
-{
-    /////////////////////////////
-    Propulsion::init( engineOn );
-    /////////////////////////////
-
-    _propeller->setRPM( engineOn ? 2700.0 : 0.0 );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void C172_Propulsion::readData( XmlNode &dataNode )
-{
-    if ( dataNode.isValid() )
-    {
-        XmlNode nodeEngine    = dataNode.getFirstChildElement( "piston_engine" );
-        XmlNode nodePropeller = dataNode.getFirstChildElement( "propeller"     );
-
-        _engine->readData( nodeEngine );
-        _propeller->readData( nodePropeller );
-    }
-    else
-    {
-        Exception e;
-
-        e.setType( Exception::FileReadingError );
-        e.setInfo( "Reading XML file failed. " + XmlUtils::getErrorInfo( dataNode ) );
-
-        FDM_THROW( e );
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void C172_Propulsion::computeForceAndMoment()
-{
-    _propeller->computeThrust( _aircraft->getAirspeed(),
-                               _aircraft->getEnvir()->getDensity() );
-
-    // thrust and moment due to thrust
-    Vector3 for_bas( _propeller->getThrust(), 0.0, 0.0 );
-    Vector3 mom_bas = _propeller->getPos_BAS() ^ for_bas;
-
-    // gyro effect
-    Vector3 omega_bas;
-
-    if ( _propeller->getDirection() == Propeller::CW )
-    {
-        omega_bas.x() =  _propeller->getOmega();
-    }
-    else
-    {
-        omega_bas.x() = -_propeller->getOmega();
-    }
-
-    mom_bas += ( _propeller->getInertia() + _engine->getInertia() ) * ( omega_bas ^ _aircraft->getOmg_BAS() );
-
-    _for_bas = for_bas;
-    _mom_bas = mom_bas;
-
-    if ( !_for_bas.isValid() || !_mom_bas.isValid() )
-    {
-        Exception e;
-
-        e.setType( Exception::UnexpectedNaN );
-        e.setInfo( "NaN detected in the propulsion model." );
-
-        FDM_THROW( e );
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void C172_Propulsion::update()
-{
-    _propeller->integrate( _aircraft->getTimeStep(), _engine->getInertia() );
-
-    _engine->update( _aircraft->getDataInp()->engine[ 0 ].throttle,
-                     _aircraft->getDataInp()->engine[ 0 ].mixture,
-                     _propeller->getEngineRPM(),
-                     _aircraft->getEnvir()->getPressure(),
-                     _aircraft->getEnvir()->getDensity(),
-                     _aircraft->getDataInp()->engine[ 0 ].fuel,
-                     _aircraft->getDataInp()->engine[ 0 ].starter,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition );
-
-    _propeller->update( _aircraft->getDataInp()->engine[ 0 ].propeller,
-                        _engine->getTorque(),
-                        _aircraft->getAirspeed(),
-                        _aircraft->getEnvir()->getDensity() );
-}
+#endif // C172_ENGINE_H
