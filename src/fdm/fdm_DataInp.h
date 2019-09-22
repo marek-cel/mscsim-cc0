@@ -153,7 +153,7 @@ struct DataInp
     };
 
     /** State input. */
-    enum PhaseInp
+    enum StateInp
     {
         Idle = 0,                       ///< idle
         Init,                           ///< initialize
@@ -275,7 +275,9 @@ struct DataInp
     Masses      masses;                 ///< masses data
 
     AircraftType aircraftType;          ///< input aircraft type
-    PhaseInp phaseInp;                  ///< input phase
+    StateInp stateInp;                  ///< input state
+
+    bool freeze;                        ///< specifies if state is frozen
 };
 
 } // end of fdm namespace

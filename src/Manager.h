@@ -139,7 +139,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * @brief Simulation class.
+ * @brief Simulation manager class.
  */
 class Manager : public QObject
 {

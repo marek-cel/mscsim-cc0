@@ -827,6 +827,9 @@ void SkyDome::createStar( float alpha, float delta, float mag, bool trueIntensit
 
     intensity = phi / 1000.0;
 
+    // intensity tuning
+    intensity *= 2.0f;
+
     ////////////////////////////////////////
 
     double alpha_rad = M_PI * alpha / 12.0;

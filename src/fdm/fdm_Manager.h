@@ -168,7 +168,7 @@ private:
 
     typedef DataInp::AircraftType AircraftType;
 
-    typedef DataInp::PhaseInp PhaseInp;
+    typedef DataInp::StateInp StateInp;
     typedef DataOut::StateOut StateOut;
 
     Aircraft *_aircraft;            ///< aircraft simulation object
@@ -178,7 +178,7 @@ private:
 
     AircraftType _aircraftType;     ///< aircraft type
 
-    PhaseInp _phaseInp;             ///< internal phase input
+    StateInp _stateInp;             ///< internal state input
     StateOut _stateOut;             ///< internal state output
 
     Vector3    _init_pos_wgs;       ///< [m] initial position expressed in WGS
@@ -213,15 +213,15 @@ private:
     void updateInitialPositionAndAttitude();
 
     /**
-     * Updates internal phase input.
+     * Updates internal state input.
      */
-    void updateInternalPhaseInp();
+    void updateInternalStateInp();
 
-    void updatePhaseIdle();
-    void updatePhaseInit();
-    void updatePhaseWork();
-    void updatePhasePause();
-    void updatePhaseStop();
+    void updateStateIdle();
+    void updateStateInit();
+    void updateStateWork();
+    void updateStatePause();
+    void updateStateStop();
 
     void printState();
 };

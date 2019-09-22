@@ -124,12 +124,16 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef C172_PROPELLER_H
-#define C172_PROPELLER_H
+#ifndef FDM_GOVERNOR_H
+#define FDM_GOVERNOR_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/models/fdm_Propeller.h>
+#include <fdm/fdm_Base.h>
+
+#include <fdm/utils/fdm_Table.h>
+#include <fdm/sys/fdm_PID.h>
+#include <fdm/xml/fdm_XmlNode.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -137,21 +141,45 @@ namespace fdm
 {
 
 /**
- * @brief Cessna 172 propeller class.
+ * @brief Propeller governor base class.
+ *
+ * <h5>XML configuration file format:</h5>
+ * @code
+ * <governor>
+ * </governor>
+ * @endcode
  */
-class C172_Propeller : public Propeller
+class FDMEXPORT Governor : public Base
 {
 public:
 
     /** Constructor. */
-    C172_Propeller();
+    Governor();
 
     /** Destructor. */
-    virtual ~C172_Propeller();
+    virtual ~Governor();
+
+    /**
+     * Reads data.
+     * @param dataNode XML node
+     */
+    virtual void readData( XmlNode &dataNode );
+
+    virtual void update( double timeStep, double propellerLever, double rpm );
+
+    inline double getPitch() const { return _pitch; }
+
+protected:
+
+    PID *_pid;          ///< PID controller
+
+    Table _prop_rpm;    ///< [rpm] propeller setpoint RPM vs [-] propeller RPM lever position
+
+    double _pitch;
 };
 
 } // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // C172_PROPELLER_H
+#endif // FDM_GOVERNOR_H

@@ -124,12 +124,16 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef C172_PROPELLER_H
-#define C172_PROPELLER_H
+#ifndef FDM_COMPRESSOR_H
+#define FDM_COMPRESSOR_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/models/fdm_Propeller.h>
+#include <fdm/fdm_Base.h>
+
+#include <fdm/utils/fdm_Table2D.h>
+
+#include <fdm/xml/fdm_XmlNode.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -137,21 +141,63 @@ namespace fdm
 {
 
 /**
- * @brief Cessna 172 propeller class.
+ * @brief Generic compressor base class.
+ *
+ * <h5>XML configuration file format:</h5>
+ * @code
+ * <compressor>
+ *   <performance_map>
+ *     { [rpm] compressor speed } ... { more values of compressor speed }
+ *     { [kg/s] air flow } { [-] pressure ratio } ... { more values of pressure ratio }
+ *     ... { more entries }
+ *   </performance_map>
+ * </compressor>
+ * @endcode
  */
-class C172_Propeller : public Propeller
+class FDMEXPORT Compressor : public Base
 {
 public:
 
+    static const double _gamma; ///< [-] dry air heat capacity ratio
+
     /** Constructor. */
-    C172_Propeller();
+    Compressor();
 
     /** Destructor. */
-    virtual ~C172_Propeller();
+    virtual ~Compressor();
+
+    /**
+     * Reads data.
+     * @param dataNode XML node
+     */
+    virtual void readData( XmlNode &dataNode );
+
+    /**
+     * Updates compressor.
+     * @param airPressure [Pa] air pressure
+     * @param airDensity [kg/m^3] air density
+     * @param airTemperature [K] air temperature
+     * @param airFlow [kg/s] air flow
+     * @param rpm [rpm] compressor rpm
+     */
+    virtual void update( double airPressure, double airDensity, double airTemperature,
+                         double airFlow, double rpm );
+
+    inline double getTemperature() const { return _temperature; }
+    inline double getPressure()    const { return _pressure;    }
+    inline double getDensity()     const { return _density;     }
+
+protected:
+
+    Table2D _performance_map;   ///< [-] performance map
+
+    double _temperature;        ///< [K] compressed air temperature
+    double _pressure;           ///< [Pa] compressed air static pressure
+    double _density;            ///< [kg/m^3] compressed air density
 };
 
 } // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // C172_PROPELLER_H
+#endif // FDM_COMPRESSOR_H

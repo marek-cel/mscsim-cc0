@@ -20,7 +20,7 @@
  * IN THE SOFTWARE.
  ******************************************************************************/
 
-#include <fdm_p51/p51_Engine.h>
+#include <fdm_p51/p51_Compressor.h>
 
 #include <fdm/xml/fdm_XmlUtils.h>
 
@@ -30,35 +30,41 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-P51_Engine::P51_Engine() :
-    PistonEngine(),
+P51_Compressor::P51_Compressor() :
+    Compressor(),
 
-    _compressor ( 0 )
-{
-    _compressor = new P51_Compressor();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-P51_Engine::~P51_Engine()
-{
-    if ( _compressor ) delete _compressor;
-    _compressor = 0;
-}
+    _gearRatio_L ( 0.0 ),
+    _gearRatio_H ( 0.0 )
+{}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Engine::readData( XmlNode &dataNode )
+P51_Compressor::~P51_Compressor() {}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void P51_Compressor::readData( XmlNode &dataNode )
 {
-    ///////////////////////////////////
-    PistonEngine::readData( dataNode );
-    ///////////////////////////////////
+    /////////////////////////////////
+    Compressor::readData( dataNode );
+    /////////////////////////////////
 
     if ( dataNode.isValid() )
     {
-        XmlNode nodeCompressor = dataNode.getFirstChildElement( "compressor" );
+        int result = FDM_SUCCESS;
 
-        _compressor->readData( nodeCompressor );
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _gearRatio_L, "gear_ratio_low"  );
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _gearRatio_H, "gear_ratio_high" );
+
+        if ( result != FDM_SUCCESS )
+        {
+            Exception e;
+
+            e.setType( Exception::FileReadingError );
+            e.setInfo( "Reading XML file failed. " + XmlUtils::getErrorInfo( dataNode ) );
+
+            FDM_THROW( e );
+        }
     }
     else
     {
@@ -73,27 +79,12 @@ void P51_Engine::readData( XmlNode &dataNode )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Engine::update( double throttleLever, double mixtureLever, double rpm,
-                         double airPressure, double airDensity, double airTemperature,
-                         bool fuel, bool starter,
-                         bool magneto_l, bool magneto_r )
+void P51_Compressor::update( double airPressure, double airDensity, double airTemperature,
+                             double airFlow, double rpm )
 {
-    _compressor->update( airPressure, airDensity, airTemperature, _airFlow, _rpm );
+    rpm *= _gearRatio_L;
 
-    //std::cout << (_compressor->getPressure() / 100.0) << std::endl;
-
-    ////////////////////////////////////////////////////////////
-    PistonEngine::update( throttleLever, mixtureLever, rpm,
-                          _compressor->getPressure(),
-                          _compressor->getDensity(),
-                          fuel, starter, magneto_l, magneto_r );
-    ////////////////////////////////////////////////////////////
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-double P51_Engine::getFuelToAirRatio( double mixture, double airDensity )
-{
-    return mixture * (1.225 / airDensity ) * 0.1;
-    //return mixture * (1.5 / airDensity ) * 0.1;
+    ////////////////////////////////////////////////////////////////////////////
+    Compressor::update( airPressure, airDensity, airTemperature, airFlow, rpm );
+    ////////////////////////////////////////////////////////////////////////////
 }

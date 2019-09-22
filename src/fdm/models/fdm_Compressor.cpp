@@ -124,34 +124,76 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef C172_PROPELLER_H
-#define C172_PROPELLER_H
+
+#include <fdm/models/fdm_Compressor.h>
+#include <fdm/models/fdm_Atmosphere.h>
+
+#include <fdm/xml/fdm_XmlUtils.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/models/fdm_Propeller.h>
+using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
+const double Compressor::_gamma = Atmosphere::_gamma;
+
+////////////////////////////////////////////////////////////////////////////////
+
+Compressor::Compressor() :
+    _temperature ( Atmosphere::_std_sl_t ),
+    _pressure    ( Atmosphere::_std_sl_p ),
+    _density     ( Atmosphere::_std_sl_rho )
+{}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Compressor::~Compressor() {}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Compressor::readData( XmlNode &dataNode )
 {
+    if ( dataNode.isValid() )
+    {
+        int result = FDM_SUCCESS;
 
-/**
- * @brief Cessna 172 propeller class.
- */
-class C172_Propeller : public Propeller
-{
-public:
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _performance_map, "performance_map" );
 
-    /** Constructor. */
-    C172_Propeller();
+        if ( result != FDM_SUCCESS )
+        {
+            Exception e;
 
-    /** Destructor. */
-    virtual ~C172_Propeller();
-};
+            e.setType( Exception::FileReadingError );
+            e.setInfo( "Reading XML file failed. " + XmlUtils::getErrorInfo( dataNode ) );
 
-} // end of fdm namespace
+            FDM_THROW( e );
+        }
+    }
+    else
+    {
+        Exception e;
+
+        e.setType( Exception::FileReadingError );
+        e.setInfo( "Reading XML file failed. " + XmlUtils::getErrorInfo( dataNode ) );
+
+        FDM_THROW( e );
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // C172_PROPELLER_H
+void Compressor::update( double airPressure, double airDensity, double airTemperature,
+                         double airFlow, double rpm )
+{
+    // pressure ratio
+    double pressureRatio = _performance_map.getValue( airFlow, rpm );
+
+    double pressure    = airPressure * pressureRatio;
+    double temperature = airTemperature * pow( pressureRatio, ( _gamma - 1.0 ) / _gamma );
+    double density     = airDensity * ( airTemperature / _temperature ) * pressureRatio;
+
+    _pressure    = Misc::inertia( pressure    , _pressure    , FDM_TIME_STEP, 0.05 );
+    _temperature = Misc::inertia( temperature , _temperature , FDM_TIME_STEP, 0.05 );
+    _density     = Misc::inertia( density     , _density     , FDM_TIME_STEP, 0.05 );
+}

@@ -146,6 +146,7 @@ namespace fdm
  * @code
  * <piston_engine>
  *   <power_max> { [W] engine maximum power } </power_max>
+ *   <displacement> { [m^3] engine displacement } </displacement>
  *   <starter> { [N*m] starter torque } </starter>
  *   <rpm_min> { [rpm] minimum rpm } </rpm_min>
  *   <rpm_max> { [rpm] maximum rpm } </rpm_max>
@@ -202,6 +203,15 @@ public:
                          bool magneto_l = true, bool magneto_r = true );
 
     /**
+     * Returns engine air flow.
+     * @return [kg/s] engine air flow
+     */
+    inline double getAirFlow() const
+    {
+        return _airFlow;
+    }
+
+    /**
      * Returns engine fuel consumption.
      * @return [kg/s] engine fuel consumption
      */
@@ -255,6 +265,8 @@ public:
         return _torque;
     }
 
+    void setRPM( double rpm );
+
 protected:
 
     Table _mixture;             ///< [-] mixture vs mixture lever position
@@ -263,6 +275,7 @@ protected:
     Table _powerFactor;         ///< [-] power factor
 
     double _power_max;          ///< [W] maximum power
+    double _displacement;       ///< [m^3] displacement
     double _starter;            ///< [N*m] starter torque
     double _rpm_min;            ///< [rpm] engine minimum rpm
     double _rpm_max;            ///< [rpm] engine maximum rpm
@@ -273,6 +286,7 @@ protected:
     double _map;                ///< [Pa] manifold absolute pressure
     double _power;              ///< [W] net power
     double _torque;             ///< [N*m] torque
+    double _airFlow;            ///< [kg/s] air flow
     double _fuelFlow;           ///< [kg/s] fuel flow
 
     /**
@@ -284,6 +298,14 @@ protected:
      */
     virtual double getManifoldAbsolutePressure( double throttle, double rpm,
                                                 double airPressure );
+
+    /**
+     * Computes fuel to air ratio.
+     * @param mixture [-] mixture
+     * @param airDensity [kg/m^3] air density
+     * @return [-] fuel to air ratio
+     */
+    virtual double getFuelToAirRatio( double mixture, double airDensity );
 
     /**
      * Computes engine power factor.

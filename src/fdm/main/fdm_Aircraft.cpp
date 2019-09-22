@@ -179,7 +179,9 @@ Aircraft::Aircraft( const DataInp *dataInp, DataOut *dataOut ) :
     _dynPress      ( 0.0 ),
     _machNumber    ( 0.0 ),
     _climbRate     ( 0.0 ),
-    _turnRate      ( 0.0 )
+    _turnRate      ( 0.0 ),
+
+    _freeze ( false )
 {
     memset( _dataOut, 0, sizeof(DataOut) );
 
@@ -223,7 +225,7 @@ void Aircraft::step( double timeStep )
     try
     {
         anteIntegration();
-        integrate();
+        if ( !_freeze ) integrate();
         postIntegration();
     }
     catch ( Exception &catched )
@@ -315,6 +317,13 @@ void Aircraft::updateOutputData()
 
     // crash
     _dataOut->crash = _crash;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Aircraft::setFreeze( bool freeze )
+{
+    _freeze = freeze;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

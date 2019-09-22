@@ -124,34 +124,80 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef C172_PROPELLER_H
-#define C172_PROPELLER_H
+
+#include <fdm/models/fdm_Governor.h>
+
+#include <fdm/xml/fdm_XmlUtils.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/models/fdm_Propeller.h>
+using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
+Governor::Governor() :
+    _pid  ( 0 ),
+    _pitch ( 0.0 )
 {
-
-/**
- * @brief Cessna 172 propeller class.
- */
-class C172_Propeller : public Propeller
-{
-public:
-
-    /** Constructor. */
-    C172_Propeller();
-
-    /** Destructor. */
-    virtual ~C172_Propeller();
-};
-
-} // end of fdm namespace
+    _pid = new PID( 0.0, 0.0, 0.0, 0.0, 1.0 );
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // C172_PROPELLER_H
+Governor::~Governor() {}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Governor::readData( XmlNode &dataNode )
+{
+    if ( dataNode.isValid() )
+    {
+        int result = FDM_SUCCESS;
+
+        double kp = 0.0;
+        double ki = 0.0;
+        double kd = 0.0;
+
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, kp, "gain_p", true );
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, ki, "gain_i", true );
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, kd, "gain_d", true );
+
+        if ( result == FDM_SUCCESS )
+        {
+            _pid->setKp( kp );
+            _pid->setKi( ki );
+            _pid->setKd( kd );
+        }
+
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _prop_rpm, "prop_rpm" );
+
+        if ( result != FDM_SUCCESS )
+        {
+            Exception e;
+
+            e.setType( Exception::FileReadingError );
+            e.setInfo( "Reading XML file failed. " + XmlUtils::getErrorInfo( dataNode ) );
+
+            FDM_THROW( e );
+        }
+    }
+    else
+    {
+        Exception e;
+
+        e.setType( Exception::FileReadingError );
+        e.setInfo( "Reading XML file failed. " + XmlUtils::getErrorInfo( dataNode ) );
+
+        FDM_THROW( e );
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Governor::update( double timeStep, double propellerLever, double rpm )
+{
+    double error = _prop_rpm.getValue( propellerLever ) - rpm;
+    _pid->update( timeStep, error );
+    _pitch = _pid->getValue();
+    //std::cout << _prop_rpm.getValue( propellerLever ) << "  " << error << "  " << _pitch << std::endl;
+}

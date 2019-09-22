@@ -141,7 +141,13 @@ namespace fdm
  */
 class C172_Engine : public PistonEngine
 {
+public:
 
+    /** Constructor. */
+    C172_Engine();
+
+    /** Destructor. */
+    virtual ~C172_Engine();
 };
 
 } // end of fdm namespace
