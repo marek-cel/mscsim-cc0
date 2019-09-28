@@ -13,7 +13,7 @@
  * <p><strong>Make sure to use "unit", "keys_unit", "cols_unit" or "rows_unit"
  * attribute when using non SI units in XML data file.</strong></p>
  * <p>
- * @see fdm::Units::getFactorSI()
+ * @see fdm::Units::getConverter()
  * @see fdm::XmlUtils
  * </p>
  *
@@ -181,6 +181,8 @@
 
 #include <fdm/fdm_Base.h>
 
+#include <fdm/fdm_Recorder.h>
+
 #include <fdm/main/fdm_Environment.h>
 #include <fdm/main/fdm_Intersections.h>
 
@@ -264,6 +266,12 @@ public:
     /** Updates output data. */
     virtual void updateOutputData();
 
+    /** Disables time integration. */
+    virtual void disableIntegration();
+
+    /** Enables time integration. */
+    virtual void enableIntegration();
+
     inline const DataInp* getDataInp() const { return _dataInp; }
     inline const DataOut* getDataOut() const { return _dataOut; }
 
@@ -280,6 +288,8 @@ public:
     inline const Propulsion*   getProp() const { return _prop; }
 
     inline const Vector3& getPosPilotBAS() const { return _pos_pilot_bas; }
+
+    inline StateVector& getStateVect() { return _stateVect; }
 
     inline const StateVector& getStateVect() const { return _stateVect; }
     inline const StateVector& getDerivVect() const { return _derivVect; }
@@ -341,8 +351,6 @@ public:
     inline double getMachNumber()    const { return _machNumber;    }
     inline double getClimbRate()     const { return _climbRate;     }
     inline double getTurnRate()      const { return _turnRate;      }
-
-    virtual void setFreeze( bool freeze );
 
     /**
      * Sets aircraft state vector.
@@ -461,7 +469,7 @@ protected:
     double _climbRate;          ///< [m/s] climb rate
     double _turnRate;           ///< [rad/s] turn rate
 
-    bool _freeze;               ///< specifies if state is frozen
+    bool _integration;          ///< specifies if integration is enabled
 
     /**
      * Reads data.

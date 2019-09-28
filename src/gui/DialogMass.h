@@ -132,6 +132,8 @@
 #include <QDialog>
 #include <QSettings>
 
+#include "gui_Defines.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace Ui
@@ -151,7 +153,7 @@ class DialogMass : public QDialog
 public:
 
     /** Constructor. */
-    explicit DialogMass( QWidget *parent = 0 );
+    explicit DialogMass( QWidget *parent = NULLPTR );
     
     /** Destructor. */
     virtual ~DialogMass();

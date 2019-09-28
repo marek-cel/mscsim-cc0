@@ -131,6 +131,7 @@
 
 #include <QWidget>
 
+#include "gui_Defines.h"
 #include "LayoutSquare.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -145,7 +146,7 @@ class WidgetSquare : public QWidget
 public:
 
     /** Constructor. */
-    explicit WidgetSquare( QWidget *parent = 0 );
+    explicit WidgetSquare( QWidget *parent = NULLPTR );
 
     /** Destructor. */
     virtual ~WidgetSquare();

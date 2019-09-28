@@ -137,6 +137,8 @@
 
 #include <fdm/fdm_Defines.h>
 
+#include "gui_Defines.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace Ui
@@ -156,7 +158,7 @@ class DockWidgetProp : public QDockWidget
 public:
 
     /** Constructor. */
-    explicit DockWidgetProp( QWidget *parent = 0 );
+    explicit DockWidgetProp( QWidget *parent = NULLPTR );
 
     /** Destructor. */
     ~DockWidgetProp();

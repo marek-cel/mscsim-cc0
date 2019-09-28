@@ -177,8 +177,7 @@ std::string String::stripLeadingSpaces( const std::string &str )
 
     std::string result = &( temp[ offset ] );
 
-    if ( temp ) delete [] temp;
-    temp = 0;
+    FDM_DELETE_TAB( temp );
 
     return result;
 }

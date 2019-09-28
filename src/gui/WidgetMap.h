@@ -138,6 +138,8 @@
 
 #include <cgi/cgi_ManipulatorMap.h>
 
+#include "gui_Defines.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -150,7 +152,7 @@ class WidgetMap : public QWidget, public osgViewer::Viewer
 public:
 
     /** Constructor. */
-    WidgetMap( QWidget *parent = 0 );
+    WidgetMap( QWidget *parent = NULLPTR );
 
     /** Destructor. */
     virtual ~WidgetMap();

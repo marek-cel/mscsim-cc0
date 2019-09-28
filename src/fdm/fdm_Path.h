@@ -139,7 +139,7 @@ namespace fdm
 {
 
 /**
- * @brief FDM files path class.
+ * @brief Files path class.
  */
 class FDMEXPORT Path
 {

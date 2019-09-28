@@ -143,7 +143,7 @@ class ComboUnitsRotation : public ComboUnits
 public:
 
     /** Constructor. */
-    explicit ComboUnitsRotation( QWidget *parent = 0 );
+    explicit ComboUnitsRotation( QWidget *parent = NULLPTR );
     
     /** Destructor. */
     virtual ~ComboUnitsRotation();

@@ -134,7 +134,7 @@
 
 QTime DialogTime::getTimeUTC( double lon_deg, const QTime &time_utc, QWidget *parent )
 {
-    DialogTime *dialog = 0;
+    DialogTime *dialog = NULLPTR;
 
     dialog = new DialogTime( parent );
     dialog->init( lon_deg, time_utc );
@@ -162,8 +162,7 @@ DialogTime::DialogTime( QWidget *parent ) :
 
 DialogTime::~DialogTime()
 {
-    if ( _ui ) delete _ui;
-    _ui = 0;
+    DELETE( _ui );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

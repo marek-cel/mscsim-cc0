@@ -124,95 +124,39 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef GRAPHICSSTICK_H
-#define GRAPHICSSTICK_H
+#ifndef WIDGETMARBLE_H
+#define WIDGETMARBLE_H
+#ifdef SIM_MARBLE_MAPS
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <QGraphicsLineItem>
-#include <QGraphicsView>
+#include <marble/MarbleWidget.h>
 
 #include "gui_Defines.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * @brief Stick graphics view class.
+ * @brief Marble map widget class.
  */
-class GraphicsStick : public QGraphicsView
+class WidgetMarble : public Marble::MarbleWidget
 {
     Q_OBJECT
 
 public:
 
     /** Constructor. */
-    explicit GraphicsStick( QWidget *parent = NULLPTR );
+    WidgetMarble( QWidget *parent = NULLPTR );
 
     /** Destructor. */
-    virtual ~GraphicsStick();
-
-    /** */
-    void reinit();
-
-    /** */
-    inline void setCtrl( int ctrlRoll, int ctrlPitch )
-    {
-        _ctrlRoll  = ctrlRoll;
-        _ctrlPitch = ctrlPitch;
-    }
-
-    /** */
-    inline void setTrim( int trimRoll, int trimPitch )
-    {
-        _trimRoll  = trimRoll;
-        _trimPitch = trimPitch;
-    }
+    virtual ~WidgetMarble();
 
 protected:
 
-    /** */
-    void resizeEvent( QResizeEvent *event );
-
-    /** */
-    void timerEvent( QTimerEvent *event );
-
-private:
-
-    int _timerId;                   ///<
-
-    QGraphicsScene *_scene;         ///< graphics scene
-
-    QGraphicsLineItem *_ctrlLineH;  ///<
-    QGraphicsLineItem *_ctrlLineV;  ///<
-    QGraphicsLineItem *_trimLineH;  ///<
-    QGraphicsLineItem *_trimLineV;  ///<
-    QGraphicsLineItem *_markLineH;  ///<
-    QGraphicsLineItem *_markLineV;  ///<
-
-    QBrush _ctrlBrush;              ///<
-    QBrush _trimBrush;              ///<
-    QBrush _markBrush;              ///<
-
-    QPen _ctrlPen;                  ///<
-    QPen _trimPen;                  ///<
-    QPen _markPen;                  ///<
-
-    int _ctrlRoll;                  ///< [-]
-    int _ctrlPitch;                 ///< [-]
-
-    int _trimRoll;                  ///< [-]
-    int _trimPitch;                 ///< [-]
-
-    /** */
-    void init();
-
-    /** */
-    void reset();
-
-    /** */
-    void updateView();
+    bool event( QEvent *event );
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // GRAPHICSSTICK_H
+#endif // SIM_MARBLE_MAPS
+#endif // WIDGETMARBLE_H

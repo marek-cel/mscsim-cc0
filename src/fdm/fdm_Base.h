@@ -143,7 +143,7 @@ namespace fdm
 class XmlNode;  ///< XmlNode forward declaration
 
 /**
- * @brief FDM base class.
+ * @brief Base class.
  */
 class FDMEXPORT Base
 {

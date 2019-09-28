@@ -128,9 +128,16 @@
 #include <gui/MainWindow.h>
 #include <ui_MainWindow.h>
 
+#include <iostream>
+
 #include <QCloseEvent>
 #include <QFile>
+#include <QFileDialog>
 #include <QMessageBox>
+
+#ifdef WIN32
+#   include <QDir>
+#endif
 
 #include <fdm/utils/fdm_Units.h>
 
@@ -143,28 +150,53 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+QString getTempFile()
+{
+    QString result;
+
+#   ifdef _LINUX_
+    result = "/tmp/";
+#   endif
+
+#   ifdef WIN32
+    result = QDir::homePath() + "/";
+#   endif
+
+    result += "fdm_temp_rec.csv";
+
+    return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+const QString MainWindow::_tmp_file = getTempFile();
+
+////////////////////////////////////////////////////////////////////////////////
+
 MainWindow::MainWindow( QWidget *parent ) :
     QMainWindow ( parent ),
     _ui ( new Ui::MainWindow ),
 
     _dateTime( QDateTime::currentDateTimeUtc() ),
     
-    _dialogConf ( 0 ),
-    _dialogEnvr ( 0 ),
-    _dialogInit ( 0 ),
-    _dialogMass ( 0 ),
+    _dialogConf ( NULLPTR ),
+    _dialogEnvr ( NULLPTR ),
+    _dialogInit ( NULLPTR ),
+    _dialogMass ( NULLPTR ),
 
-    _dockAuto ( 0 ),
-    _dockCtrl ( 0 ),
-    _dockData ( 0 ),
-    _dockEFIS ( 0 ),
-    _dockMain ( 0 ),
-    _dockMap  ( 0 ),
-    _dockProp ( 0 ),
+    _dockAuto ( NULLPTR ),
+    _dockCtrl ( NULLPTR ),
+    _dockData ( NULLPTR ),
+    _dockEFIS ( NULLPTR ),
+    _dockMain ( NULLPTR ),
+    _dockMap  ( NULLPTR ),
+    _dockProp ( NULLPTR ),
 
-    _scFullScreen ( 0 ),
-    _scTimeFaster ( 0 ),
-    _scTimeSlower ( 0 ),
+    _scCycleViews ( NULLPTR ),
+    _scToggleHud  ( NULLPTR ),
+    _scFullScreen ( NULLPTR ),
+    _scTimeFaster ( NULLPTR ),
+    _scTimeSlower ( NULLPTR ),
 
     _viewType ( Data::Camera::ViewPilot ),
     _showHUD ( true ),
@@ -176,9 +208,7 @@ MainWindow::MainWindow( QWidget *parent ) :
     _typeIndex ( 0 ),
 
     _stateInp ( fdm::DataInp::Idle ),
-    _stateOut ( fdm::DataOut::Idle ),
-
-    _freeze ( false )
+    _stateOut ( fdm::DataOut::Idle )
 {
     _ui->setupUi( this );
 
@@ -221,12 +251,13 @@ MainWindow::MainWindow( QWidget *parent ) :
     _dockMap->setVisible( false );
     _dockProp->setVisible( false );
 
-    _scFullScreen = new QShortcut( QKeySequence(Qt::CTRL + Qt::Key_F), this, SLOT(on_shorcutFullScreen_triggered()) );
+    _scCycleViews = new QShortcut( QKeySequence(Qt::CTRL + Qt::Key_V), this, SLOT(shorcutCycleViews_activated()) );
+    _scToggleHud  = new QShortcut( QKeySequence(Qt::CTRL + Qt::Key_H), this, SLOT(shorcutToggleHud_activated()) );
+    _scFullScreen = new QShortcut( QKeySequence(Qt::CTRL + Qt::Key_F), this, SLOT(shorcutFullScreen_activated()) );
     _scTimeFaster = new QShortcut( QKeySequence(Qt::CTRL + Qt::Key_Equal), this, SLOT(on_actionTimeFaster_triggered()) );
     _scTimeSlower = new QShortcut( QKeySequence(Qt::CTRL + Qt::Key_Minus), this, SLOT(on_actionTimeSlower_triggered()) );
 
     connect( _dialogInit, SIGNAL(typeIndexChanged(int)), this, SLOT(dialogInit_typeIndexChanged(int)) );
-    connect( _dockMain, SIGNAL(freezeStateChanged(bool)), this, SLOT(dockMain_freezeStateChanged(bool)) );
     connect( _dockMain, SIGNAL(stateInpChanged(fdm::DataInp::StateInp)), this, SLOT(dockMain_stateInpChanged(fdm::DataInp::StateInp)) );
 
     connect( _dockAuto , SIGNAL(closed()), this, SLOT(dockAuto_closed()) );
@@ -252,50 +283,26 @@ MainWindow::~MainWindow()
 
     settingsSave();
 
-    if ( _dialogConf ) delete _dialogConf;
-    _dialogConf = 0;
+    DELETE( _dialogConf );
+    DELETE( _dialogEnvr );
+    DELETE( _dialogInit );
+    DELETE( _dialogMass );
 
-    if ( _dialogEnvr ) delete _dialogEnvr;
-    _dialogEnvr = 0;
+    DELETE( _dockAuto );
+    DELETE( _dockCtrl );
+    DELETE( _dockData );
+    DELETE( _dockEFIS );
+    DELETE( _dockMain );
+    DELETE( _dockMap  );
+    DELETE( _dockProp );
 
-    if ( _dialogInit ) delete _dialogInit;
-    _dialogInit = 0;
+    DELETE( _scCycleViews );
+    DELETE( _scToggleHud  );
+    DELETE( _scFullScreen );
+    DELETE( _scTimeFaster );
+    DELETE( _scTimeSlower );
 
-    if ( _dialogMass ) delete _dialogMass;
-    _dialogMass = 0;
-
-    if ( _dockAuto ) delete _dockAuto;
-    _dockAuto = 0;
-
-    if ( _dockCtrl ) delete _dockCtrl;
-    _dockCtrl = 0;
-
-    if ( _dockData ) delete _dockData;
-    _dockData = 0;
-
-    if ( _dockEFIS ) delete _dockEFIS;
-    _dockEFIS = 0;
-
-    if ( _dockMain ) delete _dockMain;
-    _dockMain = 0;
-
-    if ( _dockMap ) delete _dockMap;
-    _dockMap = 0;
-
-    if ( _dockProp ) delete _dockProp;
-    _dockProp = 0;
-
-    if ( _scFullScreen ) delete _scFullScreen;
-    _scFullScreen = 0;
-
-    if ( _scTimeFaster ) delete _scTimeFaster;
-    _scTimeFaster = 0;
-
-    if ( _scTimeSlower ) delete _scTimeSlower;
-    _scTimeSlower = 0;
-    
-    if ( _ui ) delete _ui;
-    _ui = 0;
+    DELETE( _ui );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -346,7 +353,7 @@ void MainWindow::keyReleaseEvent( QKeyEvent *event )
 void MainWindow::closeEvent( QCloseEvent *event )
 {
     QString title = windowTitle();
-    QString text = "Do you really want to quit?";
+    QString text = tr( "Do you really want to quit?" );
 
     QMessageBox::StandardButton result = QMessageBox::question( this, title, text,
                                                                 QMessageBox::Yes | QMessageBox::No,
@@ -399,11 +406,56 @@ void MainWindow::timerEvent( QTimerEvent *event )
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void MainWindow::flightRecordOpen()
+{
+    QString caption = tr( "Open flight..." );
+    QString filter = tr( "CSV (*.csv)" );
+
+    QString fileName = QFileDialog::getOpenFileName( this, caption, QDir::homePath(),
+                                                     filter, &filter );
+
+    if ( fileName.length() > 0 )
+    {
+        _rec_file = fileName;
+        setStateInit();
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::flightRecordSave()
+{
+    QString caption = tr( "Save flight as..." );
+    QString filter = tr( "CSV (*.csv)" );
+
+    QString fileName = QFileDialog::getSaveFileName( this, caption, QDir::homePath(),
+                                                     filter, &filter );
+
+    if ( fileName.length() > 0 )
+    {
+        if ( !fileName.endsWith( ".csv" ) )
+        {
+            fileName += ".csv";
+        }
+
+        if ( !QFile::copy( _tmp_file, fileName ) )
+        {
+            QString title = windowTitle();
+            QString text = tr( "Error while saving file!" );
+
+            QMessageBox::critical( this, title, text, QMessageBox::Close );
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void MainWindow::setStateIdle()
 {
     _stateInp = fdm::DataInp::Idle;
     _dockMain->setStateInp( _stateInp );
 
+    _rec_file = "";
     _timeCoef = 1.0;
 }
 
@@ -425,6 +477,14 @@ void MainWindow::setStateWork()
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void MainWindow::setStateFreeze()
+{
+    _stateInp = fdm::DataInp::Freeze;
+    _dockMain->setStateInp( _stateInp );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void MainWindow::setStatePause()
 {
     _stateInp = fdm::DataInp::Pause;
@@ -437,6 +497,44 @@ void MainWindow::setStateStop()
 {
     _stateInp = fdm::DataInp::Stop;
     _dockMain->setStateInp( _stateInp );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::setViewChase()
+{
+    _viewType = Data::Camera::ViewChase;
+    _ui->stackedMain->setCurrentIndex( 1 );
+    _ui->widgetCGI->setCameraManipulatorChase();
+    _ui->widgetCGI->setDistanceDef( Aircrafts::instance()->getAircraft( _typeIndex ).distance_def );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::setViewOrbit()
+{
+    _viewType = Data::Camera::ViewOrbit;
+    _ui->stackedMain->setCurrentIndex( 1 );
+    _ui->widgetCGI->setCameraManipulatorOrbit();
+    _ui->widgetCGI->setDistanceDef( Aircrafts::instance()->getAircraft( _typeIndex ).distance_def );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::setViewPilot()
+{
+    _viewType = Data::Camera::ViewPilot;
+    _ui->stackedMain->setCurrentIndex( 1 );
+    _ui->widgetCGI->setCameraManipulatorPilot();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::setViewWorld()
+{
+    _viewType = Data::Camera::ViewWorld;
+    _ui->stackedMain->setCurrentIndex( 1 );
+    _ui->widgetCGI->setCameraManipulatorWorld();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -848,43 +946,57 @@ void MainWindow::updateMenu()
     {
     default:
     case fdm::DataOut::Idle:
-        _ui->actionStateInpIdle->setEnabled( true );
-        _ui->actionStateInpInit->setEnabled( true );
-        _ui->actionStateInpWork->setEnabled( false );
-        _ui->actionStateInpPause->setEnabled( false );
-        _ui->actionStateInpStop->setEnabled( false );
+        _ui->actionStateInpIdle   ->setEnabled( true  );
+        _ui->actionStateInpInit   ->setEnabled( true  );
+        _ui->actionStateInpWork   ->setEnabled( false );
+        _ui->actionStateInpFreeze ->setEnabled( false );
+        _ui->actionStateInpPause  ->setEnabled( false );
+        _ui->actionStateInpStop   ->setEnabled( false );
         break;
 
     case fdm::DataOut::Ready:
-        _ui->actionStateInpIdle->setEnabled( false );
-        _ui->actionStateInpInit->setEnabled( true );
-        _ui->actionStateInpWork->setEnabled( true );
-        _ui->actionStateInpPause->setEnabled( true );
-        _ui->actionStateInpStop->setEnabled( true );
+        _ui->actionStateInpIdle   ->setEnabled( false );
+        _ui->actionStateInpInit   ->setEnabled( true  );
+        _ui->actionStateInpWork   ->setEnabled( true  );
+        _ui->actionStateInpFreeze ->setEnabled( true  );
+        _ui->actionStateInpPause  ->setEnabled( true  );
+        _ui->actionStateInpStop   ->setEnabled( true  );
         break;
 
     case fdm::DataOut::Working:
-        _ui->actionStateInpIdle->setEnabled( false );
-        _ui->actionStateInpInit->setEnabled( false );
-        _ui->actionStateInpWork->setEnabled( true );
-        _ui->actionStateInpPause->setEnabled( true );
-        _ui->actionStateInpStop->setEnabled( true );
+        _ui->actionStateInpIdle   ->setEnabled( false );
+        _ui->actionStateInpInit   ->setEnabled( false );
+        _ui->actionStateInpWork   ->setEnabled( true  );
+        _ui->actionStateInpFreeze ->setEnabled( true  );
+        _ui->actionStateInpPause  ->setEnabled( true  );
+        _ui->actionStateInpStop   ->setEnabled( true  );
+        break;
+
+    case fdm::DataOut::Frozen:
+        _ui->actionStateInpIdle   ->setEnabled( false );
+        _ui->actionStateInpInit   ->setEnabled( false );
+        _ui->actionStateInpWork   ->setEnabled( true  );
+        _ui->actionStateInpFreeze ->setEnabled( true  );
+        _ui->actionStateInpPause  ->setEnabled( true  );
+        _ui->actionStateInpStop   ->setEnabled( true  );
         break;
 
     case fdm::DataOut::Paused:
-        _ui->actionStateInpIdle->setEnabled( false );
-        _ui->actionStateInpInit->setEnabled( false );
-        _ui->actionStateInpWork->setEnabled( true );
-        _ui->actionStateInpPause->setEnabled( true );
-        _ui->actionStateInpStop->setEnabled( true );
+        _ui->actionStateInpIdle   ->setEnabled( false );
+        _ui->actionStateInpInit   ->setEnabled( false );
+        _ui->actionStateInpWork   ->setEnabled( true  );
+        _ui->actionStateInpFreeze ->setEnabled( true  );
+        _ui->actionStateInpPause  ->setEnabled( true  );
+        _ui->actionStateInpStop   ->setEnabled( true  );
         break;
 
     case fdm::DataOut::Stopped:
-        _ui->actionStateInpIdle->setEnabled( true );
-        _ui->actionStateInpInit->setEnabled( false );
-        _ui->actionStateInpWork->setEnabled( false );
-        _ui->actionStateInpPause->setEnabled( false );
-        _ui->actionStateInpStop->setEnabled( true );
+        _ui->actionStateInpIdle   ->setEnabled( true  );
+        _ui->actionStateInpInit   ->setEnabled( false );
+        _ui->actionStateInpWork   ->setEnabled( false );
+        _ui->actionStateInpFreeze ->setEnabled( false );
+        _ui->actionStateInpPause  ->setEnabled( false );
+        _ui->actionStateInpStop   ->setEnabled( true  );
         break;
     }
 
@@ -892,11 +1004,24 @@ void MainWindow::updateMenu()
     {
         _ui->actionDialogInit->setEnabled( true );
         _ui->actionDialogMass->setEnabled( true );
+
+        _ui->actionFlightOpen->setEnabled( true );
     }
     else
     {
         _ui->actionDialogInit->setEnabled( false );
         _ui->actionDialogMass->setEnabled( false );
+
+        _ui->actionFlightOpen->setEnabled( false );
+    }
+
+    if ( _stateInp == fdm::DataInp::Stop && _stateOut == fdm::DataOut::Stopped && _rec_file.length() == 0 )
+    {
+        _ui->actionFlightSave->setEnabled( true );
+    }
+    else
+    {
+        _ui->actionFlightSave->setEnabled( false );
     }
 }
 
@@ -906,16 +1031,16 @@ void MainWindow::updateStatusBar()
 {
     double frameRate = 1.0 / FDM_TIME_STEP;
 
-    if ( _stateOut == fdm::DataOut::Working )
+    if ( _stateOut == fdm::DataOut::Working || _stateOut == fdm::DataOut::Frozen )
     {
         frameRate = 1.0 / Data::get()->timeStep;
     }
 
     QString text = "";
 
-    text += "Time Coef: " + QString::number( _timeCoef, 'd', 1 );
+    text += tr( "Time Coef: " ) + QString::number( _timeCoef, 'd', 1 );
     text += "   ";
-    text += "Frame Rate: " + QString::number( frameRate, 'd', 2 );
+    text += tr( "Frame Rate: " ) + QString::number( frameRate, 'd', 2 );
 
     _ui->statusBar->showMessage( text );
 }
@@ -1006,6 +1131,18 @@ void MainWindow::updateOutputData()
     Data::get()->masses.cabin       = _dialogMass->getCabin();
     Data::get()->masses.trunk       = _dialogMass->getTrunk();
 
+    // recording
+    if ( _rec_file.length() > 0 )
+    {
+        Data::get()->recording.mode = fdm::DataInp::Recording::Replay;
+        strncpy( Data::get()->recording.file, _rec_file.toLocal8Bit().data(), 4095 );
+    }
+    else
+    {
+        Data::get()->recording.mode = fdm::DataInp::Recording::Record;
+        strncpy( Data::get()->recording.file, _tmp_file.toLocal8Bit().data(), 4095 );
+    }
+
     // aircraft type
     Data::get()->aircraftType = (fdm::DataInp::AircraftType)aircraft.type;
 
@@ -1014,9 +1151,6 @@ void MainWindow::updateOutputData()
 
     // time coefficient
     Data::get()->timeCoef = _timeCoef;
-
-    // integrate
-    Data::get()->freeze = _freeze;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1136,6 +1270,20 @@ void MainWindow::on_actionDockProp_toggled( bool checked )
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void MainWindow::on_actionFlightOpen_triggered()
+{
+    flightRecordOpen();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::on_actionFlightSave_triggered()
+{
+    flightRecordSave();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void MainWindow::on_actionStateInpIdle_triggered()
 {
     setStateIdle();
@@ -1153,6 +1301,13 @@ void MainWindow::on_actionStateInpInit_triggered()
 void MainWindow::on_actionStateInpWork_triggered()
 {
     setStateWork();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::on_actionStateInpFreeze_triggered()
+{
+    setStateFreeze();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1180,38 +1335,28 @@ void MainWindow::on_actionQuit_triggered()
 
 void MainWindow::on_actionViewChase_triggered()
 {
-    _viewType = Data::Camera::ViewChase;
-    _ui->stackedMain->setCurrentIndex( 1 );
-    _ui->widgetCGI->setCameraManipulatorChase();
-    _ui->widgetCGI->setDistanceDef( Aircrafts::instance()->getAircraft( _typeIndex ).distance_def );
+    setViewChase();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void MainWindow::on_actionViewOrbit_triggered()
 {
-    _viewType = Data::Camera::ViewOrbit;
-    _ui->stackedMain->setCurrentIndex( 1 );
-    _ui->widgetCGI->setCameraManipulatorOrbit();
-    _ui->widgetCGI->setDistanceDef( Aircrafts::instance()->getAircraft( _typeIndex ).distance_def );
+    setViewOrbit();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void MainWindow::on_actionViewPilot_triggered()
 {
-    _viewType = Data::Camera::ViewPilot;
-    _ui->stackedMain->setCurrentIndex( 1 );
-    _ui->widgetCGI->setCameraManipulatorPilot();
+    setViewPilot();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void MainWindow::on_actionViewWorld_triggered()
 {
-    _viewType = Data::Camera::ViewWorld;
-    _ui->stackedMain->setCurrentIndex( 1 );
-    _ui->widgetCGI->setCameraManipulatorWorld();
+    setViewWorld();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1285,7 +1430,35 @@ void MainWindow::on_actionTimeSlower_triggered()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void MainWindow::on_shorcutFullScreen_triggered()
+void MainWindow::shorcutCycleViews_activated()
+{
+    ViewType viewType = Data::Camera::ViewChase;
+
+    if ( _viewType + 1 < Data::Camera::ViewWorld ) // sic!
+    {
+        viewType = (ViewType)( _viewType + 1 );
+    }
+
+    switch ( viewType )
+    {
+        case Data::Camera::ViewChase: setViewChase(); break;
+        case Data::Camera::ViewOrbit: setViewOrbit(); break;
+        case Data::Camera::ViewPilot: setViewPilot(); break;
+        case Data::Camera::ViewWorld: setViewWorld(); break;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::shorcutToggleHud_activated()
+{
+    _showHUD = !_showHUD;
+    _ui->actionShowHUD->setChecked( _showHUD );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::shorcutFullScreen_activated()
 {
     if ( isFullScreen() )
     {
@@ -1310,22 +1483,16 @@ void MainWindow::dialogInit_typeIndexChanged( int typeIndex )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void MainWindow::dockMain_freezeStateChanged( bool freeze )
-{
-    _freeze = freeze;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 void MainWindow::dockMain_stateInpChanged( fdm::DataInp::StateInp stateInp )
 {
     switch ( stateInp )
     {
-        case fdm::DataInp::Idle:  setStateIdle();  break;
-        case fdm::DataInp::Init:  setStateInit();  break;
-        case fdm::DataInp::Work:  setStateWork();  break;
-        case fdm::DataInp::Pause: setStatePause(); break;
-        case fdm::DataInp::Stop:  setStateStop();  break;
+        case fdm::DataInp::Idle:   setStateIdle();   break;
+        case fdm::DataInp::Init:   setStateInit();   break;
+        case fdm::DataInp::Work:   setStateWork();   break;
+        case fdm::DataInp::Freeze: setStateFreeze(); break;
+        case fdm::DataInp::Pause:  setStatePause();  break;
+        case fdm::DataInp::Stop:   setStateStop();   break;
     }
 }
 

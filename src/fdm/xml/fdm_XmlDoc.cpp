@@ -138,7 +138,7 @@ using namespace fdm;
 XmlDoc::XmlDoc( const std::string &fileName ) :
     _doc  ( 0 ),
     _open ( false ),
-    _root ( 0 )
+    _root ( FDM_NULL )
 {
     readFile( fileName );
 }
@@ -147,8 +147,7 @@ XmlDoc::XmlDoc( const std::string &fileName ) :
 
 XmlDoc::~XmlDoc()
 {
-    if ( _root ) delete _root;
-    _root = 0;
+    FDM_DELETE( _root );
 
     xmlFreeDoc( _doc );
 }

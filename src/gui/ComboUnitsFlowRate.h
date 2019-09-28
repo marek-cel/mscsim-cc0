@@ -143,7 +143,7 @@ class ComboUnitsFlowRate : public ComboUnits
 public:
 
     /** Constructor. */
-    explicit ComboUnitsFlowRate( QWidget *parent = 0 );
+    explicit ComboUnitsFlowRate( QWidget *parent = NULLPTR );
     
     /** Destructor. */
     virtual ~ComboUnitsFlowRate();

@@ -137,9 +137,10 @@
 #include <osgGA/GUIEventHandler>
 #include <osgQt/GraphicsWindowQt>
 
-#include <gui/KeyHandler.h>
-
 #include <hid/hid_Assignment.h>
+
+#include "gui_Defines.h"
+#include "KeyHandler.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -156,7 +157,7 @@ public:
     static const double _zFar;
 
     /** Constructor. */
-    WidgetCGI( QWidget *parent = 0 );
+    WidgetCGI( QWidget *parent = NULLPTR );
 
     /** Destructor. */
     virtual ~WidgetCGI();

@@ -131,6 +131,8 @@
 
 #include <QWidget>
 
+#include "gui_Defines.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace Ui
@@ -150,7 +152,7 @@ class PageGeneral : public QWidget
 public:
 
     /** Constructor. */
-    explicit PageGeneral( QWidget *parent = 0 );
+    explicit PageGeneral( QWidget *parent = NULLPTR );
 
     /** Destructor. */
     virtual ~PageGeneral();

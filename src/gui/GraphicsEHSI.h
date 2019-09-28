@@ -132,6 +132,8 @@
 #include <QGraphicsView>
 #include <QGraphicsSvgItem>
 
+#include "gui_Defines.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -144,7 +146,7 @@ class GraphicsEHSI : public QGraphicsView
 public:
 
     /** Constructor. */
-    explicit GraphicsEHSI( QWidget *parent = 0 );
+    explicit GraphicsEHSI( QWidget *parent = NULLPTR );
 
     /** Destructor. */
     virtual ~GraphicsEHSI();

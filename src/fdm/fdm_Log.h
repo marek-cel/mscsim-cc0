@@ -136,7 +136,9 @@
 namespace fdm
 {
 
-/** */
+/**
+ * @brief Logging class.
+ */
 class Log
 {
 public:

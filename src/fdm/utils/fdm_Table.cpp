@@ -155,9 +155,9 @@ Table Table::createOneRecordTable( double val )
 
 Table::Table() :
     _size ( 0 ),
-    _keyValues ( 0 ),
-    _tableData ( 0 ),
-    _interpolData ( 0 )
+    _keyValues ( FDM_NULL ),
+    _tableData ( FDM_NULL ),
+    _interpolData ( FDM_NULL )
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -165,9 +165,9 @@ Table::Table() :
 Table::Table( const std::vector< double > &keyValues,
               const std::vector< double > &tableData ) :
     _size ( 0 ),
-    _keyValues ( 0 ),
-    _tableData ( 0 ),
-    _interpolData ( 0 )
+    _keyValues ( FDM_NULL ),
+    _tableData ( FDM_NULL ),
+    _interpolData ( FDM_NULL )
 {
     if ( keyValues.size() == tableData.size() )
     {
@@ -206,9 +206,9 @@ Table::Table( const std::vector< double > &keyValues,
 
 Table::Table( const Table &table ) :
     _size ( table._size ),
-    _keyValues ( 0 ),
-    _tableData ( 0 ),
-    _interpolData ( 0 )
+    _keyValues ( FDM_NULL ),
+    _tableData ( FDM_NULL ),
+    _interpolData ( FDM_NULL )
 {
     if ( _size > 0 )
     {
@@ -229,14 +229,9 @@ Table::Table( const Table &table ) :
 
 Table::~Table()
 {
-    if ( _keyValues ) delete _keyValues;
-    _keyValues = 0;
-
-    if ( _tableData ) delete _tableData;
-    _tableData = 0;
-
-    if ( _interpolData ) delete _interpolData;
-    _interpolData = 0;
+    FDM_DELETE_TAB( _keyValues );
+    FDM_DELETE_TAB( _tableData );
+    FDM_DELETE_TAB( _interpolData );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -475,14 +470,9 @@ std::string Table::toString()
 
 const Table& Table::operator= ( const Table &table )
 {
-    if ( _keyValues ) delete _keyValues;
-    _keyValues = 0;
-
-    if ( _tableData ) delete _tableData;
-    _tableData = 0;
-
-    if ( _interpolData ) delete _interpolData;
-    _interpolData = 0;
+    FDM_DELETE_TAB( _keyValues );
+    FDM_DELETE_TAB( _tableData );
+    FDM_DELETE_TAB( _interpolData );
 
     _size = table._size;
 

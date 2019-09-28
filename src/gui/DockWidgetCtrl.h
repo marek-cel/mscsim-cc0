@@ -131,6 +131,8 @@
 
 #include <QDockWidget>
 
+#include "gui_Defines.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace Ui
@@ -150,7 +152,7 @@ class DockWidgetCtrl : public QDockWidget
 public:
 
     /** Constructor. */
-    explicit DockWidgetCtrl( QWidget *parent = 0 );
+    explicit DockWidgetCtrl( QWidget *parent = NULLPTR );
 
     /** Destructor. */
     ~DockWidgetCtrl();

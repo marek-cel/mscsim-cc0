@@ -124,95 +124,187 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef GRAPHICSSTICK_H
-#define GRAPHICSSTICK_H
+#ifndef FDM_RECORDER_H
+#define FDM_RECORDER_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <QGraphicsLineItem>
-#include <QGraphicsView>
+#include <fstream>
+#include <iomanip>
+#include <vector>
 
-#include "gui_Defines.h"
+#include <fdm/fdm_Base.h>
+#include <fdm/fdm_DataInp.h>
 
 ////////////////////////////////////////////////////////////////////////////////
+
+namespace fdm
+{
 
 /**
- * @brief Stick graphics view class.
+ * Flight recorder class
  */
-class GraphicsStick : public QGraphicsView
+class Recorder : public Base
 {
-    Q_OBJECT
-
 public:
 
-    /** Constructor. */
-    explicit GraphicsStick( QWidget *parent = NULLPTR );
+    /** Variable base class. */
+    class VariableBase
+    {
+    public:
+
+        /** Constructor. */
+        VariableBase() {}
+
+        /** Destructor. */
+        virtual ~VariableBase() {}
+
+        /** Initializes variable. */
+        virtual void init() = 0;
+
+        /** Interpolates variable value. */
+        virtual void interpolate( double coef ) = 0;
+
+        /** Returns variable name. */
+        virtual const char* name() const = 0;
+
+        /** Reads variable from stream. */
+        virtual void read( std::fstream &fstream ) = 0;
+
+        /** Writes variable into stream. */
+        virtual void write( std::fstream &fstream ) = 0;
+    };
+
+    /** Variable class implementation. */
+    template < class TYPE >
+    class Variable : public VariableBase
+    {
+    public:
+
+        /** Constructor. */
+        Variable( const std::string &name, TYPE *ptr, UInt8 precision = 1 ) :
+            _name       ( name ),
+            _ptr        ( ptr ),
+            _precision  ( precision ),
+            _value      ( 0.0 ),
+            _value_prev ( 0.0 )
+        {}
+
+        /** Destructor. */
+        virtual ~Variable() {}
+
+        /** Initializes variable. */
+        virtual void init()
+        {
+            ( *_ptr ) = _value;
+        }
+
+        /** Interpolates variable value. */
+        virtual void interpolate( double coef )
+        {
+            ( *_ptr ) = _value_prev + (TYPE)coef * ( _value - _value_prev );
+        }
+
+        /** Returns variable name. */
+        virtual const char* name() const
+        {
+            return _name.c_str();
+        }
+
+        /** Reads variable from stream. */
+        virtual void read( std::fstream &fstream )
+        {
+            _value_prev = _value;
+            fstream >> _value;
+        }
+
+        /** Writes variable into stream. */
+        virtual void write( std::fstream &fstream )
+        {
+            fstream << std::setprecision( _precision );
+            fstream << ( *_ptr );
+        }
+
+    private:
+
+        std::string _name;  ///< variable name
+        TYPE *_ptr;         ///< pointer to actual variable
+        UInt8 _precision;   ///< floating point number precision
+        TYPE _value;        ///< variable value
+        TYPE _value_prev;   ///< previous variable value
+    };
+
+    typedef DataInp::Recording::Mode Mode;
+    typedef std::vector< VariableBase* > Variables;
+
+    /**
+     * Constructor.
+     * @param desiredTimeStep
+     */
+    Recorder( double desiredTimeStep = 0.0 );
 
     /** Destructor. */
-    virtual ~GraphicsStick();
+    virtual ~Recorder();
 
     /** */
-    void reinit();
+    void addVariable( VariableBase *var );
 
-    /** */
-    inline void setCtrl( int ctrlRoll, int ctrlPitch )
+    /**
+     * @brief init
+     * @param file
+     */
+    void init( Mode mode, const std::string &file );
+
+    /**
+     * Performs recorder step.
+     * @param timeStep [s] simulation time step
+     */
+    void step( double timeStep );
+
+    inline bool isRecording() const { return _recording; }
+    inline bool isReplaying() const { return _replaying; }
+
+    inline bool isRecordingOrReplaying() const
     {
-        _ctrlRoll  = ctrlRoll;
-        _ctrlPitch = ctrlPitch;
+        return _recording || _replaying;
     }
-
-    /** */
-    inline void setTrim( int trimRoll, int trimPitch )
-    {
-        _trimRoll  = trimRoll;
-        _trimPitch = trimPitch;
-    }
-
-protected:
-
-    /** */
-    void resizeEvent( QResizeEvent *event );
-
-    /** */
-    void timerEvent( QTimerEvent *event );
 
 private:
 
-    int _timerId;                   ///<
+    const double _desiredTimeStep;  ///< [s] recording desired time step (specifies how often data record is write down)
 
-    QGraphicsScene *_scene;         ///< graphics scene
+    Variables _variables;           ///< variables
 
-    QGraphicsLineItem *_ctrlLineH;  ///<
-    QGraphicsLineItem *_ctrlLineV;  ///<
-    QGraphicsLineItem *_trimLineH;  ///<
-    QGraphicsLineItem *_trimLineV;  ///<
-    QGraphicsLineItem *_markLineH;  ///<
-    QGraphicsLineItem *_markLineV;  ///<
+    Mode _mode;                     ///< recording mode
+    std::fstream _fstream;          ///< recording file stream
 
-    QBrush _ctrlBrush;              ///<
-    QBrush _trimBrush;              ///<
-    QBrush _markBrush;              ///<
+    double _time;                   ///< [s] time
+    double _time_next;              ///< [s] next time
+    double _time_prev;              ///< [s] previous time
+    double _time_rec;               ///< [s] recording time variable (used to determine when write down data record)
 
-    QPen _ctrlPen;                  ///<
-    QPen _trimPen;                  ///<
-    QPen _markPen;                  ///<
+    UInt32 _records;                ///< record counter
 
-    int _ctrlRoll;                  ///< [-]
-    int _ctrlPitch;                 ///< [-]
+    bool _recording;                ///< recording active
+    bool _replaying;                ///< replaying active
 
-    int _trimRoll;                  ///< [-]
-    int _trimPitch;                 ///< [-]
+    std::ios_base::openmode getOpenMode( Mode mode );
 
-    /** */
-    void init();
+    void headerRead();
+    void headerWrite();
 
-    /** */
-    void reset();
+    void recordRead( double &time );
+    void recordWrite( double time );
 
-    /** */
-    void updateView();
+    /** Performs recording step. */
+    void stepRecord();
+
+    /** Performs replaying step. */
+    void stepReplay();
 };
+
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // GRAPHICSSTICK_H
+#endif // FDM_RECORDER_H

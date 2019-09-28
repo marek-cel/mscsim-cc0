@@ -124,95 +124,89 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef GRAPHICSSTICK_H
-#define GRAPHICSSTICK_H
+
+#ifdef SIM_MARBLE_MAPS
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <QGraphicsLineItem>
-#include <QGraphicsView>
+#include <gui/WidgetMarble.h>
 
-#include "gui_Defines.h"
+#include <marble/MarbleDirs.h>
+#include <marble/MarbleGlobal.h>
+#include <marble/MarbleLocale.h>
+
+//////////////
+
+#include <marble/GeoDataDocument.h>
+#include <marble/GeoDataGroundOverlay.h>
+#include <marble/GeoDataTreeModel.h>
+#include <marble/MarbleModel.h>
+
+/////////////
+
+#include <fdm/fdm_Path.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-/**
- * @brief Stick graphics view class.
- */
-class GraphicsStick : public QGraphicsView
+WidgetMarble::WidgetMarble( QWidget *parent ) :
+    Marble::MarbleWidget ( parent )
 {
-    Q_OBJECT
+    QString dataPath = fdm::Path::get().c_str();
 
-public:
-
-    /** Constructor. */
-    explicit GraphicsStick( QWidget *parent = NULLPTR );
-
-    /** Destructor. */
-    virtual ~GraphicsStick();
-
-    /** */
-    void reinit();
-
-    /** */
-    inline void setCtrl( int ctrlRoll, int ctrlPitch )
+    if ( dataPath.length() == 0 )
     {
-        _ctrlRoll  = ctrlRoll;
-        _ctrlPitch = ctrlPitch;
+        dataPath = QDir::currentPath() + "/";
     }
 
-    /** */
-    inline void setTrim( int trimRoll, int trimPitch )
-    {
-        _trimRoll  = trimRoll;
-        _trimPitch = trimPitch;
-    }
+    dataPath += "data/map/marble/";
 
-protected:
+    Marble::MarbleDirs::setMarbleDataPath( dataPath );
 
-    /** */
-    void resizeEvent( QResizeEvent *event );
+    setMapThemeId( "earth/mscsim/map_bmng.dgml" );
+    //setMapThemeId( "earth/mscsim/map_osm.dgml" );
 
-    /** */
-    void timerEvent( QTimerEvent *event );
+    //setProjection( Marble::Mercator );
 
-private:
+    setShowTerrain( true );
 
-    int _timerId;                   ///<
+    Marble::MarbleGlobal::getInstance()->locale()->setMeasurementSystem( Marble::MarbleLocale::NauticalSystem );
 
-    QGraphicsScene *_scene;         ///< graphics scene
+    //////////////////////////////////////
 
-    QGraphicsLineItem *_ctrlLineH;  ///<
-    QGraphicsLineItem *_ctrlLineV;  ///<
-    QGraphicsLineItem *_trimLineH;  ///<
-    QGraphicsLineItem *_trimLineV;  ///<
-    QGraphicsLineItem *_markLineH;  ///<
-    QGraphicsLineItem *_markLineV;  ///<
 
-    QBrush _ctrlBrush;              ///<
-    QBrush _trimBrush;              ///<
-    QBrush _markBrush;              ///<
+    // Create a bounding box from the given corner points
+    Marble::GeoDataLatLonBox box( 55, 48, 14.5, 6, Marble::GeoDataCoordinates::Degree );
+    box.setRotation( 0, Marble::GeoDataCoordinates::Degree );
 
-    QPen _ctrlPen;                  ///<
-    QPen _trimPen;                  ///<
-    QPen _markPen;                  ///<
+    // Create an overlay and assign the image to render and its bounding box to it
+    Marble::GeoDataGroundOverlay *overlay = new Marble::GeoDataGroundOverlay();
+    overlay->setLatLonBox( box );
+    overlay->setIcon( QImage( fdm::Path::get( "data/map/icons/air_friend.png" ).c_str() ) );
 
-    int _ctrlRoll;                  ///< [-]
-    int _ctrlPitch;                 ///< [-]
+    // Create a document as a container for the overlay
+    Marble::GeoDataDocument *document = new Marble::GeoDataDocument();
+    document->append( overlay );
 
-    int _trimRoll;                  ///< [-]
-    int _trimPitch;                 ///< [-]
-
-    /** */
-    void init();
-
-    /** */
-    void reset();
-
-    /** */
-    void updateView();
-};
+    // Add the document to MarbleWidget's tree model
+    model()->treeModel()->addDocument( document );
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // GRAPHICSSTICK_H
+WidgetMarble::~WidgetMarble() {}
+
+////////////////////////////////////////////////////////////////////////////////
+
+bool WidgetMarble::event( QEvent *event )
+{
+    // first!
+    //setHeading( 0.0 );
+
+    ////////////////////////////////////////////
+    return Marble::MarbleWidget::event( event );
+    ////////////////////////////////////////////
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+#endif // SIM_MARBLE_MAPS

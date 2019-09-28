@@ -134,6 +134,8 @@
 
 #include <hid/hid_Manager.h>
 
+#include "gui_Defines.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace Ui
@@ -152,9 +154,9 @@ class DialogTime : public QDialog
 
 public:
 
-    static QTime getTimeUTC( double lon_deg, const QTime &time_utc, QWidget *parent = 0 );
+    static QTime getTimeUTC( double lon_deg, const QTime &time_utc, QWidget *parent = NULLPTR );
 
-    explicit DialogTime( QWidget *parent = 0 );
+    explicit DialogTime( QWidget *parent = NULLPTR );
 
     ~DialogTime();
 

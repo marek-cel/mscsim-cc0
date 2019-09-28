@@ -132,6 +132,8 @@
 #include <QDockWidget>
 #include <QSettings>
 
+#include "gui_Defines.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace Ui
@@ -151,7 +153,7 @@ class DockWidgetData : public QDockWidget
 public:
 
     /** Constructor. */
-    explicit DockWidgetData( QWidget *parent = 0 );
+    explicit DockWidgetData( QWidget *parent = NULLPTR );
 
     /** Destructor. */
     virtual ~DockWidgetData();

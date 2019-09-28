@@ -133,6 +133,8 @@
 
 #include <QComboBox>
 
+#include "gui_Defines.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -145,7 +147,7 @@ class ComboUnits : public QComboBox
 public:
 
     /** Constructor. */
-    explicit ComboUnits( QWidget *parent = 0 );
+    explicit ComboUnits( QWidget *parent = NULLPTR );
     
     /** Destructor. */
     virtual ~ComboUnits();
