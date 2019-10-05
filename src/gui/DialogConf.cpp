@@ -149,7 +149,7 @@ DialogConf::~DialogConf()
 {
     settingsSave();
     
-    DELETE( _ui );
+    SIM_DELETE( _ui );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

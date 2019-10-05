@@ -127,7 +127,7 @@
 
 #include <Simulation.h>
 
-#include <Defines.h>
+#include <Common.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -160,10 +160,10 @@ Simulation::~Simulation()
 {
     if ( _timerId ) killTimer( _timerId );
 
-    DELETE( _timeoutTimer );
-    DELETE( _elapsedTimer );
+    SIM_DELETE( _timeoutTimer );
+    SIM_DELETE( _elapsedTimer );
 
-    DELETE( _fdm );
+    SIM_DELETE( _fdm );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -247,9 +247,9 @@ void Simulation::onDataInpUpdated( const Data::DataBuf *data )
     _dataInp.controls.spoilers     = data->controls.spoilers;
     _dataInp.controls.collective   = data->controls.collective;
 
-    _dataInp.controls.lg_handle   = data->controls.lg_handle;
-    _dataInp.controls.nw_steering = data->controls.nw_steering;
-    _dataInp.controls.antiskid    = data->controls.antiskid;
+    _dataInp.controls.lgh = data->controls.lgh;
+    _dataInp.controls.nws = data->controls.nws;
+    _dataInp.controls.abs = data->controls.abs;
 
     // engines
     for ( unsigned int i = 0; i < FDM_MAX_ENGINES; i++ )

@@ -144,10 +144,10 @@ Table2D::Table2D() :
     _rows ( 0 ),
     _cols ( 0 ),
     _size ( 0 ),
-    _rowValues ( FDM_NULL ),
-    _colValues ( FDM_NULL ),
-    _tableData ( FDM_NULL ),
-    _interpolData ( FDM_NULL )
+    _rowValues ( FDM_NULLPTR ),
+    _colValues ( FDM_NULLPTR ),
+    _tableData ( FDM_NULLPTR ),
+    _interpolData ( FDM_NULLPTR )
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -158,10 +158,10 @@ Table2D::Table2D( const std::vector< double > &rowValues,
     _rows ( 0 ),
     _cols ( 0 ),
     _size ( 0 ),
-    _rowValues ( FDM_NULL ),
-    _colValues ( FDM_NULL ),
-    _tableData ( FDM_NULL ),
-    _interpolData ( FDM_NULL )
+    _rowValues ( FDM_NULLPTR ),
+    _colValues ( FDM_NULLPTR ),
+    _tableData ( FDM_NULLPTR ),
+    _interpolData ( FDM_NULLPTR )
 {
     if ( rowValues.size() * colValues.size() == tableData.size() )
     {
@@ -207,10 +207,10 @@ Table2D::Table2D( const Table2D &table ) :
     _rows ( table._rows ),
     _cols ( table._cols ),
     _size ( table._size ),
-    _rowValues ( FDM_NULL ),
-    _colValues ( FDM_NULL ),
-    _tableData ( FDM_NULL ),
-    _interpolData ( FDM_NULL )
+    _rowValues ( FDM_NULLPTR ),
+    _colValues ( FDM_NULLPTR ),
+    _tableData ( FDM_NULLPTR ),
+    _interpolData ( FDM_NULLPTR )
 {
     if ( _size > 0 )
     {

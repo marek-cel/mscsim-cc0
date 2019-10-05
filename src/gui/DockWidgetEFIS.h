@@ -160,6 +160,30 @@ public:
     /** Destructor. */
     virtual ~DockWidgetEFIS();
 
+    /** */
+    inline void setFlightMode( GraphicsEADI::FlightMode flightMode )
+    {
+        _graphicsEADI->setFlightMode( flightMode );
+    }
+
+    /** */
+    inline void setSpeedMode( GraphicsEADI::SpeedMode speedMode )
+    {
+        _graphicsEADI->setSpeedMode( speedMode );
+    }
+
+    /** */
+    inline void setLNAV( GraphicsEADI::LNAV lnav )
+    {
+        _graphicsEADI->setLNAV( lnav );
+    }
+
+    /** */
+    inline void setVNAV( GraphicsEADI::VNAV vnav )
+    {
+        _graphicsEADI->setVNAV( vnav );
+    }
+
     /** @param roll angle [deg] */
     inline void setRoll( float roll )
     {
@@ -244,6 +268,12 @@ public:
         _graphicsEADI->setClimbRate( climbRate );
     }
 
+    /** @param course [deg] */
+    inline void setCourse( float course )
+    {
+        _graphicsEHSI->setCourse( course );
+    }
+
     /**
      * setDistance
      * @param distance [nmi] distance
@@ -272,6 +302,24 @@ public:
     inline void setDeviation( float deviation, bool visible )
     {
         _graphicsEHSI->setDeviation( deviation, visible );
+    }
+
+    /** @param airspeed (dimensionless numeric value) */
+    inline void setAirspeedSet( double airspeed )
+    {
+        _graphicsEADI->setAirspeedSet( airspeed );
+    }
+
+    /** @param altitude (dimensionless numeric value) */
+    inline void setAltitudeSet( double altitude )
+    {
+        _graphicsEADI->setAltitudeSet( altitude );
+    }
+
+    /** @param heading [deg] */
+    inline void setHeadingSet( float heading )
+    {
+        _graphicsEHSI->setHeadingSet( heading );
     }
 
 signals:

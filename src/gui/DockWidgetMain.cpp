@@ -154,7 +154,7 @@ DockWidgetMain::DockWidgetMain( QWidget *parent ) :
 
 DockWidgetMain::~DockWidgetMain()
 {
-    DELETE( _ui );
+    SIM_DELETE( _ui );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

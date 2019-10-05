@@ -134,7 +134,7 @@ using namespace fdm;
 ////////////////////////////////////////////////////////////////////////////////
 
 Environment::Environment() :
-    _atmosphere ( FDM_NULL )
+    _atmosphere ( FDM_NULLPTR )
 {
     _atmosphere = new Atmosphere();
 }

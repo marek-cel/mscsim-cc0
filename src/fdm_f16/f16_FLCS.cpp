@@ -127,7 +127,6 @@
 
 #include <fdm_f16/f16_FLCS.h>
 
-#include <iostream>
 #include <algorithm>
 
 #include <fdm/sys/fdm_Lag.h>

@@ -162,7 +162,7 @@ DialogTime::DialogTime( QWidget *parent ) :
 
 DialogTime::~DialogTime()
 {
-    DELETE( _ui );
+    SIM_DELETE( _ui );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
