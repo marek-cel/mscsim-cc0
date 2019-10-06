@@ -181,7 +181,7 @@ void Module::removeAllChildren()
     List::iterator it = _children.begin();
     while ( it != _children.end() )
     {
-        SIM_DELETE( (*it) );
+        DELPTR( (*it) );
         it = _children.erase( it );
     }
 }

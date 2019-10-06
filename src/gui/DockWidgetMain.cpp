@@ -154,7 +154,7 @@ DockWidgetMain::DockWidgetMain( QWidget *parent ) :
 
 DockWidgetMain::~DockWidgetMain()
 {
-    SIM_DELETE( _ui );
+    DELPTR( _ui );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

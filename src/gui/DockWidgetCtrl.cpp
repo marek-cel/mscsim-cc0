@@ -143,7 +143,7 @@ DockWidgetCtrl::DockWidgetCtrl( QWidget *parent ) :
 
 DockWidgetCtrl::~DockWidgetCtrl()
 {
-    SIM_DELETE( _ui );
+    DELPTR( _ui );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

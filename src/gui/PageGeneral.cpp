@@ -157,7 +157,7 @@ PageGeneral::~PageGeneral()
 {
     settingsSave();
 
-    SIM_DELETE( _ui );
+    DELPTR( _ui );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -143,7 +143,7 @@ DockWidgetMap::DockWidgetMap( QWidget *parent ) :
 
 DockWidgetMap::~DockWidgetMap()
 {
-    SIM_DELETE( _ui );
+    DELPTR( _ui );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

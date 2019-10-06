@@ -138,7 +138,7 @@ WidgetSquare::WidgetSquare( QWidget *parent ) :
 
 WidgetSquare::~WidgetSquare()
 {
-    SIM_DELETE( _layoutSquare );
+    DELPTR( _layoutSquare );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

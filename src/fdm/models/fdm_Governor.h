@@ -145,6 +145,7 @@ namespace fdm
  * <h5>XML configuration file format:</h5>
  * @code
  * <governor>
+ * TODO
  * </governor>
  * @endcode
  */
@@ -172,10 +173,10 @@ protected:
 
     Table _prop_rpm;    ///< [rpm] propeller setpoint RPM vs [-] propeller RPM lever position
 
-    double _gain_1;
-    double _gain_2;
+    double _gain_1;     ///<
+    double _gain_2;     ///<
 
-    double _pitch;
+    double _pitch;      ///<
 };
 
 } // end of fdm namespace

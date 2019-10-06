@@ -198,7 +198,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define FDM_DELETE( ptr ) \
+#define FDM_DELPTR( ptr ) \
 { \
     if ( ptr ) delete ptr; \
     ptr = FDM_NULLPTR; \
