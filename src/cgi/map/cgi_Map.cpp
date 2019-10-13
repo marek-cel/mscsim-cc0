@@ -241,7 +241,7 @@ const double Map::_zOwnship     = -1.0;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Map::Map( Module *parent ) :
+Map::Map( const Module *parent ) :
     Module( parent ),
 
     _icons  ( 0 ),

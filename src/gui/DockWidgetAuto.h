@@ -169,6 +169,7 @@ public:
     double getAltitude() const;
     double getCourse() const;
     double getHeading() const;
+    double getNavFreq()  const;
 
     double getCmdRoll() const;
     double getCmdPitch() const;

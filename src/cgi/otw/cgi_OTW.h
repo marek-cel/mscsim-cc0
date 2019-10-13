@@ -147,7 +147,7 @@ class OTW : public Module
 public:
 
     /** Constructor. */
-    OTW( Module *parent = 0 );
+    OTW( const Module *parent = NULLPTR );
 
     /** Destructor. */
     virtual ~OTW();

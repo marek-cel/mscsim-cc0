@@ -145,6 +145,10 @@ Manager::Manager() :
     _sim ( NULLPTR ),
     _win ( NULLPTR ),
 
+#   ifdef SIM_NETWORKING
+    _net ( NULLPTR ),
+#   endif
+
     _timer ( 0 ),
     _timerId ( 0 ),
     _timeStep ( 0.0 )
@@ -152,6 +156,10 @@ Manager::Manager() :
     _nav = new Navigation();
     _sim = new Simulation();
     _win = new MainWindow();
+
+#   ifdef SIM_NETWORKING
+    _net = new Networking();
+#   endif
 
     _timer = new QElapsedTimer();
 }
@@ -175,6 +183,10 @@ Manager::~Manager()
     DELPTR( _nav );
     DELPTR( _sim );
     DELPTR( _win );
+
+#   ifdef SIM_NETWORKING
+    DELPTR( _net );
+#   endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -219,6 +231,7 @@ void Manager::timerEvent( QTimerEvent *event )
     }
 
     hid::Manager::instance()->update( _timeStep );
+
     _nav->update();
 
     // controls
@@ -263,6 +276,10 @@ void Manager::timerEvent( QTimerEvent *event )
         Data::get()->propulsion.engine[ i ].mixture   = hid::Manager::instance()->getMixture( i );
         Data::get()->propulsion.engine[ i ].propeller = hid::Manager::instance()->getPropeller( i );
     }
+
+#   ifdef SIM_NETWORKING
+    _net->update();
+#   endif
 
     ///////////////////////////////////
     emit dataInpUpdated( Data::get() );
@@ -309,8 +326,8 @@ void Manager::onDataOutUpdated( const fdm::DataOut &dataOut )
     Data::get()->ownship.angleOfAttack = dataOut.flight.angleOfAttack;
     Data::get()->ownship.sideslipAngle = dataOut.flight.sideslipAngle;
 
-    Data::get()->ownship.course    = dataOut.flight.course;
-    Data::get()->ownship.pathAngle = dataOut.flight.pathAngle;
+    Data::get()->ownship.climbAngle = dataOut.flight.climbAngle;
+    Data::get()->ownship.trackAngle = dataOut.flight.trackAngle;
 
     Data::get()->ownship.slipSkidAngle = dataOut.flight.slipSkidAngle;
 

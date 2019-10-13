@@ -161,7 +161,7 @@ public:
     static int getFogNumber( float sun_elev );
 
     /** Constructor. */
-    FogScene( Module *parent = 0 );
+    FogScene( const Module *parent = NULLPTR );
 
     /** Destructor. */
     virtual ~FogScene();

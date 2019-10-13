@@ -136,7 +136,7 @@ using namespace cgi;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-OTW::OTW( Module *parent ) :
+OTW::OTW( const Module *parent ) :
     Module( parent )
 {
     osg::ref_ptr<osg::StateSet> stateSet = _root->getOrCreateStateSet();

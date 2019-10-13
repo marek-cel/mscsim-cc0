@@ -147,6 +147,7 @@ FlightDirector::FlightDirector() :
     _pid_vs  ( 0.0, 0.0, 0.0, -M_PI_2  , M_PI_2  ),
     _pid_arm ( 0.0, 0.0, 0.0, -DBL_MAX , DBL_MAX ),
     _pid_hdg ( 0.0, 0.0, 0.0, -M_PI_2  , M_PI_2  ),
+    _pid_trn ( 0.0, 0.0, 0.0, -DBL_MAX , DBL_MAX ),
 
     _max_roll  ( 0.0 ),
     _min_pitch ( 0.0 ),
@@ -154,6 +155,7 @@ FlightDirector::FlightDirector() :
 
     _max_rate_roll  ( 0.0 ),
     _max_rate_pitch ( 0.0 ),
+    _max_rate_tr    ( 0.0 ),
 
     _cmd_roll  ( 0.0 ),
     _cmd_pitch ( 0.0 ),
@@ -168,6 +170,8 @@ FlightDirector::FlightDirector() :
     _climbRate_act ( 0.0 ),
     _climbRate_tc  ( 0.0 ),
 
+    _turnRate ( 0.0 ),
+
     _min_dh_arm ( 0.0 ),
 
     _engaged ( false )
@@ -177,6 +181,7 @@ FlightDirector::FlightDirector() :
     _pid_vs  .setAntiWindup( PID::Calculation );
     _pid_arm .setAntiWindup( PID::Calculation );
     _pid_hdg .setAntiWindup( PID::Calculation );
+    _pid_trn .setAntiWindup( PID::Calculation );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -197,6 +202,7 @@ void FlightDirector::readData( XmlNode &dataNode )
 
         if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _max_rate_roll  , "max_rate_roll"  );
         if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _max_rate_pitch , "max_rate_pitch" );
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _max_rate_tr    , "max_rate_tr"    );
 
         if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _climbRate_tc, "climb_rate_tc" );
 
@@ -209,14 +215,15 @@ void FlightDirector::readData( XmlNode &dataNode )
         XmlNode nodeVS  = dataNode.getFirstChildElement( "mode_vs"  );
         XmlNode nodeARM = dataNode.getFirstChildElement( "mode_arm" );
         XmlNode nodeHDG = dataNode.getFirstChildElement( "mode_hdg" );
+        XmlNode nodeTRN = dataNode.getFirstChildElement( "mode_trn" );
 
         readMode( nodeALT , _pid_alt , _min_pitch , _max_pitch );
         readMode( nodeIAS , _pid_ias , _min_pitch , _max_pitch );
         readMode( nodeVS  , _pid_vs  , _min_pitch , _max_pitch );
+        readMode( nodeARM , _pid_arm , -DBL_MAX   , DBL_MAX    );
 
-        readMode( nodeARM , _pid_arm , -DBL_MAX   , DBL_MAX );
-
-        readMode( nodeHDG , _pid_hdg , -_max_roll , _max_roll );
+        readMode( nodeHDG , _pid_hdg , -DBL_MAX   , DBL_MAX   );
+        readMode( nodeTRN , _pid_trn , -_max_roll , _max_roll );
 
         disableHalfBank();
     }
@@ -229,16 +236,17 @@ void FlightDirector::readData( XmlNode &dataNode )
 ////////////////////////////////////////////////////////////////////////////////
 
 void FlightDirector::update( double timeStep, double heading, double altitude,
-                             double airspeed, double climbRate,
+                             double airspeed, double climbRate, double turnRate,
                              double deviation_hor, double deviation_ver )
 {
     if ( _engaged )
     {
-        updateHorFD( timeStep );
+        updateHorFD( timeStep, turnRate );
         updateHorHDG( timeStep, heading );
         updateHorNAV();
         updateHorAPR();
         updateHorBC();
+        updateHorTRN( timeStep, turnRate );
 
         updateVerFD( timeStep );
         updateVerALT( timeStep, altitude );
@@ -262,6 +270,7 @@ void FlightDirector::update( double timeStep, double heading, double altitude,
         _cmd_pitch = 0.0;
 
         _climbRate_act = climbRate;
+        _turnRate = turnRate;
     }
 }
 
@@ -269,8 +278,8 @@ void FlightDirector::update( double timeStep, double heading, double altitude,
 
 void FlightDirector::disableHalfBank()
 {
-    _pid_hdg .setMin( -_max_roll );
-    _pid_hdg .setMax(  _max_roll );
+    _pid_trn .setMin( -_max_roll );
+    _pid_trn .setMax(  _max_roll );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -409,10 +418,13 @@ void FlightDirector::readPID( const fdm::XmlNode &dataNode, PID &pid, double min
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void FlightDirector::updateHorFD( double timeStep )
+void FlightDirector::updateHorFD( double timeStep, double turnRate )
 {
     if ( _hor_mode == HM_FD )
+    {
         _cmd_roll = Misc::rate( timeStep, _max_rate_roll, _cmd_roll, 0.0 );
+        _turnRate = turnRate;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -427,11 +439,11 @@ void FlightDirector::updateHorHDG( double timeStep, double heading )
         while ( delta_hdg >  M_PI ) delta_hdg -= 2.0 * M_PI;
 
         _pid_hdg.update( timeStep, delta_hdg );
-        _cmd_roll = Misc::rate( timeStep, _max_rate_roll, _cmd_roll, _pid_hdg.getValue() );
+        _turnRate = Misc::rate( timeStep, _max_rate_tr, _turnRate, _pid_hdg.getValue() );
     }
     else
     {
-        _pid_hdg.setValue( _cmd_roll );
+        _pid_hdg.setValue( _turnRate );
     }
 }
 
@@ -456,6 +468,21 @@ void FlightDirector::updateHorAPR() {}
 ////////////////////////////////////////////////////////////////////////////////
 
 void FlightDirector::updateHorBC() {}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void FlightDirector::updateHorTRN( double timeStep, double turnRate )
+{
+    if ( _hor_mode == HM_HDG )
+    {
+        _pid_trn.update( timeStep, _turnRate - turnRate );
+        _cmd_roll = Misc::rate( timeStep, _max_rate_roll, _cmd_roll, _pid_trn.getValue() );
+    }
+    else
+    {
+        _pid_trn.setValue( _cmd_roll );
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 

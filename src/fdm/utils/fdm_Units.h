@@ -161,6 +161,7 @@ public:
      * <li>Angle: radian [rad]</li>
      * <li>Length: meter [m]</li>
      * <li>Velocity: meter per second [m/s]</li>
+     * <li>Angular Velocity: radian per second [rad/s]</li>
      * <li>Mass: kilogram [kg]</li>
      * <li>Force: newton [N]</li>
      * <li>Pressure: pascal [Pa]</li>
@@ -174,8 +175,9 @@ public:
      * <ul>
      * <li>Angle: deg (degree)</li>
      * <li>Length: ft (feet), km (kilometer), nmi (nautical mile)</li>
-     * <li>Volumen: cuin (cubic inches), l (litres)
-     * <li>Velocity: ft_min (feet per minute), ft_s (feet per second), km_h (kilemeter per hour), kts (knots)</li>
+     * <li>Volume: cuin (cubic inches), l (litres)
+     * <li>Velocity: fpm (feet per minute), fps (feet per second), kmh (kilemeter per hour), kts (knots)</li>
+     * <li>Angular Velocity: deg_s (degrees per second), rpm (revolutions per minute)</li>
      * <li>Mass: lb (pound)</li>
      * <li>Force: lbf (pound of force)</li>
      * <li>Pressure: psi (pound per square inch), inHg (inch of mercury)</li>
@@ -197,247 +199,247 @@ public:
 
     /**
      * Converts given angle from degrees to radians.
-     * @param angle angle expressed in degrees
+     * @param ang angle expressed in degrees
      * @return angle expressed in radians
      */
-    static inline double deg2rad( double angle = 1.0 )
+    static inline double deg2rad( double ang = 1.0 )
     {
-        return angle * M_PI / 180.0;
+        return ang * M_PI / 180.0;
     }
 
     /**
      * Converts given angle from radians to degrees.
-     * @param angle angle expressed in radians
+     * @param ang angle expressed in radians
      * @return angle expressed in degrees
      */
-    static inline double rad2deg( double angle = 1.0 )
+    static inline double rad2deg( double ang = 1.0 )
     {
-        return angle * 180.0 / M_PI;
+        return ang * 180.0 / M_PI;
     }
 
     /**
      * Converts given length from metres to feet.
-     * @param length length expressed in metres
+     * @param len length expressed in metres
      * @return length expressed in feet
      */
-    static inline double m2ft( double length = 1.0 )
+    static inline double m2ft( double len = 1.0 )
     {
-        return length * 3.2808399;
+        return len * 3.2808399;
     }
 
     /**
      * Converts given length from metres to miles.
-     * @param length length expressed in metres
+     * @param len length expressed in metres
      * @return length expressed in miles
      */
-    static inline double m2mi( double length = 1.0 )
+    static inline double m2mi( double len = 1.0 )
     {
-        return length * 0.000621371192;
+        return len * 0.000621371192;
     }
 
     /**
      * Converts given length from metres to nautical miles.
-     * @param length length expressed in metres
+     * @param len length expressed in metres
      * @return length expressed in nautical miles
      */
-    static inline double m2nmi( double length = 1.0 )
+    static inline double m2nmi( double len = 1.0 )
     {
-        return length * 0.000539956803;
+        return len * 0.000539956803;
     }
 
     /**
      * Converts given length from metres to kilometres.
-     * @param length length expressed in metres
+     * @param len length expressed in metres
      * @return length expressed in kilometres
      */
-    static inline double m2km( double length = 1.0 )
+    static inline double m2km( double len = 1.0 )
     {
-        return length * 0.001;
+        return len * 0.001;
     }
 
     /**
      * Converts given length from feet to metres.
-     * @param length length expressed in feet
+     * @param len length expressed in feet
      * @return length expressed in metres
      */
-    static inline double ft2m( double length = 1.0 )
+    static inline double ft2m( double len = 1.0 )
     {
-        return length * 0.3048;
+        return len * 0.3048;
     }
 
     /**
      * Converts given length from feet to kilometres.
-     * @param length length expressed in feet
+     * @param len length expressed in feet
      * @return length expressed in kilometres
      */
-    static inline double ft2km( double length = 1.0 )
+    static inline double ft2km( double len = 1.0 )
     {
-        return length * 0.0003048;
+        return len * 0.0003048;
     }
 
     /**
      * Converts given length from feet to miles.
-     * @param length length expressed in feet
+     * @param len length expressed in feet
      * @return length expressed in miles
      */
-    static inline double ft2mi( double length = 1.0 )
+    static inline double ft2mi( double len = 1.0 )
     {
-        return length * 0.000189393939;
+        return len * 0.000189393939;
     }
 
     /**
      * Converts given length from feet to nautical miles.
-     * @param length length expressed in feet
+     * @param len length expressed in feet
      * @return length expressed in nautical miles
      */
-    static inline double ft2nmi( double length = 1.0 )
+    static inline double ft2nmi( double len = 1.0 )
     {
-        return length * 0.000164578834;
+        return len * 0.000164578834;
     }
 
     /**
      * Converts given length from kilometres to metres.
-     * @param length length expressed in kilometres
+     * @param len length expressed in kilometres
      * @return length expressed in metres
      */
-    static inline double km2m( double length = 1.0 )
+    static inline double km2m( double len = 1.0 )
     {
-        return length * 1000.0;
+        return len * 1000.0;
     }
 
     /**
      * Converts given length from kilometres to feet.
-     * @param length length expressed in kilometres
+     * @param len length expressed in kilometres
      * @return length expressed in feet
      */
-    static inline double km2ft( double length = 1.0 )
+    static inline double km2ft( double len = 1.0 )
     {
-        return length * 3280.8399;
+        return len * 3280.8399;
     }
 
     /**
      * Converts given length from kilometres to miles.
-     * @param length length expressed in kilometres
+     * @param len length expressed in kilometres
      * @return length expressed in miles
      */
-    static inline double km2mi( double length = 1.0 )
+    static inline double km2mi( double len = 1.0 )
     {
-        return length * 0.621371192;
+        return len * 0.621371192;
     }
 
     /**
      * Converts given length from kilometres to nautical miles.
-     * @param length length expressed in kilometres
+     * @param len length expressed in kilometres
      * @return length expressed in nautical miles
      */
-    static inline double km2nmi( double length = 1.0 )
+    static inline double km2nmi( double len = 1.0 )
     {
-        return length * 0.539956803;
+        return len * 0.539956803;
     }
 
     /**
      * Converts given length from miles to metres.
-     * @param length length expressed in nautical miles
+     * @param len length expressed in nautical miles
      * @return length expressed in metres
      */
-    static inline double mi2m( double length = 1.0 )
+    static inline double mi2m( double len = 1.0 )
     {
-        return length * 1609.344;
+        return len * 1609.344;
     }
 
     /**
      * Converts given length from miles to feet.
-     * @param length length expressed in nautical miles
+     * @param len length expressed in nautical miles
      * @return length expressed in feet
      */
-    static inline double mi2ft( double length = 1.0 )
+    static inline double mi2ft( double len = 1.0 )
     {
-        return length * 5280.0;
+        return len * 5280.0;
     }
 
     /**
      * Converts given length from miles to kilometres.
-     * @param length length expressed in nautical miles
+     * @param len length expressed in nautical miles
      * @return length expressed in kilometres
      */
-    static inline double mi2km( double length = 1.0 )
+    static inline double mi2km( double len = 1.0 )
     {
-        return length * 1.609344;
+        return len * 1.609344;
     }
 
     /**
      * Converts given length from miles to nautical miles.
-     * @param length length expressed in miles
+     * @param len length expressed in miles
      * @return length expressed in nautical miles
      */
-    static inline double mi2nmi( double length = 1.0 )
+    static inline double mi2nmi( double len = 1.0 )
     {
-        return length * 0.868976242;
+        return len * 0.868976242;
     }
 
     /**
      * Converts given length from nautical miles to metres.
-     * @param length length expressed in nautical miles
+     * @param len length expressed in nautical miles
      * @return length expressed in metres
      */
-    static inline double nmi2m( double length = 1.0 )
+    static inline double nmi2m( double len = 1.0 )
     {
-        return length * 1852.0;
-    }
-
-    /**
-     * Converts given volume from cubic inches to cubic metres.
-     * @param length length expressed in cubic inches
-     * @return length expressed in cubic metres
-     */
-    static inline double cuin2m3( double volume = 1.0 )
-    {
-        return volume * 0.000016387064;
-    }
-
-    /**
-     * Converts given volume from litres to cubic metres.
-     * @param length length expressed in litress
-     * @return length expressed in cubic metres
-     */
-    static inline double l2m3( double volume = 1.0 )
-    {
-        return volume / 1000.0;
+        return len * 1852.0;
     }
 
     /**
      * Converts given length from nautical miles to feet.
-     * @param length length expressed in nautical miles
+     * @param len length expressed in nautical miles
      * @return length expressed in feet
      */
-    static inline double nmi2ft( double length = 1.0 )
+    static inline double nmi2ft( double len = 1.0 )
     {
-        return length * 6076.11549;
+        return len * 6076.11549;
     }
 
     /**
      * Converts given length from nautical miles to kilometres.
-     * @param length length expressed in nautical miles
+     * @param len length expressed in nautical miles
      * @return length expressed in kilometres
      */
-    static inline double nmi2km( double length = 1.0 )
+    static inline double nmi2km( double len = 1.0 )
     {
-        return length * 1.852;
+        return len * 1.852;
     }
 
     /**
      * Converts given length from nautical miles to miles.
-     * @param length length expressed in nautical miles
+     * @param len length expressed in nautical miles
      * @return length expressed in miles
      */
-    static inline double nmi2mi( double length = 1.0 )
+    static inline double nmi2mi( double len = 1.0 )
     {
-        return length * 1.15077945;
+        return len * 1.15077945;
+    }
+
+    /**
+     * Converts given volume from cubic inches to cubic metres.
+     * @param vol volume expressed in cubic inches
+     * @return volume expressed in cubic metres
+     */
+    static inline double cuin2m3( double vol = 1.0 )
+    {
+        return vol * 0.000016387064;
+    }
+
+    /**
+     * Converts given volume from litres to cubic metres.
+     * @param vol volume expressed in litress
+     * @return volume expressed in cubic metres
+     */
+    static inline double l2m3( double vol = 1.0 )
+    {
+        return vol / 1000.0;
     }
 
     /**
      * Converts given velocity from m/s to ft/min.
-     * @param velocity velocity expressed in m/s
+     * @param vel velocity expressed in m/s
      * @return velocity expressed in ft/min
      */
     static inline double mps2fpm( double vel = 1.0 )
@@ -447,7 +449,7 @@ public:
 
     /**
      * Converts given velocity from m/s to ft/s.
-     * @param velocity velocity expressed in m/s
+     * @param vel velocity expressed in m/s
      * @return velocity expressed in ft/s
      */
     static inline double mps2fps( double vel = 1.0 )
@@ -457,7 +459,7 @@ public:
 
     /**
      * Converts given velocity from m/s to km/h.
-     * @param velocity velocity expressed in m/s
+     * @param vel velocity expressed in m/s
      * @return velocity expressed in km/h
      */
     static inline double mps2kmh( double vel = 1.0 )
@@ -467,7 +469,7 @@ public:
 
     /**
      * Converts given velocity from m/s to knots.
-     * @param velocity velocity expressed in m/s
+     * @param vel velocity expressed in m/s
      * @return velocity expressed in knots
      */
     static inline double mps2kts( double vel = 1.0 )
@@ -477,7 +479,7 @@ public:
 
     /**
      * Converts given velocity from m/s to miles per hour.
-     * @param velocity velocity expressed in m/s
+     * @param vel velocity expressed in m/s
      * @return velocity expressed in miles per hour
      */
     static inline double mps2mph( double vel = 1.0 )
@@ -487,7 +489,7 @@ public:
 
     /**
      * Converts given velocity from ft/min to ft/s.
-     * @param velocity velocity expressed in ft/min
+     * @param vel velocity expressed in ft/min
      * @return velocity expressed in ft/s
      */
     static inline double fpm2fps( double vel = 1.0 )
@@ -497,7 +499,7 @@ public:
 
     /**
      * Converts given velocity from ft/min to km/h.
-     * @param velocity velocity expressed in ft/min
+     * @param vel velocity expressed in ft/min
      * @return velocity expressed in km/h
      */
     static inline double fpm2kmh( double vel = 1.0 )
@@ -507,7 +509,7 @@ public:
 
     /**
      * Converts given velocity from ft/min to knots.
-     * @param velocity velocity expressed in ft/min
+     * @param vel velocity expressed in ft/min
      * @return velocity expressed in knots
      */
     static inline double fpm2kts( double vel = 1.0 )
@@ -517,7 +519,7 @@ public:
 
     /**
      * Converts given velocity from ft/min to miles per hour.
-     * @param velocity velocity expressed in ft/min
+     * @param vel velocity expressed in ft/min
      * @return velocity expressed in miles per hour
      */
     static inline double fpm2mph( double vel = 1.0 )
@@ -527,7 +529,7 @@ public:
 
     /**
      * Converts given velocity from ft/min to m/s.
-     * @param velocity velocity expressed in ft/min
+     * @param vel velocity expressed in ft/min
      * @return velocity expressed in m/s
      */
     static inline double fpm2mps( double vel = 1.0 )
@@ -537,7 +539,7 @@ public:
 
     /**
      * Converts given velocity from ft/s to ft/min.
-     * @param velocity velocity expressed in ft/s
+     * @param vel velocity expressed in ft/s
      * @return velocity expressed in ft/min
      */
     static inline double fps2fpm( double vel = 1.0 )
@@ -547,7 +549,7 @@ public:
 
     /**
      * Converts given velocity from ft/s to km/h.
-     * @param velocity velocity expressed in ft/s
+     * @param vel velocity expressed in ft/s
      * @return velocity expressed in km/h
      */
     static inline double fps2kmh( double vel = 1.0 )
@@ -557,7 +559,7 @@ public:
 
     /**
      * Converts given velocity from ft/s to knots.
-     * @param velocity velocity expressed in ft/s
+     * @param vel velocity expressed in ft/s
      * @return velocity expressed in knots
      */
     static inline double fps2kts( double vel = 1.0 )
@@ -567,7 +569,7 @@ public:
 
     /**
      * Converts given velocity from ft/s to miles per hour.
-     * @param velocity velocity expressed in ft/s
+     * @param vel velocity expressed in ft/s
      * @return velocity expressed in miles per hour
      */
     static inline double fps2mph( double vel = 1.0 )
@@ -577,7 +579,7 @@ public:
 
     /**
      * Converts given velocity from ft/s to m/s.
-     * @param velocity velocity expressed in ft/s
+     * @param vel velocity expressed in ft/s
      * @return velocity expressed in m/s
      */
     static inline double fps2mps( double vel = 1.0 )
@@ -587,7 +589,7 @@ public:
 
     /**
      * Converts given velocity from km/h to ft/min.
-     * @param velocity velocity expressed in km/h
+     * @param vel velocity expressed in km/h
      * @return velocity expressed in ft/min
      */
     static inline double kmh2fpm( double vel = 1.0 )
@@ -597,7 +599,7 @@ public:
 
     /**
      * Converts given velocity from km/h to ft/s.
-     * @param velocity velocity expressed in km/h
+     * @param vel velocity expressed in km/h
      * @return velocity expressed in ft/s
      */
     static inline double kmh2fps( double vel = 1.0 )
@@ -607,7 +609,7 @@ public:
 
     /**
      * Converts given velocity from km/h to knots.
-     * @param velocity velocity expressed in km/h
+     * @param vel velocity expressed in km/h
      * @return velocity expressed in knots
      */
     static inline double kmh2kts( double vel = 1.0 )
@@ -617,7 +619,7 @@ public:
 
     /**
      * Converts given velocity from km/h to miles per hour.
-     * @param velocity velocity expressed in km/h
+     * @param vel velocity expressed in km/h
      * @return velocity expressed in miles per hour
      */
     static inline double kmh2mph( double vel = 1.0 )
@@ -627,7 +629,7 @@ public:
 
     /**
      * Converts given velocity from km/h to m/s.
-     * @param velocity velocity expressed in km/h
+     * @param vel velocity expressed in km/h
      * @return velocity expressed in m/s
      */
     static inline double kmh2mps( double vel = 1.0 )
@@ -637,7 +639,7 @@ public:
 
     /**
      * Converts given velocity from kntos to ft/min.
-     * @param velocity velocity expressed in knots
+     * @param vel velocity expressed in knots
      * @return velocity expressed in ft/min
      */
     static inline double kts2fpm( double vel = 1.0 )
@@ -647,7 +649,7 @@ public:
 
     /**
      * Converts given velocity from kntos to ft/s.
-     * @param velocity velocity expressed in knots
+     * @param vel velocity expressed in knots
      * @return velocity expressed in ft/s
      */
     static inline double kts2fps( double vel = 1.0 )
@@ -657,7 +659,7 @@ public:
 
     /**
      * Converts given velocity from kntos to km/h.
-     * @param velocity velocity expressed in knots
+     * @param vel velocity expressed in knots
      * @return velocity expressed in km/h
      */
     static inline double kts2kmh( double vel = 1.0 )
@@ -667,7 +669,7 @@ public:
 
     /**
      * Converts given velocity from kntos to miles per hour.
-     * @param velocity velocity expressed in knots
+     * @param vel velocity expressed in knots
      * @return velocity expressed in miles per hour
      */
     static inline double kts2mph( double vel = 1.0 )
@@ -677,7 +679,7 @@ public:
 
     /**
      * Converts given velocity from kntos to m/s.
-     * @param velocity velocity expressed in knots
+     * @param vel velocity expressed in knots
      * @return velocity expressed in m/s
      */
     static inline double kts2mps( double vel = 1.0 )
@@ -687,7 +689,7 @@ public:
 
     /**
      * Converts given velocity from m/s to ft/min.
-     * @param velocity velocity expressed in m/s
+     * @param vel velocity expressed in m/s
      * @return velocity expressed in ft/min
      */
     static inline double mph2fpm( double vel = 1.0 )
@@ -697,7 +699,7 @@ public:
 
     /**
      * Converts given velocity from m/s to ft/s.
-     * @param velocity velocity expressed in m/s
+     * @param vel velocity expressed in m/s
      * @return velocity expressed in ft/s
      */
     static inline double mph2fps( double vel = 1.0 )
@@ -707,7 +709,7 @@ public:
 
     /**
      * Converts given velocity from m/s to km/h.
-     * @param velocity velocity expressed in m/s
+     * @param vel velocity expressed in m/s
      * @return velocity expressed in km/h
      */
     static inline double mph2kmh( double vel = 1.0 )
@@ -717,7 +719,7 @@ public:
 
     /**
      * Converts given velocity from m/s to knots.
-     * @param velocity velocity expressed in m/s
+     * @param vel velocity expressed in m/s
      * @return velocity expressed in knots
      */
     static inline double mph2kts( double vel = 1.0 )
@@ -727,12 +729,22 @@ public:
 
     /**
      * Converts given velocity from m/s to miles per hour.
-     * @param velocity velocity expressed in m/s
+     * @param vel velocity expressed in m/s
      * @return velocity expressed in miles per hour
      */
     static inline double mph2mps( double vel = 1.0 )
     {
         return vel * 0.44704;
+    }
+
+    /**
+     * Converts given angular velocity from revolutions per minute to radians per second.
+     * @param ang_vel angular velocity expressed in revolutions per minute
+     * @return velocity expressed in radians per second
+     */
+    static inline double rpm2rad_s( double ang_vel = 1.0 )
+    {
+        return 120.0 * M_PI * ang_vel;
     }
 
     /**
@@ -837,122 +849,122 @@ public:
 
     /**
      * Converts given power from (metric) horsepower to (mechanical) horsepower.
-     * @param power power expressed in (metric) horsepower
+     * @param pwr power expressed in (metric) horsepower
      * @return power expressed in (mechanical) horsepower
      */
-    static inline double ps2hp( double power = 1.0 )
+    static inline double ps2hp( double pwr = 1.0 )
     {
-        return power * 0.98632005756;
+        return pwr * 0.98632005756;
     }
 
     /**
      * Converts given power from (metric) horsepower to watts.
-     * @param power power expressed in (metric) horsepower
+     * @param pwr power expressed in (metric) horsepower
      * @return power expressed in watts
      */
-    static inline double ps2w( double power = 1.0 )
+    static inline double ps2w( double pwr = 1.0 )
     {
-        return power * 735.498749992;
+        return pwr * 735.498749992;
     }
 
     /**
      * Converts given power from (metric) horsepower to kilowatts.
-     * @param power power expressed in (metric) horsepower
+     * @param pwr power expressed in (metric) horsepower
      * @return power expressed in kilowatts
      */
-    static inline double ps2kw( double power = 1.0 )
+    static inline double ps2kw( double pwr = 1.0 )
     {
-        return power * 0.735498749992;
+        return pwr * 0.735498749992;
     }
 
     /**
      * Converts given power from (mechanical) horsepower to (metric) horsepower.
-     * @param power power expressed in (mechanical) horsepower
+     * @param pwr power expressed in (mechanical) horsepower
      * @return power expressed in (metric) horsepower
      */
-    static inline double hp2ps( double power = 1.0 )
+    static inline double hp2ps( double pwr = 1.0 )
     {
-        return power * 1.01386967884;
+        return pwr * 1.01386967884;
     }
 
     /**
      * Converts given power from (mechanical) horsepower to watts.
-     * @param power power expressed in (mechanical) horsepower
+     * @param pwr power expressed in (mechanical) horsepower
      * @return power expressed in watts
      */
-    static inline double hp2w( double power = 1.0 )
+    static inline double hp2w( double pwr = 1.0 )
     {
-        return power * 745.699881448;
+        return pwr * 745.699881448;
     }
 
     /**
      * Converts given power from (mechanical) horsepower to kilowatts.
-     * @param power power expressed in (mechanical) horsepower
+     * @param pwr power expressed in (mechanical) horsepower
      * @return power expressed in kilowatts
      */
-    static inline double hp2kw( double power = 1.0 )
+    static inline double hp2kw( double pwr = 1.0 )
     {
-        return power * 0.745699881448;
+        return pwr * 0.745699881448;
     }
 
     /**
      * Converts given power from watts to (metric) horsepower.
-     * @param power power expressed in watts
+     * @param pwr power expressed in watts
      * @return power expressed in (metric) horsepower
      */
-    static inline double w2ps( double power = 1.0 )
+    static inline double w2ps( double pwr = 1.0 )
     {
-        return power * 0.00135962161;
+        return pwr * 0.00135962161;
     }
 
     /**
      * Converts given power from watts to (mechanical) horsepower.
-     * @param power power expressed in watts
+     * @param pwr power expressed in watts
      * @return power expressed in (mechanical) horsepower
      */
-    static inline double w2hp( double power = 1.0 )
+    static inline double w2hp( double pwr = 1.0 )
     {
-        return power * 0.00134102207;
+        return pwr * 0.00134102207;
     }
 
     /**
      * Converts given power from watts to kilowatts.
-     * @param power power expressed in watts
+     * @param pwr power expressed in watts
      * @return power expressed in kilowatts
      */
-    static inline double w2kw( double power = 1.0 )
+    static inline double w2kw( double pwr = 1.0 )
     {
-        return power * 0.001;
+        return pwr * 0.001;
     }
 
     /**
      * Converts given power from kilowatts to (metric) horsepower.
-     * @param power power expressed in kilowatts
+     * @param pwr power expressed in kilowatts
      * @return power expressed in (metric) horsepower
      */
-    static inline double kw2ps( double power = 1.0 )
+    static inline double kw2ps( double pwr = 1.0 )
     {
-        return power * 1.35962161732;
+        return pwr * 1.35962161732;
     }
 
     /**
      * Converts given power from kilowatts to (mechanical) horsepower.
-     * @param power power expressed in kilowatts
+     * @param pwr power expressed in kilowatts
      * @return power expressed in (mechanical) horsepower
      */
-    static inline double kw2hp( double power = 1.0 )
+    static inline double kw2hp( double pwr = 1.0 )
     {
-        return power * 1.34102207185;
+        return pwr * 1.34102207185;
     }
 
     /**
      * Converts given power from kilowatts to watts.
-     * @param power power expressed in kilowatts
+     * @param pwr power expressed in kilowatts
      * @return power expressed in watts
      */
-    static inline double kw2w( double power = 1.0 )
+    static inline double kw2w( double pwr = 1.0 )
     {
-        return power * 1000.0;
+        return pwr * 1000.0;
     }
 
     /**

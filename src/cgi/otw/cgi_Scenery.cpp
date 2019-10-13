@@ -152,7 +152,7 @@ using namespace cgi;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Scenery::Scenery( Module *parent ) :
+Scenery::Scenery( const Module *parent ) :
     Module( parent )
 {
     _root->setName( "Scenery" );

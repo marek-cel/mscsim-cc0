@@ -124,9 +124,8 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef WIDGETMARBLE_H
+#if !defined(WIDGETMARBLE_H) && defined(SIM_MARBLE_MAPS)
 #define WIDGETMARBLE_H
-#ifdef SIM_MARBLE_MAPS
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -158,5 +157,4 @@ protected:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // SIM_MARBLE_MAPS
 #endif // WIDGETMARBLE_H

@@ -133,7 +133,7 @@ using namespace cgi;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Module::Module( Module *parent ) :
+Module::Module( const Module *parent ) :
     _parent ( parent )
 {
     _root = new osg::Group();

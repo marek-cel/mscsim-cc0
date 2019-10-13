@@ -142,7 +142,7 @@ using namespace cgi;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Traces::Traces( Module *parent ) :
+Traces::Traces( const Module *parent ) :
     Module( parent ),
     _visible ( true ),
     _counter ( 0 )

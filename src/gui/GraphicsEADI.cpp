@@ -1323,6 +1323,7 @@ GraphicsEADI::ASI::ASI( QGraphicsScene *scene ) :
     _itemLabel7   ( NULLPTR ),
     _itemBugIAS   ( NULLPTR ),
     _itemFrame    ( NULLPTR ),
+    _itemVne      ( NULLPTR ),
     _itemAirspeed ( NULLPTR ),
     _itemMachNo   ( NULLPTR ),
     _itemSetpoint ( NULLPTR ),
@@ -1332,6 +1333,8 @@ GraphicsEADI::ASI::ASI( QGraphicsScene *scene ) :
 
     _airspeed_set ( 0.0f ),
 
+    _vne ( 0.0f ),
+
     _scale1DeltaY_new ( 0.0f ),
     _scale1DeltaY_old ( 0.0f ),
     _scale2DeltaY_new ( 0.0f ),
@@ -1340,6 +1343,8 @@ GraphicsEADI::ASI::ASI( QGraphicsScene *scene ) :
     _labelsDeltaY_old ( 0.0f ),
     _bugDeltaY_new    ( 0.0f ),
     _bugDeltaY_old    ( 0.0f ),
+    _vneDeltaY_new    ( 0.0f ),
+    _vneDeltaY_old    ( 0.0f ),
 
     _scaleX ( 1.0f ),
     _scaleY ( 1.0f ),
@@ -1367,6 +1372,7 @@ GraphicsEADI::ASI::ASI( QGraphicsScene *scene ) :
     _scaleZ     (  80 ),
     _labelsZ    (  90 ),
     _iasBugZ    ( 110 ),
+    _iasVneZ    (  90 ),
     _frameZ     ( 110 ),
     _frameTextZ ( 120 )
 {
@@ -1487,6 +1493,13 @@ void GraphicsEADI::ASI::init( float scaleX, float scaleY )
     _itemFrame->moveBy( _scaleX * _originalFramePos.x(), _scaleY * _originalFramePos.y() );
     _scene->addItem( _itemFrame );
 
+    _itemVne = new QGraphicsSvgItem( ":/gui/images/efis/eadi/eadi_asi_vne.svg" );
+    _itemVne->setCacheMode( QGraphicsItem::NoCache );
+    _itemVne->setZValue( _iasVneZ );
+    _itemVne->setTransform( QTransform::fromScale( _scaleX, _scaleY ), true );
+    _itemVne->moveBy( _scaleX * _originalScale1Pos.x(), _scaleY * _originalScale1Pos.y() );
+    _scene->addItem( _itemVne );
+
     _itemAirspeed = new QGraphicsTextItem( QString( "000" ) );
     _itemAirspeed->setCacheMode( QGraphicsItem::NoCache );
     _itemAirspeed->setZValue( _frameTextZ );
@@ -1536,6 +1549,7 @@ void GraphicsEADI::ASI::update( float scaleX, float scaleY )
     _scale2DeltaY_old = _scale2DeltaY_new;
     _labelsDeltaY_old = _labelsDeltaY_new;
     _bugDeltaY_old    = _bugDeltaY_new;
+    _vneDeltaY_old    = _vneDeltaY_new;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1570,6 +1584,16 @@ void GraphicsEADI::ASI::setAirspeedSet( double airspeed )
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void GraphicsEADI::ASI::setVne( double vne )
+{
+    _vne = vne;
+
+    if      ( _vne < 0.0f    ) _vne = 0.0;
+    else if ( _vne > 9999.0f ) _vne = 9999.0f;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void GraphicsEADI::ASI::reset()
 {
     _itemBack     = NULLPTR;
@@ -1584,6 +1608,7 @@ void GraphicsEADI::ASI::reset()
     _itemLabel7   = NULLPTR;
     _itemBugIAS   = NULLPTR;
     _itemFrame    = NULLPTR;
+    _itemVne      = NULLPTR;
     _itemAirspeed = NULLPTR;
     _itemMachNo   = NULLPTR;
     _itemSetpoint = NULLPTR;
@@ -1593,6 +1618,8 @@ void GraphicsEADI::ASI::reset()
 
     _airspeed_set = 0.0f;
 
+    _vne = 0.0f;
+
     _scale1DeltaY_new = 0.0f;
     _scale1DeltaY_old = 0.0f;
     _scale2DeltaY_new = 0.0f;
@@ -1601,13 +1628,15 @@ void GraphicsEADI::ASI::reset()
     _labelsDeltaY_old = 0.0f;
     _bugDeltaY_new    = 0.0f;
     _bugDeltaY_old    = 0.0f;
+    _vneDeltaY_new    = 0.0f;
+    _vneDeltaY_old    = 0.0f;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GraphicsEADI::ASI::updateAirspeed()
 {
-    _itemAirspeed->setPlainText( QString("%1").arg(_airspeed     , 3, 'f', 0, QChar('0')) );
+    _itemAirspeed->setPlainText( QString("%1").arg(_airspeed     , 3, 'f', 0, QChar(' ')) );
     _itemSetpoint->setPlainText( QString("%1").arg(_airspeed_set , 3, 'f', 0, QChar(' ')) );
 
     if ( _machNo < 1.0f )
@@ -1630,6 +1659,7 @@ void GraphicsEADI::ASI::updateAirspeed()
     updateScale();
     updateScaleLabels();
     updateAirspeedBug();
+    updateVne();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1782,27 +1812,39 @@ void GraphicsEADI::ASI::updateScaleLabels()
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void GraphicsEADI::ASI::updateVne()
+{
+    _vneDeltaY_new = _scaleY * _originalPixPerSpd * ( _airspeed - _vne );
+
+    _itemVne->moveBy( 0.0f, _vneDeltaY_new - _vneDeltaY_old );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 GraphicsEADI::HDG::HDG( QGraphicsScene *scene ) :
     _scene ( scene ),
 
     _itemBack      ( NULLPTR ),
     _itemFace      ( NULLPTR ),
+    _itemHdgBug    ( NULLPTR ),
     _itemMarks     ( NULLPTR ),
     _itemFrameText ( NULLPTR ),
 
-    _heading  ( 0.0f ),
+    _heading ( 0.0f ),
+    _heading_set ( 0.0f ),
 
     _scaleX ( 1.0f ),
     _scaleY ( 1.0f ),
 
     _originalHsiCtr       ( 150.0f , 345.0f ),
-    _originalBackPos      (  60.0f,  240.0f ),
-    _originalFacePos      (  45.0f , 240.0f ),
-    _originalMarksPos     ( 134.0f , 219.0f ),
-    _originalFrameTextCtr ( 149.5f , 227.5f ),
+    _originalBackPos      (   0.0f,  210.0f ),
+    _originalFacePos      (  38.0f , 233.0f ),
+    _originalMarksPos     ( 134.0f , 217.0f ),
+    _originalFrameTextCtr ( 149.5f , 225.5f ),
 
     _backZ      (  80 ),
     _faceZ      (  90 ),
+    _hdgBugZ    ( 100 ),
     _marksZ     ( 110 ),
     _frameTextZ ( 120 )
 {
@@ -1832,6 +1874,14 @@ void GraphicsEADI::HDG::init( float scaleX, float scaleY )
     _itemFace->setTransformOriginPoint( _originalHsiCtr - _originalFacePos );
     _itemFace->moveBy( _scaleX * _originalFacePos.x(), _scaleY * _originalFacePos.y() );
     _scene->addItem( _itemFace );
+
+    _itemHdgBug = new QGraphicsSvgItem( ":/gui/images/efis/eadi/eadi_hsi_bug.svg" );
+    _itemHdgBug->setCacheMode( QGraphicsItem::NoCache );
+    _itemHdgBug->setZValue( _hdgBugZ );
+    _itemHdgBug->setTransform( QTransform::fromScale( _scaleX, _scaleY ), true );
+    _itemHdgBug->setTransformOriginPoint( _originalHsiCtr - _originalFacePos );
+    _itemHdgBug->moveBy( _scaleX * _originalFacePos.x(), _scaleY * _originalFacePos.y() );
+    _scene->addItem( _itemHdgBug );
 
     _itemMarks = new QGraphicsSvgItem( ":/gui/images/efis/eadi/eadi_hsi_marks.svg" );
     _itemMarks->setCacheMode( QGraphicsItem::NoCache );
@@ -1870,15 +1920,18 @@ void GraphicsEADI::HDG::setHeading( float heading )
 {
     _heading = heading;
 
-    while ( _heading < 0.0f )
-    {
-        _heading += 360.0f;
-    }
+    while ( _heading < 0.0f ) _heading += 360.0f;
+    while ( _heading > 360.0f ) _heading -= 360.0f;
+}
 
-    while ( _heading > 360.0f )
-    {
-        _heading -= 360.0f;
-    }
+////////////////////////////////////////////////////////////////////////////////
+
+void GraphicsEADI::HDG::setHeadingSet( float heading )
+{
+    _heading_set = heading;
+
+    while ( _heading_set <   0.0f ) _heading_set += 360.0f;
+    while ( _heading_set > 360.0f ) _heading_set -= 360.0f;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1887,10 +1940,12 @@ void GraphicsEADI::HDG::reset()
 {
     _itemBack      = NULLPTR;
     _itemFace      = NULLPTR;
+    _itemHdgBug    = NULLPTR;
     _itemMarks     = NULLPTR;
     _itemFrameText = NULLPTR;
 
-    _heading  = 0.0f;
+    _heading = 0.0f;
+    _heading_set = 0.0f;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1898,6 +1953,7 @@ void GraphicsEADI::HDG::reset()
 void GraphicsEADI::HDG::updateHeading()
 {
     _itemFace->setRotation( -_heading );
+    _itemHdgBug->setRotation( -_heading + _heading_set );
 
     float fHeading = floor( _heading + 0.5f );
 

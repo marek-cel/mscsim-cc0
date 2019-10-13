@@ -140,7 +140,7 @@ using namespace cgi;
 ////////////////////////////////////////////////////////////////////////////////
 
 Airport::Airport( const std::string &file, double lat, double lon, double alt,
-                  Module *parent ) :
+                  const Module *parent ) :
     Module( parent )
 {
     _pat = new osg::PositionAttitudeTransform();

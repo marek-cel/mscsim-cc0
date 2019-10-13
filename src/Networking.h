@@ -124,25 +124,38 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <cgi/otw/cgi_Clouds.h>
-
-#include <cgi/otw/cgi_CloudsBlock.h>
-#include <cgi/otw/cgi_CloudsLayer.h>
+#if !defined(NETWORKING_H) && defined(SIM_NETWORKING)
+#define NETWORKING_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using namespace cgi;
+#include <QUdpSocket>
+
+#include <DataNet.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Clouds::Clouds( const Module *parent ) :
-    Module( parent )
+/** */
+class Networking
 {
-    addChild( new CloudsBlock( this ) );
-    addChild( new CloudsLayer( this ) );
-}
+public:
+
+    Networking();
+
+    virtual ~Networking();
+
+    void update();
+
+private:
+
+    const QHostAddress _address;
+    const quint16 _port;
+
+    QUdpSocket *_socket;
+
+    DataNet _data_net;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Clouds::~Clouds() {}
+#endif // NETWORKING_H

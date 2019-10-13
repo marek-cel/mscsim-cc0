@@ -145,7 +145,7 @@ class CloudsBlock : public Module
 public:
 
     /** Constructor. */
-    CloudsBlock( Module *parent = 0 );
+    CloudsBlock( const Module *parent = NULLPTR );
 
     /** Destructor. */
     virtual ~CloudsBlock();

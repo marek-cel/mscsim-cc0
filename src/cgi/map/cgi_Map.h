@@ -184,7 +184,7 @@ public:
     static const double _zOwnship;
 
     /** Constructor. */
-    Map( Module *parent = 0 );
+    Map( const Module *parent = NULLPTR );
 
     /** Destructor. */
     virtual ~Map();

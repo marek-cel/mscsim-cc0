@@ -124,25 +124,54 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <cgi/otw/cgi_Clouds.h>
-
-#include <cgi/otw/cgi_CloudsBlock.h>
-#include <cgi/otw/cgi_CloudsLayer.h>
+#ifndef DATANET_H
+#define DATANET_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using namespace cgi;
-
-////////////////////////////////////////////////////////////////////////////////
-
-Clouds::Clouds( const Module *parent ) :
-    Module( parent )
+struct DataNet
 {
-    addChild( new CloudsBlock( this ) );
-    addChild( new CloudsLayer( this ) );
-}
+    /** Flight data. */
+    struct FlightData
+    {
+        double latitude;                ///< [rad] geodetic latitude (positive north)
+        double longitude;               ///< [rad] geodetic longitude (positive east)
+
+        double altitude_asl;            ///< [m] altitude above mean sea level
+        double altitude_agl;            ///< [m] altitude above ground level
+
+        double roll;                    ///< [rad] roll angle
+        double pitch;                   ///< [rad] pitch angle
+        double heading;                 ///< [rad] heading
+
+        double angleOfAttack;           ///< [rad] angle of attack
+        double sideslipAngle;           ///< [rad] angle of sideslip
+
+        double climbAngle;              ///< [rad] climb angle
+        double trackAngle;              ///< [rad] track angle
+
+        double slipSkidAngle;           ///< [rad] slip/skid angle
+
+        double airspeed;                ///< [m/s] airspeed
+        double machNumber;              ///< [-]   Mach number
+        double climbRate;               ///< [m/s] climb rate
+
+        double rollRate;                ///< [rad/s] roll rate  (angular velcoity p component expressed in BAS)
+        double pitchRate;               ///< [rad/s] pitch rate (angular velcoity q component expressed in BAS)
+        double yawRate;                 ///< [rad/s] yaw rate   (angular velcoity r component expressed in BAS)
+        double turnRate;                ///< [rad/s] turn rate  (heading change rate)
+    };
+
+    /** Navigation data. */
+    struct Navigation
+    {
+        double course;                  ///< [rad]
+    };
+
+    FlightData flightData;              ///< flight data
+    Navigation navigation;              ///< navigation data
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Clouds::~Clouds() {}
+#endif // DATANET_H

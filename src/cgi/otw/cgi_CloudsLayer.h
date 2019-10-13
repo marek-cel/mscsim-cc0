@@ -147,7 +147,7 @@ public:
     typedef Data::CGI::Environment::Clouds::Data::Layer::Cover Cover;
 
     /** Constructor. */
-    CloudsLayer( Module *parent = 0 );
+    CloudsLayer( const Module *parent = NULLPTR );
 
     /** Destructor. */
     virtual ~CloudsLayer();
