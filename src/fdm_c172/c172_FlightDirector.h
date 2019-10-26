@@ -124,207 +124,157 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef HID_MANAGER_H
-#define HID_MANAGER_H
+#ifndef C172_FLIGHTDIRECTOR_H
+#define C172_FLIGHTDIRECTOR_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <string>
-
-#include <fdm/fdm_Defines.h>
-
-#include <hid/hid_Assignment.h>
+#include <fdm/auto/fdm_FlightDirector.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace hid
+namespace fdm
 {
 
 /**
- * @brief HID manager class.
+ * @brief Flight director class.
+ *
+ * @see Bociek S., Gruszecki J.: Uklady sterowania automatycznego samolotem, 1999, p.213. [in Polish]
  */
-class Manager
+class C172_FlightDirector : public FlightDirector
 {
 public:
 
-    static const std::string _actionNames[ HID_MAX_ACTIONS ];   ///<
-    static const std::string _keysNames[ HID_MAX_KEYS ];        ///<
-
-    static const double _speedCtrl;         ///< [1/s]
-    static const double _speedTrim;         ///< [1/s]
-    static const double _speedBrakes;       ///< [1/s]
-    static const double _speedGear;         ///< [1/s]
-    static const double _speedFlaps;        ///< [1/s]
-    static const double _speedAirbrake;     ///< [1/s]
-    static const double _speedSpoilers;     ///< [1/s]
-    static const double _speedCollective;   ///< [1/s]
-    static const double _speedThrottle;     ///< [1/s]
-    static const double _speedMixture;      ///< [1/s]
-    static const double _speedPropeller;    ///< [1/s]
-
-    /** */
-    static inline Manager* instance()
+    /** Lateral modes. */
+    enum LatMode
     {
-        if ( !_instance )
-        {
-            _instance = new Manager();
-        }
+        LM_FD = 0,      ///< wing level
+        LM_HDG,         ///< heading select
+        LM_NAV,         ///< track navigation senson
+        LM_APR,         ///< approach
+        LM_BC           ///< back course approach
+    };
 
-        return _instance;
-    }
+    /** Vertical modes. */
+    enum VerMode
+    {
+        VM_FD = 0,      ///< pitch attitude hold
+        VM_ALT,         ///< altitude hold
+        VM_IAS,         ///< indicated airspeed hold
+        VM_VS,          ///< vertical speed
+        VM_ARM,         ///< altitude select
+        VM_GS           ///< approach glide slope
+    };
 
-    /** */
-    static Assignment::POVs getPOV( short pov_deg );
+    /** Armed modes. */
+    enum ArmMode
+    {
+        ARM_NONE = 0,   ///< no mode armed
+        ARM_NAV,        ///< track navigation senson
+        ARM_APR,        ///< approach
+        ARM_BC          ///< back course approach
+    };
 
-    static bool isAxis( Assignment::Action action );
+    /** Constructor. */
+    C172_FlightDirector();
 
     /** Destructor. */
-    virtual ~Manager();
-
-    /** */
-    void init();
-
-    /** */
-    void reset( bool onGround = true );
+    virtual ~C172_FlightDirector();
 
     /**
-     * @param time step [s]
-     * @param data input
-     * @param data output
+     * Reads data.
+     * @param dataNode XML node
      */
-    void update( double timeStep );
-
-    double getCtrlRoll()     const { return _ctrlRoll;     }
-    double getCtrlPitch()    const { return _ctrlPitch;    }
-    double getCtrlYaw()      const { return _ctrlYaw;      }
-    double getTrimRoll()     const { return _trimRoll;     }
-    double getTrimPitch()    const { return _trimPitch;    }
-    double getTrimYaw()      const { return _trimYaw;      }
-    double getBrakeLeft()    const { return _brakeLeft;    }
-    double getBrakeRight()   const { return _brakeRight;   }
-    double getParkingBrake() const { return _parkingBrake; }
-    double getLandingGear()  const { return _landingGear;  }
-    double getFlaps()        const { return _flaps;        }
-    double getAirbrake()     const { return _airbrake;     }
-    double getSpoilers()     const { return _spoilers;     }
-    double getCollective()   const { return _collective;   }
-
-    double getThrottle  ( int num ) const { return _throttle  [ num ]; }
-    double getMixture   ( int num ) const { return _mixture   [ num ]; }
-    double getPropeller ( int num ) const { return _propeller [ num ]; }
-
-    bool getTrigger() const { return _trigger; }
-    bool getAP_Disc() const { return _ap_disc; }
-    bool getCWS() const { return _cws; }
-
-
-    bool isLgHandleDown() const { return _stateLandingGear; }
-
-    /** */
-    void setAssingment( Assignment::Action action, const Assignment &assignment );
-
-    /** */
-    void setKeysState( bool keysState[] );
-
-private:
-
-    static Manager *_instance;                  ///<  instance of Manager singleton class
-
-    Assignment _assignments[ HID_MAX_ACTIONS ]; ///<
-
-    bool _keysState[ HID_MAX_KEYS ];            ///<
-
-    double _timeStep;                           ///< [s] simulation time step
-
-    bool _trigger;                              ///< trigger
-    bool _ap_disc;                              ///< autopilot disconnect
-    bool _cws;                                  ///< cws
-
-    double _ctrlRoll;                           ///< [-1.0,1.0]
-    double _ctrlPitch;                          ///< [-1.0,1.0]
-    double _ctrlYaw;                            ///< [-1.0,1.0]
-
-    double _trimRoll;                           ///< [-1.0,1.0]
-    double _trimPitch;                          ///< [-1.0,1.0]
-    double _trimYaw;                            ///< [-1.0,1.0]
-
-    double _brakeLeft;                          ///< [0.0,1.0]
-    double _brakeRight;                         ///< [0.0,1.0]
-    double _parkingBrake;                       ///< [0.0,1.0]
-
-    double _landingGear;                        ///< [0.0,1.0]
-
-    double _flaps;                              ///< [0.0,1.0]
-    double _airbrake;                           ///< [0.0,1.0]
-    double _spoilers;                           ///< [0.0,1.0]
-
-    double _collective;                         ///< [0.0,1.0]
-
-    double _commonThrottle;                     ///< [0.0,1.0]
-    double _commonMixture;                      ///< [0.0,1.0]
-    double _commonPropeller;                    ///< [0.0,1.0]
-
-    double _throttle  [ FDM_MAX_ENGINES ];      ///< [0.0,1.0]
-    double _mixture   [ FDM_MAX_ENGINES ];      ///< [0.0,1.0]
-    double _propeller [ FDM_MAX_ENGINES ];      ///< [0.0,1.0]
-
-    bool _prevLandingGearToggle;                ///<
-    bool _prevParkingBrakeToggle;               ///<
-    bool _prevSpoilersToggle;                   ///<
-
-    bool _stateLandingGear;                     ///<
-    bool _stateParkingBrake;                    ///<
-    bool _stateSpoilers;                        ///<
+    void readData( XmlNode &dataNode );
 
     /**
-     * You should use static function instance() due to get refernce
-     * to Manager class instance.
+     * Updates flight director.
      */
-    Manager();
+    void update( double timeStep,
+                 double heading,
+                 double altitude, double airspeed,
+                 double turnRate, double climbRate,
+                 double distance,
+                 double lat_deviation, bool lat_active,
+                 double ver_deviation, bool ver_active );
 
-    /** Using this constructor is forbidden. */
-    Manager( const Manager & ) {}
+    void disableHalfBank();
+    void enableHalfBank();
 
-    /** */
-    void getAxisValue( const Assignment &assignment, double &value, int absolute = 0 );
+    inline LatMode getLatMode() const { return _lat_mode; }
+    inline VerMode getVerMode() const { return _ver_mode; }
+    inline ArmMode getArmMode() const { return _arm_mode; }
 
-    /** */
-    void getRealValue( Assignment::Action decreaseAction,
-                       Assignment::Action increaseAction,
-                       double &value,
-                       double speed,
-                       double min,
-                       double max,
-                       bool autocenter = false );
+    inline void setLatMode( LatMode lat_mode ) { _lat_mode = lat_mode; }
+    inline void setVerMode( VerMode ver_mode ) { _ver_mode = ver_mode; }
+    inline void setArmMode( ArmMode arm_mode ) { _arm_mode = arm_mode; }
 
-    /** */
-    void getRealValue( Assignment::Action applyAction,
-                       double &value,
-                       double speed,
-                       double min,
-                       double max );
+    void toggleLatMode( LatMode lat_mode );
+    void toggleVerMode( VerMode ver_mode );
 
-    /** */
-    void getRealValue( Assignment::Action toggleAction,
-                       bool &togglePrev,
-                       bool &state,
-                       double &value,
-                       double speed,
-                       double min,
-                       double max );
+protected:
 
-    /** */
-    bool getButtState( const Assignment &assignment );
+    LatMode _lat_mode;      ///< lateral mode
+    VerMode _ver_mode;      ///< vertical mode
+    ArmMode _arm_mode;      ///< horizontal arm mode
 
-    /** */
-    void updateAxisActions();
+    PID _pid_alt;           ///< ALT mode PID controller
+    PID _pid_ias;           ///< IAS mode PID controller
+    PID _pid_vs;            ///< VS mode PID controller
+    PID _pid_arm;           ///< ARM mode PID controller
+    PID _pid_gs;            ///< GS quasi mode PID controller
+    PID _pid_nav;           ///< NAV mode PID controller
+    PID _pid_apr;           ///< APR mode PID controller
+    PID _pid_hdg;           ///< HDG mode PID controller
+    PID _pid_trn;           ///< TRN quasi mode PID controller
 
-    /** */
-    void updateMiscActions();
+    double _max_roll;       ///< [rad] max roll
+    double _min_pitch;      ///< [rad] min pitch
+    double _max_pitch;      ///< [rad] max pitch
+    double _max_yaw;        ///< [rad] max yaw
+
+    double _max_rate_roll;  ///< [rad/s] roll max rate
+    double _max_rate_pitch; ///< [rad/s] pitch max rate
+    double _max_rate_tr;    ///< [rad/s^2] turn rate max rate
+
+    double _heading_act;    ///< [rad] acting desired heading
+
+    double _climbRate_act;  ///< [m/s] acting desired climb rate
+    double _climbRate_tc;   ///< [s] acting desired climb rate time constant
+
+    double _turnRate;       ///< [rad/s] turn rate
+
+    double _min_dh_arm;     ///< [m] ARM mode min altitude difference
+
+    double _nav_dev_max;    ///< [rad]
+    double _apr_dev_max;    ///< [rad]
+
+    double _ver_dev_prev;   ///< [rad]
+
+    bool _turnRateMode;     ///<
+
+    virtual void readMode( const fdm::XmlNode &dataNode, PID &pid, double min, double max );
+    virtual void readPID( const fdm::XmlNode &dataNode, PID &pid, double min, double max );
+
+    virtual void updateArmMode( double distance, double lat_deviation, bool lat_active );
+
+    virtual void updateLatFD( double timeStep );
+    virtual void updateLatNAV( double timeStep, double distance, double lat_deviation );
+    virtual void updateLatAPR( double timeStep, double distance, double lat_deviation );
+    virtual void updateLatBC();
+    virtual void updateLatHDG( double timeStep, double heading, double turnRate );
+    virtual void updateLatTRN( double timeStep, double turnRate, double airspeed );
+
+    virtual void updateVerFD( double timeStep );
+    virtual void updateVerALT( double timeStep, double altitude );
+    virtual void updateVerIAS( double timeStep, double airspeed );
+    virtual void updateVerVS( double timeStep, double climbRate );
+    virtual void updateVerARM( double timeStep, double altitude, double climbRate );
+    virtual void updateVerGS( double timeStep, double ver_deviation, bool ver_active );
 };
 
-} // end of hid namepsace
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // HID_MANAGER_H
+#endif // C172_FLIGHTDIRECTOR_H

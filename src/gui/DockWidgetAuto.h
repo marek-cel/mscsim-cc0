@@ -169,7 +169,7 @@ public:
     double getAltitude() const;
     double getCourse() const;
     double getHeading() const;
-    double getNavFreq()  const;
+    double getFreqNav()  const;
 
     double getCmdRoll() const;
     double getCmdPitch() const;
@@ -219,6 +219,9 @@ private:
 
     bool isWorking();
 
+    void settingsRead();
+    void settingsSave();
+
     void updateIdle();
     void updateWork();
 
@@ -245,6 +248,9 @@ private slots:
     void on_pushButtonTest_pressed();
     void on_pushButtonTest_released();
 
+    void on_pushButton_CRS_clicked();
+    void on_pushButton_HDG_clicked();
+
     void on_spinBox_CRS_valueChanged( double arg1 );
     void on_spinBox_HDG_valueChanged( double arg1 );
 
@@ -253,6 +259,7 @@ private slots:
     void on_pushButtonShowVS_clicked( bool checked );
     void on_pushButtonShowALT_clicked( bool checked );
 
+    void on_spinBoxFreqStandby_editingFinished();
     void on_pushButtonSwitchFreq_clicked();
 };
 
