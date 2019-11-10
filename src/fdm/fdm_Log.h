@@ -131,6 +131,8 @@
 
 #include <sstream>
 
+#include <fdm/fdm_Defines.h>
+
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace fdm
@@ -139,7 +141,7 @@ namespace fdm
 /**
  * @brief Logging class.
  */
-class Log
+class FDMEXPORT Log
 {
 public:
 

@@ -134,13 +134,13 @@
 ComboUnitsTemperature::ComboUnitsTemperature( QWidget *parent ) :
     ComboUnits ( parent )
 {
-    _coefs.push_back( 1.0f );
+    _coefs.push_back( 1.0 );
     _names.push_back( QString( "K" ) );
 
-    _coefs.push_back( 1.0f );
+    _coefs.push_back( 1.0 );
     _names.push_back( QString( "deg C" ) );
 
-    _coefs.push_back( 1.0f );
+    _coefs.push_back( 1.0 );
     _names.push_back( QString( "deg F" ) );
 
     for ( size_t i = 0; i < _names.size(); i++ ) addItem( _names[ i ] );
@@ -152,9 +152,9 @@ ComboUnitsTemperature::~ComboUnitsTemperature() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-float ComboUnitsTemperature::convert( float value ) const
+double ComboUnitsTemperature::convert( double value ) const
 {
-    float result = value;
+    double result = value;
 
     switch ( _index )
     {
@@ -167,9 +167,9 @@ float ComboUnitsTemperature::convert( float value ) const
 
 ////////////////////////////////////////////////////////////////////////////////
 
-float ComboUnitsTemperature::convertPrev( float value ) const
+double ComboUnitsTemperature::convertPrev( double value ) const
 {
-    float result = value;
+    double result = value;
 
     switch ( _index_prev )
     {
@@ -182,9 +182,9 @@ float ComboUnitsTemperature::convertPrev( float value ) const
 
 ////////////////////////////////////////////////////////////////////////////////
 
-float ComboUnitsTemperature::invert( float value ) const
+double ComboUnitsTemperature::invert( double value ) const
 {
-    float result = value;
+    double result = value;
 
     switch ( _index )
     {
@@ -197,9 +197,9 @@ float ComboUnitsTemperature::invert( float value ) const
 
 ////////////////////////////////////////////////////////////////////////////////
 
-float ComboUnitsTemperature::invertPrev( float value ) const
+double ComboUnitsTemperature::invertPrev( double value ) const
 {
-    float result = value;
+    double result = value;
 
     switch ( _index_prev )
     {

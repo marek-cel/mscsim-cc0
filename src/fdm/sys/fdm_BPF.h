@@ -138,6 +138,8 @@ namespace fdm
 
 /**
  * @brief Band-pass filter (BPF) class.
+ *
+ * @todo TODO
  */
 class FDMEXPORT BPF
 {

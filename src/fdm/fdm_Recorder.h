@@ -144,7 +144,7 @@ namespace fdm
 /**
  * Flight recorder class
  */
-class Recorder : public Base
+class FDMEXPORT Recorder : public Base
 {
 public:
 
