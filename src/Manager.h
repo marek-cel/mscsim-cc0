@@ -132,8 +132,8 @@
 #include <QObject>
 
 #include <gui/MainWindow.h>
+#include <nav/nav_Manager.h>
 
-#include <Navigation.h>
 #include <Simulation.h>
 
 #ifdef SIM_NETWORKING
@@ -167,9 +167,9 @@ protected:
 
 private:
 
-    Navigation *_nav;           ///< navigation
-    Simulation *_sim;           ///< simulation
-    MainWindow *_win;           ///< GUI
+    nav::Manager *_nav;         ///< navigation
+    Simulation   *_sim;         ///< simulation
+    MainWindow   *_win;         ///< GUI
 
 #   ifdef SIM_NETWORKING
     Networking *_net;           ///< networking

@@ -131,8 +131,8 @@
 #   include <float.h>
 #endif
 
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
 
 #include <gui/Colors.h>
 #include <gui/Fonts.h>

@@ -128,7 +128,7 @@
 #include <fdm/sys/fdm_LeadLag.h>
 
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 
 ////////////////////////////////////////////////////////////////////////////////
 

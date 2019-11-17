@@ -127,8 +127,8 @@
 
 #include <fdm/utils/fdm_Random.h>
 
-#include <stdlib.h>
-#include <time.h>
+#include <cstdlib>
+#include <ctime>
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -129,8 +129,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <cmath>
 #include <limits>
-#include <math.h>
 #include <sstream>
 #include <string>
 

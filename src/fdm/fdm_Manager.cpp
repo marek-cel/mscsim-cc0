@@ -127,7 +127,7 @@
 
 #include <fdm/fdm_Manager.h>
 
-#include <memory.h>
+#include <cstring>
 
 #include <fdm/fdm_Log.h>
 

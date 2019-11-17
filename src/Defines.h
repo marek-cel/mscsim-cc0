@@ -136,7 +136,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#if __cplusplus > 199711L
+#if __cplusplus >= 201103L
 #   define NULLPTR nullptr
 #else
 #   define NULLPTR 0

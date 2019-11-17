@@ -127,7 +127,7 @@
 
 #include <hid/hid_Manager.h>
 
-#include <memory.h>
+#include <cstring>
 
 #include <Common.h>
 

@@ -127,7 +127,7 @@
 
 #include <fdm/xml/fdm_XmlUtils.h>
 
-#include <stdio.h>
+//#include <cstdio>
 
 #include <fdm/utils/fdm_String.h>
 #include <fdm/utils/fdm_Units.h>

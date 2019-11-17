@@ -127,8 +127,7 @@
 
 #include <cgi/otw/cgi_SkyDome.h>
 
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
 
 #include <osg/Geode>
 #include <osg/Geometry>

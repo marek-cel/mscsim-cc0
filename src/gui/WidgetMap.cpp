@@ -244,6 +244,7 @@ void WidgetMap::contextMenuEvent( QContextMenuEvent *event )
     QAction actionViewBorders   ( this );
     QAction actionViewTraces    ( this );
     QAction actionTracesReset   ( this );
+    QAction actionCenterView    ( this );
 
     actionViewCrops     .setText( "Show/Hide Crops" );
     actionViewGrassland .setText( "Show/Hide Grass" );
@@ -256,6 +257,7 @@ void WidgetMap::contextMenuEvent( QContextMenuEvent *event )
     actionViewBorders   .setText( "Show/Hide Borders" );
     actionViewTraces    .setText( "Show/Hide Traces" );
     actionTracesReset   .setText( "Reset Traces" );
+    actionCenterView    .setText( "Center View" );
 
     actionViewCrops     .setCheckable( true );
     actionViewGrassland .setCheckable( true );
@@ -292,6 +294,8 @@ void WidgetMap::contextMenuEvent( QContextMenuEvent *event )
 
     connect( &actionTracesReset, SIGNAL( triggered() ), this, SLOT( actionTracesReset_triggered() ) );
 
+    connect( &actionCenterView, SIGNAL( triggered() ), this, SLOT( actionCenterView_triggered() ) );
+
 //    menuLayers.addAction( &actionViewCrops     );
 //    menuLayers.addAction( &actionViewGrassland );
 //    menuLayers.addAction( &actionViewWoodland  );
@@ -304,6 +308,8 @@ void WidgetMap::contextMenuEvent( QContextMenuEvent *event )
 
     menuTraces.addAction( &actionViewTraces  );
     menuTraces.addAction( &actionTracesReset );
+
+    menuContext.addAction( &actionCenterView );
 
     menuContext.exec( event->globalPos() );
 
@@ -597,4 +603,12 @@ void WidgetMap::actionViewTraces_toggled( bool checked )
 void WidgetMap::actionTracesReset_triggered()
 {
     cgi::Manager::instance()->resetTraces();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void WidgetMap::actionCenterView_triggered()
+{
+    _manipulator->setCenterX( cgi::Mercator::x( Data::get()->ownship.longitude ) );
+    _manipulator->setCenterY( cgi::Mercator::y( Data::get()->ownship.latitude  ) );
 }
