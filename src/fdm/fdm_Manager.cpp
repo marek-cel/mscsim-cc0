@@ -270,6 +270,8 @@ void Manager::initInFlight()
         stateVector( _is_q  ) = 0.0;
         stateVector( _is_r  ) = 0.0;
 
+        _aircraft->setStateVector( stateVector );
+
         // TODO
         _stateOut = DataOut::Ready;
 
@@ -278,8 +280,6 @@ void Manager::initInFlight()
             Log::i() << "In-flight initialization finished in " << _initStep << " steps" << std::endl;
             printState();
         }
-
-        _aircraft->setStateVector( stateVector );
     }
 }
 

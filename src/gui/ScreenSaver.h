@@ -124,108 +124,21 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef DIALOGINIT_H
-#define DIALOGINIT_H
+#ifndef SCREENSAVER_H
+#define SCREENSAVER_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <QDateTime>
-#include <QDialog>
-#include <QDomElement>
-#include <QSettings>
-
-#include "gui_Defines.h"
-
-////////////////////////////////////////////////////////////////////////////////
-
-namespace Ui
+/** */
+class ScreenSaver
 {
-    class DialogInit;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-/**
- * @brief This is 'Initial Conditions' dialog class.
- */
-class DialogInit : public QDialog
-{
-    Q_OBJECT
-
 public:
 
-    /** Constructor. */
-    explicit DialogInit( QWidget *parent = NULLPTR );
-    
-    /** Destructor. */
-    virtual ~DialogInit();
+    static void disable();
 
-    inline QDateTime getDateTime() const { return _dateTime; }
-
-    inline int getTypeIndex() const { return _typeIndex; }
-
-    inline float getLat() const { return _lat; }
-    inline float getLon() const { return _lon; }
-    inline float getAlt() const { return _alt; }
-    inline float getPsi() const { return _psi; }
-    inline float getIAS() const { return _ias; }
-
-    inline bool getEngine() const { return _engine; }
-
-    void readData();
-    void saveData();
-
-signals:
-
-    void typeIndexChanged( int );
-
-private:
-
-    Ui::DialogInit *_ui;    ///<
-
-    QDateTime _dateTime;    ///<
-
-    int _typeIndex;         ///< aircraft type index
-
-    float _lat;             ///< [rad]
-    float _lon;             ///< [rad]
-    float _alt;             ///< [m] altitude above ground level
-    float _psi;             ///< [rad] heading
-    float _ias;             ///< [m/s] airspeed
-
-    bool _engine;           ///< specifies if engine is on at start
-
-    void settingsRead();
-    void settingsRead_InitData( QSettings &settings );
-    void settingsRead_UnitCombos( QSettings &settings );
-
-    void settingsSave();
-    void settingsSave_InitData( QSettings &settings );
-    void settingsSave_UnitCombos( QSettings &settings );
-
-private slots:
-
-    void on_comboAirports_currentIndexChanged( int index );
-    void on_comboLocations_currentIndexChanged( int index );
-
-    void on_spinInitLat_valueChanged( double arg1 );
-    void on_spinInitLon_valueChanged( double arg1 );
-    void on_spinInitAlt_valueChanged( double arg1 );
-    void on_spinInitPsi_valueChanged( double arg1 );
-
-    void on_comboDistance_currentIndexChanged( int index );
-
-    void on_comboInitLat_currentIndexChanged( int index );
-    void on_comboInitLon_currentIndexChanged( int index );
-    void on_comboInitAlt_currentIndexChanged( int index );
-    void on_comboInitPsi_currentIndexChanged( int index );
-    void on_comboInitIAS_currentIndexChanged( int index );
-
-    void on_pushButtonTime_clicked();
-
-    void on_checkBoxEngineOn_toggled( bool checked );
+    static void enable();
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // DIALOGINIT_H
+#endif // SCREENSAVER_H
