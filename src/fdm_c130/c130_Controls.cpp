@@ -125,7 +125,8 @@
  *
  ******************************************************************************/
 
-#include <fdm_uh60/uh60_Aircraft.h>
+#include <fdm_c130/c130_Controls.h>
+#include <fdm_c130/c130_Aircraft.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -133,42 +134,90 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::UH60_Mass( const UH60_Aircraft *aircraft ) :
-    Mass( aircraft ),
-    _aircraft ( aircraft )
+C130_Controls::C130_Controls( const C130_Aircraft *aircraft ) :
+    Controls( aircraft ),
+    _aircraft ( aircraft ),
+
+    _channelAilerons     ( 0 ),
+    _channelElevator     ( 0 ),
+    _channelRudder       ( 0 ),
+    _channelElevatorTrim ( 0 ),
+    _channelFlaps        ( 0 ),
+    _channelBrakeL       ( 0 ),
+    _channelBrakeR       ( 0 ),
+
+    _ailerons      ( 0.0 ),
+    _elevator      ( 0.0 ),
+    _rudder        ( 0.0 ),
+    _elevator_trim ( 0.0 ),
+    _flaps         ( 0.0 ),
+    _brake_l       ( 0.0 ),
+    _brake_r       ( 0.0 )
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::~UH60_Mass() {}
+C130_Controls::~C130_Controls() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void UH60_Mass::init()
+void C130_Controls::init()
 {
-    VarMass *pilot_l   = getVariableMassByName( "pilot_l" );
-    VarMass *pilot_r   = getVariableMassByName( "pilot_r" );
-    VarMass *fuel_tank = getVariableMassByName( "fuel_tank" );
-    VarMass *cabin     = getVariableMassByName( "cabin" );
+    _channelAilerons     = getChannelByName( "ailerons"      );
+    _channelElevator     = getChannelByName( "elevator"      );
+    _channelRudder       = getChannelByName( "rudder"        );
+    _channelElevatorTrim = getChannelByName( "elevator_trim" );
+    _channelFlaps        = getChannelByName( "flaps"         );
+    _channelBrakeL       = getChannelByName( "brake_l"       );
+    _channelBrakeR       = getChannelByName( "brake_r"       );
 
-    if ( pilot_l && pilot_r && fuel_tank && cabin )
+    if ( 0 != _channelAilerons
+      && 0 != _channelElevator
+      && 0 != _channelRudder
+      && 0 != _channelElevatorTrim
+      && 0 != _channelFlaps
+      && 0 != _channelBrakeL
+      && 0 != _channelBrakeR )
     {
-        pilot_l->input   = &_aircraft->getDataInp()->masses.pilot_1;
-        pilot_r->input   = &_aircraft->getDataInp()->masses.pilot_2;
-        fuel_tank->input = &_aircraft->getDataInp()->masses.fuel_tank_1;
-        cabin->input     = &_aircraft->getDataInp()->masses.cabin;
+        _channelAilerons     ->input = &_aircraft->getDataInp()->controls.roll;
+        _channelElevator     ->input = &_aircraft->getDataInp()->controls.pitch;
+        _channelRudder       ->input = &_aircraft->getDataInp()->controls.yaw;
+        _channelElevatorTrim ->input = &_aircraft->getDataInp()->controls.trim_pitch;
+        _channelFlaps        ->input = &_aircraft->getDataInp()->controls.flaps;
+        _channelBrakeL       ->input = &_aircraft->getDataInp()->controls.brake_l;
+        _channelBrakeR       ->input = &_aircraft->getDataInp()->controls.brake_r;
     }
     else
     {
         Exception e;
 
         e.setType( Exception::UnknownException );
-        e.setInfo( "Obtaining variable masses failed." );
+        e.setInfo( "Obtaining control channels failed." );
 
         FDM_THROW( e );
     }
 
-    /////////////
-    Mass::init();
-    /////////////
+    /////////////////
+    Controls::init();
+    /////////////////
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void C130_Controls::update()
+{
+    ///////////////////
+    Controls::update();
+    ///////////////////
+
+    _ailerons = _channelAilerons->output;
+    _elevator = _channelElevator->output;
+    _rudder   = _channelRudder->output;
+
+    _elevator_trim = _channelElevatorTrim->output;
+
+    _flaps = _channelFlaps->output;
+
+    _brake_l = _channelBrakeL->output;
+    _brake_r = _channelBrakeR->output;
 }

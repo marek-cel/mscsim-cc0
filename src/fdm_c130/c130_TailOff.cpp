@@ -125,7 +125,10 @@
  *
  ******************************************************************************/
 
-#include <fdm_uh60/uh60_Aircraft.h>
+#include <fdm_c130/c130_TailOff.h>
+
+#include <fdm/main/fdm_Aerodynamics.h>
+#include <fdm/xml/fdm_XmlUtils.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -133,42 +136,117 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::UH60_Mass( const UH60_Aircraft *aircraft ) :
-    Mass( aircraft ),
-    _aircraft ( aircraft )
-{}
+C130_TailOff::C130_TailOff() :
+    _ailerons ( 0.0 ),
+    _flaps    ( 0.0 ),
 
-////////////////////////////////////////////////////////////////////////////////
-
-UH60_Mass::~UH60_Mass() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void UH60_Mass::init()
+    _dcl_dailerons ( 0.0 )
 {
-    VarMass *pilot_l   = getVariableMassByName( "pilot_l" );
-    VarMass *pilot_r   = getVariableMassByName( "pilot_r" );
-    VarMass *fuel_tank = getVariableMassByName( "fuel_tank" );
-    VarMass *cabin     = getVariableMassByName( "cabin" );
+    _dcx_dflaps = Table::createOneRecordTable( 0.0 );
+    _dcz_dflaps = Table::createOneRecordTable( 0.0 );
+    _dcm_dflaps = Table::createOneRecordTable( 0.0 );
+}
 
-    if ( pilot_l && pilot_r && fuel_tank && cabin )
+////////////////////////////////////////////////////////////////////////////////
+
+C130_TailOff::~C130_TailOff() {}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void C130_TailOff::readData( XmlNode &dataNode )
+{
+    //////////////////////////////
+    TailOff::readData( dataNode );
+    //////////////////////////////
+
+    if ( dataNode.isValid() )
     {
-        pilot_l->input   = &_aircraft->getDataInp()->masses.pilot_1;
-        pilot_r->input   = &_aircraft->getDataInp()->masses.pilot_2;
-        fuel_tank->input = &_aircraft->getDataInp()->masses.fuel_tank_1;
-        cabin->input     = &_aircraft->getDataInp()->masses.cabin;
+        int result = FDM_SUCCESS;
+
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _dcl_dailerons, "dcl_dailerons" );
+
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _dcx_dflaps, "dcx_dflaps"  );
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _dcz_dflaps, "dcz_dflaps"  );
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _dcm_dflaps, "dcm_dflaps" );
+
+        if ( result != FDM_SUCCESS ) XmlUtils::throwError( __FILE__, __LINE__, dataNode );
     }
     else
     {
-        Exception e;
-
-        e.setType( Exception::UnknownException );
-        e.setInfo( "Obtaining variable masses failed." );
-
-        FDM_THROW( e );
+        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
     }
+}
 
-    /////////////
-    Mass::init();
-    /////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void C130_TailOff::computeForceAndMoment( const Vector3 &vel_air_bas,
+                                          const Vector3 &omg_air_bas,
+                                          double airDensity,
+                                          double ailerons,
+                                          double flaps )
+{
+    _ailerons = ailerons;
+    _flaps    = flaps;
+
+    ///////////////////////////////////////////////////////////////////////
+    TailOff::computeForceAndMoment( vel_air_bas, omg_air_bas, airDensity );
+    ///////////////////////////////////////////////////////////////////////
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void C130_TailOff::update( const Vector3 &vel_air_bas, const Vector3 &omg_air_bas )
+{
+    ////////////////////////////////////////////
+    TailOff::update( vel_air_bas, omg_air_bas );
+    ////////////////////////////////////////////
+
+    Table cz_total = _cz + _flaps * _dcz_dflaps;
+
+    _aoa_critical_neg = cz_total.getKeyOfValueMin();
+    _aoa_critical_pos = cz_total.getKeyOfValueMax();
+
+    //_ailerons->getHingeMoment( dynPress, alpha, m_delta_a );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+double C130_TailOff::getCx( double angleOfAttack ) const
+{
+    return TailOff::getCx( angleOfAttack ) + _flaps * _dcx_dflaps.getValue( angleOfAttack );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+double C130_TailOff::getCy( double sideslipAngle ) const
+{
+    return TailOff::getCy( sideslipAngle );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+double C130_TailOff::getCz( double angleOfAttack ) const
+{
+    return TailOff::getCz( angleOfAttack ) + _flaps * _dcz_dflaps.getValue( angleOfAttack );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+double C130_TailOff::getCl( double sideslipAngle ) const
+{
+    return TailOff::getCl( sideslipAngle ) + _ailerons * _dcl_dailerons;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+double C130_TailOff::getCm( double angleOfAttack ) const
+{
+    return TailOff::getCm( angleOfAttack ) + _flaps * _dcm_dflaps.getValue( angleOfAttack );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+double C130_TailOff::getCn( double sideslipAngle ) const
+{
+    return TailOff::getCn( sideslipAngle );
 }

@@ -154,12 +154,7 @@ void C172_Mass::init()
     VarMass *cabin       = getVariableMassByName( "cabin" );
     VarMass *trunk       = getVariableMassByName( "cargo_trunk" );
 
-    if ( 0 != pilot_l
-      && 0 != pilot_r
-      && 0 != fuel_tank_l
-      && 0 != fuel_tank_r
-      && 0 != cabin
-      && 0 != trunk )
+    if ( pilot_l && pilot_r && fuel_tank_l && fuel_tank_r && cabin && trunk )
     {
         pilot_l->input = &_aircraft->getDataInp()->masses.pilot_1;
         pilot_r->input = &_aircraft->getDataInp()->masses.pilot_2;

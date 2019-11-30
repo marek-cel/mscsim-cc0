@@ -124,51 +124,114 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm_uh60/uh60_Aircraft.h>
-
-////////////////////////////////////////////////////////////////////////////////
-
-using namespace fdm;
+#ifndef C130_TAILOFF_H
+#define C130_TAILOFF_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::UH60_Mass( const UH60_Aircraft *aircraft ) :
-    Mass( aircraft ),
-    _aircraft ( aircraft )
-{}
+#include <fdm/models/fdm_TailOff.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::~UH60_Mass() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void UH60_Mass::init()
+namespace fdm
 {
-    VarMass *pilot_l   = getVariableMassByName( "pilot_l" );
-    VarMass *pilot_r   = getVariableMassByName( "pilot_r" );
-    VarMass *fuel_tank = getVariableMassByName( "fuel_tank" );
-    VarMass *cabin     = getVariableMassByName( "cabin" );
 
-    if ( pilot_l && pilot_r && fuel_tank && cabin )
-    {
-        pilot_l->input   = &_aircraft->getDataInp()->masses.pilot_1;
-        pilot_r->input   = &_aircraft->getDataInp()->masses.pilot_2;
-        fuel_tank->input = &_aircraft->getDataInp()->masses.fuel_tank_1;
-        cabin->input     = &_aircraft->getDataInp()->masses.cabin;
-    }
-    else
-    {
-        Exception e;
+/**
+ * @brief C-130 tail-off aerodynamics class.
+ */
+class C130_TailOff : public TailOff
+{
+public:
 
-        e.setType( Exception::UnknownException );
-        e.setInfo( "Obtaining variable masses failed." );
+    /** Constructor. */
+    C130_TailOff();
 
-        FDM_THROW( e );
-    }
+    /** Destructor. */
+    ~C130_TailOff();
 
-    /////////////
-    Mass::init();
-    /////////////
-}
+    /**
+     * Reads data.
+     * @param dataNode XML node
+     */
+    void readData( fdm::XmlNode &dataNode );
+
+    /**
+     * Computes force and moment.
+     * @param vel_air_bas [m/s] aircraft linear velocity relative to the air expressed in BAS
+     * @param omg_air_bas [rad/s] aircraft angular velocity relative to the air expressed in BAS
+     * @param airDensity [kg/m^3] air density
+     * @param ailerons [rad] ailerons deflection
+     * @param flaps [rad] flaps deflection
+     */
+    void computeForceAndMoment( const fdm::Vector3 &vel_air_bas,
+                                const fdm::Vector3 &omg_air_bas,
+                                double airDensity ,
+                                double ailerons,
+                                double flaps );
+
+    /**
+     * Updates model.
+     * @param vel_air_bas [m/s] aircraft linear velocity relative to the air expressed in BAS
+     * @param omg_air_bas [rad/s] aircraft angular velocity relative to the air expressed in BAS
+     */
+    void update( const fdm::Vector3 &vel_air_bas, const fdm::Vector3 &omg_air_bas );
+
+private:
+
+    double _ailerons;               ///< [rad] ailerons deflection
+    double _flaps;                  ///< [rad] flaps deflection
+
+    double _dcl_dailerons;          ///< [1/rad]
+
+    Table _dcx_dflaps;              ///< [1/rad]
+    Table _dcz_dflaps;              ///< [1/rad]
+    Table _dcm_dflaps;              ///< [1/rad]
+
+    /**
+     * Computes drag coefficient.
+     * @param angleOfAttack [rad] angle of attack
+     * @return [-] drag coefficient
+     */
+    double getCx( double angleOfAttack ) const;
+
+    /**
+     * Computes sideforce coefficient.
+     * @param sideslipAngle [rad] angle of sideslip
+     * @return [-] sideforce coefficient
+     */
+    double getCy( double sideslipAngle ) const;
+
+    /**
+     * Computes lift coefficient.
+     * @param angleOfAttack [rad] angle of attack
+     * @return [-] lift coefficient
+     */
+    double getCz( double angleOfAttack ) const;
+
+    /**
+     * Computes rolling moment coefficient.
+     * @param sideslipAngle [rad] angle of sideslip
+     * @return [-] rolling moment coefficient
+     */
+    double getCl( double sideslipAngle ) const;
+
+    /**
+     * Computes pitching moment coefficient.
+     * @param angleOfAttack [rad] angle of attack
+     * @return [-] pitching moment coefficient
+     */
+    double getCm( double angleOfAttack ) const;
+
+    /**
+     * Computes yawing moment coefficient.
+     * @param sideslipAngle [rad] angle of sideslip
+     * @return [-] yawing moment coefficient
+     */
+    double getCn( double sideslipAngle ) const;
+};
+
+} // end of fdm namespace
+
+////////////////////////////////////////////////////////////////////////////////
+
+#endif // C130_TAILOFF_H

@@ -124,51 +124,80 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm_uh60/uh60_Aircraft.h>
-
-////////////////////////////////////////////////////////////////////////////////
-
-using namespace fdm;
+#ifndef C130_STABILIZERHOR_H
+#define C130_STABILIZERHOR_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::UH60_Mass( const UH60_Aircraft *aircraft ) :
-    Mass( aircraft ),
-    _aircraft ( aircraft )
-{}
+#include <fdm/models/fdm_Stabilizer.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::~UH60_Mass() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void UH60_Mass::init()
+namespace fdm
 {
-    VarMass *pilot_l   = getVariableMassByName( "pilot_l" );
-    VarMass *pilot_r   = getVariableMassByName( "pilot_r" );
-    VarMass *fuel_tank = getVariableMassByName( "fuel_tank" );
-    VarMass *cabin     = getVariableMassByName( "cabin" );
 
-    if ( pilot_l && pilot_r && fuel_tank && cabin )
-    {
-        pilot_l->input   = &_aircraft->getDataInp()->masses.pilot_1;
-        pilot_r->input   = &_aircraft->getDataInp()->masses.pilot_2;
-        fuel_tank->input = &_aircraft->getDataInp()->masses.fuel_tank_1;
-        cabin->input     = &_aircraft->getDataInp()->masses.cabin;
-    }
-    else
-    {
-        Exception e;
+/**
+ * @brief C-130 horizontal stabilizer class.
+ */
+class C130_StabilizerHor : public Stabilizer
+{
+public:
 
-        e.setType( Exception::UnknownException );
-        e.setInfo( "Obtaining variable masses failed." );
+    /** Constructor. */
+    C130_StabilizerHor();
 
-        FDM_THROW( e );
-    }
+    /** Destructor. */
+    ~C130_StabilizerHor();
 
-    /////////////
-    Mass::init();
-    /////////////
-}
+    /**
+     * Reads data.
+     * @param dataNode XML node
+     */
+    void readData( XmlNode &dataNode );
+
+    /**
+     * Computes force and moment.
+     * @param vel_air_bas [m/s] aircraft linear velocity relative to the air expressed in BAS
+     * @param omg_air_bas [rad/s] aircraft angular velocity relative to the air expressed in BAS
+     * @param airDensity [kg/m^3] air density
+     * @param angleOfAttackWing [rad] wing angle of attack
+     * @param elevator [rad] elevator deflection
+     * @param elevatorTrim [rad] elevator trim deflection
+     */
+    void computeForceAndMoment( const Vector3 &vel_air_bas,
+                                const Vector3 &omg_air_bas,
+                                double airDensity,
+                                double wingAngleOfAttack,
+                                double elevator,
+                                double elevatorTrim );
+
+private:
+
+    double _dcx_delevator;          ///< [1/rad] drag coefficient due to elevator deflection
+    double _dcz_delevator;          ///< [1/rad] lift coefficient due to elevator deflection
+
+    double _dcz_delevator_trim;     ///< [1/rad] lift coefficient due to elevator trim deflection
+
+    double _elevator;               ///< [rad] elevator deflection
+    double _elevatorTrim;           ///< [rad] elevator trim deflection
+
+    /**
+     * Computes drag coefficient.
+     * @param angle [rad] "angle of attack"
+     * @return [-] drag coefficient
+     */
+    virtual double getCx( double angle ) const;
+
+    /**
+     * Computes lift coefficient.
+     * @param angle [rad] "angle of attack"
+     * @return [-] lift coefficient
+     */
+    virtual double getCz( double angle ) const;
+};
+
+} // end of fdm namespace
+
+////////////////////////////////////////////////////////////////////////////////
+
+#endif // C130_STABILIZERHOR_H

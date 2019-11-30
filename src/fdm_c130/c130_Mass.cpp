@@ -125,7 +125,8 @@
  *
  ******************************************************************************/
 
-#include <fdm_uh60/uh60_Aircraft.h>
+#include <fdm_c130/c130_Mass.h>
+#include <fdm_c130/c130_Aircraft.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -133,30 +134,34 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::UH60_Mass( const UH60_Aircraft *aircraft ) :
+C130_Mass::C130_Mass( const C130_Aircraft *aircraft ) :
     Mass( aircraft ),
     _aircraft ( aircraft )
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::~UH60_Mass() {}
+C130_Mass::~C130_Mass() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void UH60_Mass::init()
+void C130_Mass::init()
 {
-    VarMass *pilot_l   = getVariableMassByName( "pilot_l" );
-    VarMass *pilot_r   = getVariableMassByName( "pilot_r" );
-    VarMass *fuel_tank = getVariableMassByName( "fuel_tank" );
-    VarMass *cabin     = getVariableMassByName( "cabin" );
+    VarMass *pilot_l     = getVariableMassByName( "pilot_l" );
+    VarMass *pilot_r     = getVariableMassByName( "pilot_r" );
+    VarMass *fuel_tank_l = getVariableMassByName( "fuel_tank_l" );
+    VarMass *fuel_tank_r = getVariableMassByName( "fuel_tank_r" );
+    VarMass *cabin       = getVariableMassByName( "cabin" );
 
-    if ( pilot_l && pilot_r && fuel_tank && cabin )
+    if ( pilot_l && pilot_r && fuel_tank_l && fuel_tank_r && cabin )
     {
-        pilot_l->input   = &_aircraft->getDataInp()->masses.pilot_1;
-        pilot_r->input   = &_aircraft->getDataInp()->masses.pilot_2;
-        fuel_tank->input = &_aircraft->getDataInp()->masses.fuel_tank_1;
-        cabin->input     = &_aircraft->getDataInp()->masses.cabin;
+        pilot_l->input = &_aircraft->getDataInp()->masses.pilot_1;
+        pilot_r->input = &_aircraft->getDataInp()->masses.pilot_2;
+
+        fuel_tank_l->input = &_aircraft->getDataInp()->masses.fuel_tank_1;
+        fuel_tank_r->input = &_aircraft->getDataInp()->masses.fuel_tank_2;
+
+        cabin->input = &_aircraft->getDataInp()->masses.cabin;
     }
     else
     {

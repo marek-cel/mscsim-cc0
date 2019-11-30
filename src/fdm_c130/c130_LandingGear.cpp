@@ -125,7 +125,8 @@
  *
  ******************************************************************************/
 
-#include <fdm_uh60/uh60_Aircraft.h>
+#include <fdm_c130/c130_LandingGear.h>
+#include <fdm_c130/c130_Aircraft.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -133,42 +134,61 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::UH60_Mass( const UH60_Aircraft *aircraft ) :
-    Mass( aircraft ),
+C130_LandingGear::C130_LandingGear( const C130_Aircraft *aircraft ) :
+    LandingGear( aircraft ),
     _aircraft ( aircraft )
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::~UH60_Mass() {}
+C130_LandingGear::~C130_LandingGear() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void UH60_Mass::init()
+void C130_LandingGear::init()
 {
-    VarMass *pilot_l   = getVariableMassByName( "pilot_l" );
-    VarMass *pilot_r   = getVariableMassByName( "pilot_r" );
-    VarMass *fuel_tank = getVariableMassByName( "fuel_tank" );
-    VarMass *cabin     = getVariableMassByName( "cabin" );
+    Wheel *wheel_n  = getWheelByName( "wheel_n"  );
+    Wheel *wheel_lf = getWheelByName( "wheel_lf" );
+    Wheel *wheel_lr = getWheelByName( "wheel_lr" );
+    Wheel *wheel_rf = getWheelByName( "wheel_rf" );
+    Wheel *wheel_rr = getWheelByName( "wheel_rr" );
 
-    if ( pilot_l && pilot_r && fuel_tank && cabin )
+    if ( wheel_n && wheel_lf && wheel_lr && wheel_rf && wheel_rr )
     {
-        pilot_l->input   = &_aircraft->getDataInp()->masses.pilot_1;
-        pilot_r->input   = &_aircraft->getDataInp()->masses.pilot_2;
-        fuel_tank->input = &_aircraft->getDataInp()->masses.fuel_tank_1;
-        cabin->input     = &_aircraft->getDataInp()->masses.cabin;
+        wheel_n  ->input = &_aircraft->getDataInp()->controls.landing_gear;
+        wheel_lf ->input = &_aircraft->getDataInp()->controls.landing_gear;
+        wheel_lr ->input = &_aircraft->getDataInp()->controls.landing_gear;
+        wheel_rf ->input = &_aircraft->getDataInp()->controls.landing_gear;
+        wheel_rr ->input = &_aircraft->getDataInp()->controls.landing_gear;
     }
     else
     {
         Exception e;
 
         e.setType( Exception::UnknownException );
-        e.setInfo( "Obtaining variable masses failed." );
+        e.setInfo( "Obtaining wheels failed." );
 
         FDM_THROW( e );
     }
 
-    /////////////
-    Mass::init();
-    /////////////
+    ////////////////////
+    LandingGear::init();
+    ////////////////////
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void C130_LandingGear::update()
+{
+    //////////////////////
+    LandingGear::update();
+    //////////////////////
+
+    _brake_l = _aircraft->getCtrl()->getBrakeL();
+    _brake_r = _aircraft->getCtrl()->getBrakeR();
+
+    _ctrlAngle = 0.0;
+
+    _antiskid = _aircraft->getDataInp()->controls.abs;
+    _steering = _aircraft->getDataInp()->controls.nws;
 }

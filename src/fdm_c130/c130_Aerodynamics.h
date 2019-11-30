@@ -124,51 +124,69 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm_uh60/uh60_Aircraft.h>
-
-////////////////////////////////////////////////////////////////////////////////
-
-using namespace fdm;
+#ifndef C130_AERODYNAMICS_H
+#define C130_AERODYNAMICS_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::UH60_Mass( const UH60_Aircraft *aircraft ) :
-    Mass( aircraft ),
-    _aircraft ( aircraft )
-{}
+#include <fdm/main/fdm_Aerodynamics.h>
+
+#include <fdm_c130/c130_TailOff.h>
+#include <fdm_c130/c130_StabilizerHor.h>
+#include <fdm_c130/c130_StabilizerVer.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::~UH60_Mass() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void UH60_Mass::init()
+namespace fdm
 {
-    VarMass *pilot_l   = getVariableMassByName( "pilot_l" );
-    VarMass *pilot_r   = getVariableMassByName( "pilot_r" );
-    VarMass *fuel_tank = getVariableMassByName( "fuel_tank" );
-    VarMass *cabin     = getVariableMassByName( "cabin" );
 
-    if ( pilot_l && pilot_r && fuel_tank && cabin )
-    {
-        pilot_l->input   = &_aircraft->getDataInp()->masses.pilot_1;
-        pilot_r->input   = &_aircraft->getDataInp()->masses.pilot_2;
-        fuel_tank->input = &_aircraft->getDataInp()->masses.fuel_tank_1;
-        cabin->input     = &_aircraft->getDataInp()->masses.cabin;
-    }
-    else
-    {
-        Exception e;
+class C130_Aircraft;    ///< aircraft class forward declaration
 
-        e.setType( Exception::UnknownException );
-        e.setInfo( "Obtaining variable masses failed." );
+/**
+ * @brief C-130 aerodynamics class.
+ */
+class C130_Aerodynamics : public Aerodynamics
+{
+public:
 
-        FDM_THROW( e );
-    }
+    /** Constructor. */
+    C130_Aerodynamics( const C130_Aircraft *aircraft );
 
-    /////////////
-    Mass::init();
-    /////////////
-}
+    /** Destructor. */
+    ~C130_Aerodynamics();
+
+    /**
+     * Reads data.
+     * @param dataNode XML node
+     */
+    void readData( XmlNode &dataNode );
+
+    /** Computes force and moment. */
+    void computeForceAndMoment();
+
+    /** Updates aerodynamics. */
+    void update();
+
+    /**
+     * Returns true if aircraft is stalling, otherwise returns false.
+     * @return true if aircraft is stalling, false otherwise
+     */
+    inline bool getStall() const { return _tailOff->getStall(); }
+
+private:
+
+    const C130_Aircraft *_aircraft;     ///< aircraft model main object
+
+    C130_TailOff       *_tailOff;       ///< wing model
+    C130_StabilizerHor *_stabHor;       ///< horizontal stabilizer model
+    C130_StabilizerVer *_stabVer;       ///< vertical stabilizer model
+
+    Table _drag_ground_effect;          ///< [-] drag factor due to ground effect vs [m] altitude AGL
+    Table _lift_ground_effect;          ///< [-] lift factor due to ground effect vs [m] altitude AGL
+};
+
+} // end of fdm namespace
+
+////////////////////////////////////////////////////////////////////////////////
+
+#endif // C130_AERODYNAMICS_H

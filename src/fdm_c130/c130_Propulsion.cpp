@@ -125,7 +125,10 @@
  *
  ******************************************************************************/
 
-#include <fdm_uh60/uh60_Aircraft.h>
+#include <fdm_c130/c130_Propulsion.h>
+#include <fdm_c130/c130_Aircraft.h>
+
+#include <fdm/xml/fdm_XmlUtils.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -133,42 +136,134 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::UH60_Mass( const UH60_Aircraft *aircraft ) :
-    Mass( aircraft ),
-    _aircraft ( aircraft )
-{}
+C130_Propulsion::C130_Propulsion( const C130_Aircraft *aircraft ) :
+    Propulsion( aircraft ),
+    _aircraft ( aircraft ),
 
-////////////////////////////////////////////////////////////////////////////////
-
-UH60_Mass::~UH60_Mass() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void UH60_Mass::init()
+    _enginesCount ( 4 )
 {
-    VarMass *pilot_l   = getVariableMassByName( "pilot_l" );
-    VarMass *pilot_r   = getVariableMassByName( "pilot_r" );
-    VarMass *fuel_tank = getVariableMassByName( "fuel_tank" );
-    VarMass *cabin     = getVariableMassByName( "cabin" );
-
-    if ( pilot_l && pilot_r && fuel_tank && cabin )
+    for ( int i = 0; i < _enginesCount; i++ )
     {
-        pilot_l->input   = &_aircraft->getDataInp()->masses.pilot_1;
-        pilot_r->input   = &_aircraft->getDataInp()->masses.pilot_2;
-        fuel_tank->input = &_aircraft->getDataInp()->masses.fuel_tank_1;
-        cabin->input     = &_aircraft->getDataInp()->masses.cabin;
+        _engine[ i ]    = new C130_Engine();
+        _propeller[ i ] = new C130_Propeller();
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+C130_Propulsion::~C130_Propulsion()
+{
+    for ( int i = 0; i < _enginesCount; i++ )
+    {
+        FDM_DELPTR( _engine[ i ] );
+        FDM_DELPTR( _propeller[ i ] );
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void C130_Propulsion::init( bool engineOn )
+{
+    /////////////////////////////
+    Propulsion::init( engineOn );
+    /////////////////////////////
+
+    for ( int i = 0; i < _enginesCount; i++ )
+    {
+        _propeller[ i ]->setRPM( engineOn ? 3000.0 : 0.0 );
+        _engine[ i ]->setRPM( _propeller[ i ]->getEngineRPM() );
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void C130_Propulsion::readData( XmlNode &dataNode )
+{
+    if ( dataNode.isValid() )
+    {
+        XmlNode nodeEngine    = dataNode.getFirstChildElement( "engine"    );
+        XmlNode nodePropeller = dataNode.getFirstChildElement( "propeller" );
+
+        for ( int i = 0; i < _enginesCount; i++ )
+        {
+            _engine[ i ]->readData( nodeEngine );
+            _propeller[ i ]->readData( nodePropeller );
+        }
     }
     else
     {
+        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void C130_Propulsion::computeForceAndMoment()
+{
+    _for_bas.zeroize();
+    _mom_bas.zeroize();
+
+    for ( int i = 0; i < _enginesCount; i++ )
+    {
+        _propeller[ i ]->computeThrust( _aircraft->getAirspeed(),
+                                        _aircraft->getEnvir()->getDensity() );
+
+        // thrust and moment due to thrust
+        Vector3 for_bas( _propeller[ i ]->getThrust(), 0.0, 0.0 );
+        Vector3 mom_bas = _propeller[ i ]->getPos_BAS() ^ for_bas;
+
+        // gyro effect
+        Vector3 omega_bas;
+
+        if ( _propeller[ i ]->getDirection() == Propeller::CW )
+        {
+            omega_bas.x() =  _propeller[ i ]->getOmega();
+        }
+        else
+        {
+            omega_bas.x() = -_propeller[ i ]->getOmega();
+        }
+
+        mom_bas += ( _propeller[ i ]->getInertia() + _engine[ i ]->getInertia() )
+                 * ( omega_bas ^ _aircraft->getOmg_BAS() );
+
+        _for_bas += for_bas;
+        _mom_bas += mom_bas;
+    }
+
+    if ( !_for_bas.isValid() || !_mom_bas.isValid() )
+    {
         Exception e;
 
-        e.setType( Exception::UnknownException );
-        e.setInfo( "Obtaining variable masses failed." );
+        e.setType( Exception::UnexpectedNaN );
+        e.setInfo( "NaN detected in the propulsion model." );
 
         FDM_THROW( e );
     }
+}
 
-    /////////////
-    Mass::init();
-    /////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void C130_Propulsion::update()
+{
+    for ( int i = 0; i < _enginesCount; i++ )
+    {
+        _propeller[ i ]->integrate( _aircraft->getTimeStep(), _engine[ i ]->getInertia() );
+
+        _engine[ i ]->update( _aircraft->getDataInp()->engine[ 0 ].throttle,
+                              _aircraft->getDataInp()->engine[ 0 ].mixture,
+                              _propeller[ i ]->getEngineRPM(),
+                              _aircraft->getEnvir()->getPressure(),
+                              _aircraft->getEnvir()->getDensity(),
+                              _aircraft->getEnvir()->getDensityAltitude(),
+                              _aircraft->getDataInp()->engine[ 0 ].fuel,
+                              _aircraft->getDataInp()->engine[ 0 ].starter,
+                              _aircraft->getDataInp()->engine[ 0 ].ignition,
+                              _aircraft->getDataInp()->engine[ 0 ].ignition );
+
+        _propeller[ i ]->update( _aircraft->getDataInp()->engine[ 0 ].propeller,
+                                 _engine[ i ]->getTorque(),
+                                 _aircraft->getAirspeed(),
+                                 _aircraft->getEnvir()->getDensity() );
+    }
 }

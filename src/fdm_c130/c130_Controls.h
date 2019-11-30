@@ -124,51 +124,70 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm_uh60/uh60_Aircraft.h>
-
-////////////////////////////////////////////////////////////////////////////////
-
-using namespace fdm;
+#ifndef C130_CONTROLS_H
+#define C130_CONTROLS_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::UH60_Mass( const UH60_Aircraft *aircraft ) :
-    Mass( aircraft ),
-    _aircraft ( aircraft )
-{}
+#include <fdm/main/fdm_Controls.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::~UH60_Mass() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void UH60_Mass::init()
+namespace fdm
 {
-    VarMass *pilot_l   = getVariableMassByName( "pilot_l" );
-    VarMass *pilot_r   = getVariableMassByName( "pilot_r" );
-    VarMass *fuel_tank = getVariableMassByName( "fuel_tank" );
-    VarMass *cabin     = getVariableMassByName( "cabin" );
 
-    if ( pilot_l && pilot_r && fuel_tank && cabin )
-    {
-        pilot_l->input   = &_aircraft->getDataInp()->masses.pilot_1;
-        pilot_r->input   = &_aircraft->getDataInp()->masses.pilot_2;
-        fuel_tank->input = &_aircraft->getDataInp()->masses.fuel_tank_1;
-        cabin->input     = &_aircraft->getDataInp()->masses.cabin;
-    }
-    else
-    {
-        Exception e;
+class C130_Aircraft;    ///< aircraft class forward declaration
 
-        e.setType( Exception::UnknownException );
-        e.setInfo( "Obtaining variable masses failed." );
+/**
+ * @brief C-130 controls class.
+ */
+class C130_Controls : public Controls
+{
+public:
 
-        FDM_THROW( e );
-    }
+    /** Constructor. */
+    C130_Controls( const C130_Aircraft *aircraft );
 
-    /////////////
-    Mass::init();
-    /////////////
-}
+    /** Destructor. */
+    ~C130_Controls();
+
+    /** Initializes controls. */
+    void init();
+
+    /** Updates controls. */
+    void update();
+
+    inline double getAilerons()     const { return _ailerons;      }
+    inline double getElevator()     const { return _elevator;      }
+    inline double getRudder()       const { return _rudder;        }
+    inline double getElevatorTrim() const { return _elevator_trim; }
+    inline double getFlaps()        const { return _flaps;         }
+    inline double getBrakeL()       const { return _brake_l;       }
+    inline double getBrakeR()       const { return _brake_r;       }
+
+private:
+
+    const C130_Aircraft *_aircraft;     ///< aircraft model main object
+
+    Channel *_channelAilerons;          ///< ailerons channel
+    Channel *_channelElevator;          ///< elevator channel
+    Channel *_channelRudder;            ///< rudder channel
+    Channel *_channelElevatorTrim;      ///< elevator trim channel
+    Channel *_channelFlaps;             ///< flaps channel
+    Channel *_channelBrakeL;            ///< left brake channel
+    Channel *_channelBrakeR;            ///< right brake channel
+
+    double _ailerons;                   ///< [rad] ailerons deflection
+    double _elevator;                   ///< [rad] elevator deflection
+    double _rudder;                     ///< [rad] rudder deflection
+    double _elevator_trim;              ///< [rad] elevator trim deflection
+    double _flaps;                      ///< [rad] flaps deflection
+    double _brake_l;                    ///< [-] normalized left brake force
+    double _brake_r;                    ///< [-] normalized right brake force
+};
+
+} // end of fdm namespace
+
+////////////////////////////////////////////////////////////////////////////////
+
+#endif // C130_CONTROLS_H

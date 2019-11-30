@@ -124,51 +124,71 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm_uh60/uh60_Aircraft.h>
-
-////////////////////////////////////////////////////////////////////////////////
-
-using namespace fdm;
+#ifndef C130_PROPULSION_H
+#define C130_PROPULSION_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::UH60_Mass( const UH60_Aircraft *aircraft ) :
-    Mass( aircraft ),
-    _aircraft ( aircraft )
-{}
+#include <fdm/main/fdm_Propulsion.h>
+
+#include <fdm_c130/c130_Engine.h>
+#include <fdm_c130/c130_Propeller.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::~UH60_Mass() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void UH60_Mass::init()
+namespace fdm
 {
-    VarMass *pilot_l   = getVariableMassByName( "pilot_l" );
-    VarMass *pilot_r   = getVariableMassByName( "pilot_r" );
-    VarMass *fuel_tank = getVariableMassByName( "fuel_tank" );
-    VarMass *cabin     = getVariableMassByName( "cabin" );
 
-    if ( pilot_l && pilot_r && fuel_tank && cabin )
-    {
-        pilot_l->input   = &_aircraft->getDataInp()->masses.pilot_1;
-        pilot_r->input   = &_aircraft->getDataInp()->masses.pilot_2;
-        fuel_tank->input = &_aircraft->getDataInp()->masses.fuel_tank_1;
-        cabin->input     = &_aircraft->getDataInp()->masses.cabin;
-    }
-    else
-    {
-        Exception e;
+class C130_Aircraft;    ///< aircraft class forward declaration
 
-        e.setType( Exception::UnknownException );
-        e.setInfo( "Obtaining variable masses failed." );
+/**
+ * @brief C-130 propulsion class.
+ */
+class C130_Propulsion : public Propulsion
+{
+public:
 
-        FDM_THROW( e );
-    }
+    /** Constructor. */
+    C130_Propulsion( const C130_Aircraft *aircraft );
 
-    /////////////
-    Mass::init();
-    /////////////
-}
+    /** Destructor. */
+    ~C130_Propulsion();
+
+    /**
+     * Initializes propulsion.
+     * @param engineOn specifies if engine is working at start
+     */
+    void init( bool engineOn );
+
+    /**
+     * Reads data.
+     * @param dataNode XML node
+     */
+    void readData( XmlNode &dataNode );
+
+    /** Computes force and moment. */
+    void computeForceAndMoment();
+
+    /** Updates propulsion. */
+    void update();
+
+    inline int getEnginesCount() const { return _enginesCount; }
+
+    inline const C130_Engine* getEngine( int i ) const { return _engine[ i ]; }
+    inline const C130_Propeller* getPropeller( int i ) const { return _propeller[ i ]; }
+
+private:
+
+    const C130_Aircraft *_aircraft;     ///< aircraft model main object
+
+    const int _enginesCount;            ///< engines count
+
+    C130_Engine    *_engine    [ 4 ];   ///< engine model
+    C130_Propeller *_propeller [ 4 ];   ///< propeller model
+};
+
+} // end of fdm namespace
+
+////////////////////////////////////////////////////////////////////////////////
+
+#endif // C130_PROPULSION_H

@@ -1,3 +1,4 @@
+
 QT += core gui opengl svg xml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -11,7 +12,7 @@ TARGET = mscsim
 
 ################################################################################
 
-#CONFIG += c++11
+CONFIG += c++11
 
 #CONFIG += marble_maps
 #CONFIG += networking
@@ -41,8 +42,8 @@ DEFINES += \
     SIM_INTERSECTIONS \
     SIM_LOCAL_DATA_DIR \
     SIM_SKYDOME_SCALING \
-    SIM_USE_THREADS
-#    SIM_VERTICALSYNC
+    SIM_USE_THREADS \
+    SIM_VERTICALSYNC
 
 marble_maps: DEFINES += SIM_MARBLE_MAPS
 networking:  DEFINES += SIM_NETWORKING

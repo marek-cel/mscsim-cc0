@@ -125,7 +125,9 @@
  *
  ******************************************************************************/
 
-#include <fdm_uh60/uh60_Aircraft.h>
+#include <fdm_c130/c130_StabilizerVer.h>
+
+#include <fdm/xml/fdm_XmlUtils.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -133,42 +135,64 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::UH60_Mass( const UH60_Aircraft *aircraft ) :
-    Mass( aircraft ),
-    _aircraft ( aircraft )
+C130_StabilizerVer::C130_StabilizerVer() :
+    _dcx_drudder ( 0.0 ),
+    _dcy_drudder ( 0.0 ),
+    _rudder ( 0.0 )
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::~UH60_Mass() {}
+C130_StabilizerVer::~C130_StabilizerVer() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void UH60_Mass::init()
+void C130_StabilizerVer::readData( XmlNode &dataNode )
 {
-    VarMass *pilot_l   = getVariableMassByName( "pilot_l" );
-    VarMass *pilot_r   = getVariableMassByName( "pilot_r" );
-    VarMass *fuel_tank = getVariableMassByName( "fuel_tank" );
-    VarMass *cabin     = getVariableMassByName( "cabin" );
+    /////////////////////////////////
+    Stabilizer::readData( dataNode );
+    /////////////////////////////////
 
-    if ( pilot_l && pilot_r && fuel_tank && cabin )
+    if ( dataNode.isValid() )
     {
-        pilot_l->input   = &_aircraft->getDataInp()->masses.pilot_1;
-        pilot_r->input   = &_aircraft->getDataInp()->masses.pilot_2;
-        fuel_tank->input = &_aircraft->getDataInp()->masses.fuel_tank_1;
-        cabin->input     = &_aircraft->getDataInp()->masses.cabin;
+        int result = FDM_SUCCESS;
+
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _dcx_drudder, "dcx_drudder" );
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _dcy_drudder, "dcy_drudder" );
+
+        if ( result != FDM_SUCCESS ) XmlUtils::throwError( __FILE__, __LINE__, dataNode );
     }
     else
     {
-        Exception e;
-
-        e.setType( Exception::UnknownException );
-        e.setInfo( "Obtaining variable masses failed." );
-
-        FDM_THROW( e );
+        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
     }
+}
 
-    /////////////
-    Mass::init();
-    /////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void C130_StabilizerVer::computeForceAndMoment( const Vector3 &vel_air_bas,
+                                                const Vector3 &omg_air_bas,
+                                                double airDensity,
+                                                double rudder )
+{
+    _rudder = rudder;
+
+    Stabilizer::computeForceAndMoment( vel_air_bas, omg_air_bas,
+                                       airDensity );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+double C130_StabilizerVer::getCx( double angle ) const
+{
+    return Stabilizer::getCx( angle )
+            + _dcx_drudder * _rudder;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+double C130_StabilizerVer::getCy( double angle ) const
+{
+    return Stabilizer::getCy( angle )
+            + _dcy_drudder * _rudder;
 }

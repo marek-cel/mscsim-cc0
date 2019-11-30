@@ -125,7 +125,9 @@
  *
  ******************************************************************************/
 
-#include <fdm_uh60/uh60_Aircraft.h>
+#include <fdm_c130/c130_Propeller.h>
+
+#include <fdm/xml/fdm_XmlUtils.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -133,42 +135,48 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::UH60_Mass( const UH60_Aircraft *aircraft ) :
-    Mass( aircraft ),
-    _aircraft ( aircraft )
-{}
+C130_Propeller::C130_Propeller() :
+    Propeller(),
 
-////////////////////////////////////////////////////////////////////////////////
-
-UH60_Mass::~UH60_Mass() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void UH60_Mass::init()
+    _governor ( 0 )
 {
-    VarMass *pilot_l   = getVariableMassByName( "pilot_l" );
-    VarMass *pilot_r   = getVariableMassByName( "pilot_r" );
-    VarMass *fuel_tank = getVariableMassByName( "fuel_tank" );
-    VarMass *cabin     = getVariableMassByName( "cabin" );
+    _governor = new C130_Governor();
+}
 
-    if ( pilot_l && pilot_r && fuel_tank && cabin )
+////////////////////////////////////////////////////////////////////////////////
+
+C130_Propeller::~C130_Propeller()
+{
+    FDM_DELPTR( _governor );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void C130_Propeller::readData( XmlNode &dataNode )
+{
+    ////////////////////////////////
+    Propeller::readData( dataNode );
+    ////////////////////////////////
+
+    if ( dataNode.isValid() )
     {
-        pilot_l->input   = &_aircraft->getDataInp()->masses.pilot_1;
-        pilot_r->input   = &_aircraft->getDataInp()->masses.pilot_2;
-        fuel_tank->input = &_aircraft->getDataInp()->masses.fuel_tank_1;
-        cabin->input     = &_aircraft->getDataInp()->masses.cabin;
+        XmlNode nodeGovernor = dataNode.getFirstChildElement( "governor" );
+        _governor->readData( nodeGovernor );
     }
     else
     {
-        Exception e;
-
-        e.setType( Exception::UnknownException );
-        e.setInfo( "Obtaining variable masses failed." );
-
-        FDM_THROW( e );
+        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
     }
+}
 
-    /////////////
-    Mass::init();
-    /////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void C130_Propeller::update( double propellerLever, double engineTorque,
+                            double airspeed, double airDensity )
+{
+    _governor->update( propellerLever, _speed_rpm );
+
+    ///////////////////////////////////////////////////////////////////////////////
+    Propeller::update( _governor->getPitch(), engineTorque, airspeed, airDensity );
+    ///////////////////////////////////////////////////////////////////////////////
 }

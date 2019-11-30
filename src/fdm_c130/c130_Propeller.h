@@ -124,51 +124,56 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm_uh60/uh60_Aircraft.h>
-
-////////////////////////////////////////////////////////////////////////////////
-
-using namespace fdm;
+#ifndef C130_PROPELLER_H
+#define C130_PROPELLER_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::UH60_Mass( const UH60_Aircraft *aircraft ) :
-    Mass( aircraft ),
-    _aircraft ( aircraft )
-{}
+#include <fdm/models/fdm_Propeller.h>
+
+#include <fdm_c130/c130_Governor.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-UH60_Mass::~UH60_Mass() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void UH60_Mass::init()
+namespace fdm
 {
-    VarMass *pilot_l   = getVariableMassByName( "pilot_l" );
-    VarMass *pilot_r   = getVariableMassByName( "pilot_r" );
-    VarMass *fuel_tank = getVariableMassByName( "fuel_tank" );
-    VarMass *cabin     = getVariableMassByName( "cabin" );
 
-    if ( pilot_l && pilot_r && fuel_tank && cabin )
-    {
-        pilot_l->input   = &_aircraft->getDataInp()->masses.pilot_1;
-        pilot_r->input   = &_aircraft->getDataInp()->masses.pilot_2;
-        fuel_tank->input = &_aircraft->getDataInp()->masses.fuel_tank_1;
-        cabin->input     = &_aircraft->getDataInp()->masses.cabin;
-    }
-    else
-    {
-        Exception e;
+/**
+ * @brief C-130 propeller class.
+ */
+class C130_Propeller : public Propeller
+{
+public:
 
-        e.setType( Exception::UnknownException );
-        e.setInfo( "Obtaining variable masses failed." );
+    /** Constructor. */
+    C130_Propeller();
 
-        FDM_THROW( e );
-    }
+    /** Destructor. */
+    virtual ~C130_Propeller();
 
-    /////////////
-    Mass::init();
-    /////////////
-}
+    /**
+     * Reads data.
+     * @param dataNode XML node
+     */
+    void readData( XmlNode &dataNode );
+
+    /**
+     * Updates propeller.
+     * @param normPitch [0.0,1.0] normalized propeller lever position
+     * @param engineTorque [N] engine torque
+     * @param airspeed [m/s] airspeed
+     * @param airDensity [kg/m^3] air density
+     */
+    void update( double propellerLever, double engineTorque,
+                 double airspeed, double airDensity );
+
+private:
+
+    C130_Governor *_governor;       ///< propeller governor model
+};
+
+} // end of fdm namespace
+
+////////////////////////////////////////////////////////////////////////////////
+
+#endif // C130_PROPELLER_H

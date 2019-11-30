@@ -151,9 +151,7 @@ void F16_LandingGear::init()
     Wheel *wheel_l = getWheelByName( "wheel_l" );
     Wheel *wheel_r = getWheelByName( "wheel_r" );
 
-    if ( 0 != wheel_n
-      && 0 != wheel_l
-      && 0 != wheel_r )
+    if ( wheel_n && wheel_l && wheel_r )
     {
         wheel_n->input = &_aircraft->getDataInp()->controls.landing_gear;
         wheel_l->input = &_aircraft->getDataInp()->controls.landing_gear;

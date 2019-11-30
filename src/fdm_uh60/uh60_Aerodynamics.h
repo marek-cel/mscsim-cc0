@@ -149,6 +149,9 @@ class UH60_Aircraft;    ///< aircraft class forward declaration
 
 /**
  * @brief UH-60 aerodynamics class.
+ *
+ * @see Howlett J.: UH-60A Black Hawk Engineering Simulation Program. NASA, CR-166309, 1981
+ * @see Hilbert K.: A Mathematical Model of the UH-60 Helicopter. NASA, TM-85890, 1984
  */
 class UH60_Aerodynamics : public Aerodynamics
 {

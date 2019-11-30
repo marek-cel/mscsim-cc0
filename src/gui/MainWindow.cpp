@@ -1105,6 +1105,8 @@ void MainWindow::updateStatusBar()
 
 void MainWindow::updateOutputData()
 {
+    Aircrafts::Aircraft aircraft = Aircrafts::instance()->getAircraft( _dialogInit->getTypeIndex() );
+
     // CGI - airport
     Data::get()->cgi.airport.lightsHELI = _ui->actionAirportLightsHELI->isChecked();
     Data::get()->cgi.airport.lightsRALS = _ui->actionAirportLightsRALS->isChecked();
@@ -1116,6 +1118,11 @@ void MainWindow::updateOutputData()
     Data::get()->cgi.airport.lightsVGSI = _ui->actionAirportLightsVGSI->isChecked();
     Data::get()->cgi.airport.gatesRwy18 = _ui->actionAirportGatesRwy18->isChecked();
     Data::get()->cgi.airport.gatesRwy36 = _ui->actionAirportGatesRwy36->isChecked();
+
+    // CGI - camera
+    Data::get()->cgi.camera.offset_x = aircraft.offset_x;
+    Data::get()->cgi.camera.offset_y = aircraft.offset_y;
+    Data::get()->cgi.camera.offset_z = aircraft.offset_z;
 
     // CGI - environment
     Data::get()->cgi.environment.clouds.type = _dialogEnvr->getCloudsType();
@@ -1165,8 +1172,6 @@ void MainWindow::updateOutputData()
     Data::get()->initial.heading      = _dialogInit->getPsi();
     Data::get()->initial.airspeed     = _dialogInit->getIAS();
     Data::get()->initial.engineOn     = _dialogInit->getEngine();
-
-    Aircrafts::Aircraft aircraft = Aircrafts::instance()->getAircraft( _dialogInit->getTypeIndex() );
 
     // ownship
     strcpy( Data::get()->ownship.aircraftFile, aircraft.file.toStdString().c_str() );
