@@ -173,7 +173,7 @@ public:
     void setDistance( float distance, bool visible = false );
 
     /** @param heading [deg] */
-    void setHeadingSet( float heading );
+    void setHeadingSel( float heading );
 
 protected:
 
@@ -212,7 +212,7 @@ private:
     float _deviation;                   ///<
     float _distance;                    ///<
 
-    float _heading_set;                 ///< [deg]
+    float _heading_sel;                 ///< [deg]
 
     CDI _cdi;                           ///<
 

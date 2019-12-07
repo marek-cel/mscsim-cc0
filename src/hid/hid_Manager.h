@@ -286,12 +286,12 @@ private:
     Manager( const Manager & ) {}
 
     /** */
-    void getAxisValue( const Assignment &assignment, double &value, int absolute = 0 );
+    void getAxisValue( const Assignment &assignment, double *value, int absolute = 0 );
 
     /** */
     void getRealValue( Assignment::Action decreaseAction,
                        Assignment::Action increaseAction,
-                       double &value,
+                       double *value,
                        double speed,
                        double min,
                        double max,
@@ -299,16 +299,16 @@ private:
 
     /** */
     void getRealValue( Assignment::Action applyAction,
-                       double &value,
+                       double *value,
                        double speed,
                        double min,
                        double max );
 
     /** */
     void getRealValue( Assignment::Action toggleAction,
-                       bool &togglePrev,
-                       bool &state,
-                       double &value,
+                       bool *togglePrev,
+                       bool *state,
+                       double *value,
                        double speed,
                        double min,
                        double max );

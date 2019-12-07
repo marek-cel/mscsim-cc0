@@ -327,8 +327,6 @@ public:
         /** VOR TO/FROM indicator. */
         enum NAV_CDI { NONE = 0, TO, FROM };
 
-        double course;                      ///< [rad]
-
         bool adf_visible;                   ///<
         double adf_bearing;                 ///< [rad]
 
@@ -375,6 +373,7 @@ public:
         double slipSkidAngle;               ///< [rad] slip/skid angle
 
         double airspeed;                    ///< [m/s] airspeed
+        double ias;                         ///< [m/s] indicated airspeed
         double machNumber;                  ///< [-]   Mach number
         double climbRate;                   ///< [m/s] climb rate
 

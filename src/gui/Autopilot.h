@@ -124,84 +124,135 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#ifdef SIM_NETWORKING
-
-////////////////////////////////////////////////////////////////////////////////
-
-#include <Networking.h>
-
-#include <Common.h>
-#include <Data.h>
+#ifndef AUTOPILOT_H
+#define AUTOPILOT_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Networking::Networking() :
-    _address ( "127.0.0.1" ),
-    _port ( 5505 ),
+#include <QElapsedTimer>
+#include <QObject>
 
-    _socket ( NULLPTR )
+#include <fdm/auto/fdm_Autopilot.h>
+#include <fdm_c172/c172_Autopilot.h>
+
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief Autopilot class.
+ */
+class Autopilot: public QObject
 {
-    _socket = new QUdpSocket();
-    _socket->connectToHost( _address, _port );
+    Q_OBJECT
 
-    memset( &_data_net, 0, sizeof(DataNet) );
-}
+public:
+
+    Autopilot();
+
+    virtual ~Autopilot();
+
+    void init();
+    void stop();
+
+    void update( bool btn_dn, bool btn_up );
+
+    void onPressedAP();
+    void onPressedFD();
+
+    void onPressedALT();
+    void onPressedIAS();
+    void onPressedENG();
+    void onPressedARM();
+
+    void onPressedHDG( double hdg );
+    void onPressedNAV( double crs );
+    void onPressedAPR();
+    void onPressedBC();
+
+    void onPressedYD();
+
+    void onPressedSoftRide();
+    void onPressedHalfBank();
+
+    void onPressedTest();
+    void onReleasedTest();
+
+    double getAirspeed() const;
+    double getAltitude() const;
+    double getClimbRate() const;
+    double getHeading() const;
+
+    double getCmdRoll() const;
+    double getCmdPitch() const;
+
+    double getCtrlRoll() const;
+    double getCtrlPitch() const;
+    double getCtrlYaw() const;
+
+    bool getLampAP() const;
+    bool getLampFD() const;
+    bool getLampYD() const;
+    bool getLampALT() const;
+    bool getLampIAS() const;
+    bool getLampGS()  const;
+    bool getLampHDG() const;
+    bool getLampNAV() const;
+    bool getLampAPR() const;
+    bool getLampBC()  const;
+    bool getLampNAV_ARM() const;
+    bool getLampAPR_ARM() const;
+    bool getLampSR() const;
+    bool getLampHB() const;
+    bool getLampTRIM() const;
+    bool getLampVS()  const;
+    bool getLampARM() const;
+
+    double getMinAltitude()  const;
+    double getMaxAltitude()  const;
+    double getMinClimbRate() const;
+    double getMaxClimbRate() const;
+
+    bool isActiveAP() const;
+    bool isActiveFD() const;
+    bool isActiveYD() const;
+
+    bool isActiveALT() const;
+    bool isActiveIAS() const;
+    bool isActiveVS()  const;
+    bool isActiveARM() const;
+    bool isActiveGS()  const;
+    bool isActiveHDG() const;
+    bool isActiveNAV() const;
+    bool isActiveAPR() const;
+    bool isActiveBC()  const;
+
+    bool isInited() const;
+    bool isWorking() const;
+
+    void setAltitude( double altitude );
+    void setClimbRate( double climbRate );
+    void setCourse( double course );
+    void setHeading( double heading );
+
+protected:
+
+    /** */
+    void timerEvent( QTimerEvent *event );
+
+private:
+
+    typedef fdm::C172_Autopilot C172_Autopilot;
+
+    QElapsedTimer *_timer;              ///<
+
+    fdm::Autopilot *_autopilot;         ///<
+    C172_Autopilot *_autopilot_c172;    ///<
+
+    double _altitude;                   ///< [m]   desired altitude
+    double _climbRate;                  ///< [m/s] desired climb rate
+
+    int _timerId;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Networking::~Networking()
-{
-    if ( _socket )
-    {
-        _socket->abort();
-        _socket->close();
-        delete _socket;
-    }
-    _socket = NULLPTR;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void Networking::update()
-{
-    _data_net.flightData.latitude      = Data::get()->ownship.latitude;
-    _data_net.flightData.longitude     = Data::get()->ownship.longitude;
-    _data_net.flightData.altitude_asl  = Data::get()->ownship.altitude_asl;
-    _data_net.flightData.altitude_agl  = Data::get()->ownship.altitude_agl;
-    _data_net.flightData.roll          = Data::get()->ownship.roll;
-    _data_net.flightData.pitch         = Data::get()->ownship.pitch;
-    _data_net.flightData.heading       = Data::get()->ownship.heading;
-    _data_net.flightData.angleOfAttack = Data::get()->ownship.angleOfAttack;
-    _data_net.flightData.sideslipAngle = Data::get()->ownship.sideslipAngle;
-    _data_net.flightData.climbAngle    = Data::get()->ownship.climbAngle;
-    _data_net.flightData.trackAngle    = Data::get()->ownship.trackAngle;
-    _data_net.flightData.slipSkidAngle = Data::get()->ownship.slipSkidAngle;
-    _data_net.flightData.airspeed      = Data::get()->ownship.airspeed;
-    _data_net.flightData.machNumber    = Data::get()->ownship.machNumber;
-    _data_net.flightData.climbRate     = Data::get()->ownship.climbRate;
-    _data_net.flightData.rollRate      = Data::get()->ownship.rollRate;
-    _data_net.flightData.pitchRate     = Data::get()->ownship.pitchRate;
-    _data_net.flightData.yawRate       = Data::get()->ownship.yawRate;
-    _data_net.flightData.turnRate      = Data::get()->ownship.turnRate;
-
-    _data_net.navigation.course = Data::get()->navigation.course;
-
-    //_data_net.navigation.course = Data::get()->navigation.
-
-    if ( _socket->state() == QAbstractSocket::UnconnectedState )
-    {
-        _socket->connectToHost( _address, _port );
-    }
-    else
-    {
-        if ( _socket->state() == QAbstractSocket::ConnectedState )
-        {
-            _socket->writeDatagram( (char*)(&_data_net), (qint64)sizeof(DataNet), _address, _port );
-        }
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-#endif
+#endif // AUTOPILOT_H

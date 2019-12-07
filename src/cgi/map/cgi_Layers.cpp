@@ -233,10 +233,7 @@ Layers::Layers( const Module *parent ) :
     initLayer( _borders      .get() , Map::_colorBorders     );
 
     createOcean();
-
-#   ifndef SIM_MARBLE_MAPS
     readLayers();
-#   endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
