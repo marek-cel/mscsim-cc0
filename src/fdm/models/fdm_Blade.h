@@ -124,17 +124,36 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm/models/fdm_RotorBlade.h>
-
-////////////////////////////////////////////////////////////////////////////////
-
-using namespace fdm;
+#ifndef FDM_BLADE_H
+#define FDM_BLADE_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-RotorBlade::RotorBlade() {}
+#include <fdm/fdm_Defines.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-RotorBlade::~RotorBlade() {}
+namespace fdm
+{
+
+/**
+ * @brief Rotor blade class for Blade Element Theory (BET) model.
+ *
+ * @see Stepniewski W.: Rotary-Wing Aerodynamics. Volume I: Basic Theories of Rotor Aerodynamics, 1984
+ */
+class FDMEXPORT Blade
+{
+public:
+
+    /** Constructor. */
+    Blade();
+
+    /** Destructor. */
+    virtual ~Blade();
+};
+
+} // end of fdm namespace
+
+////////////////////////////////////////////////////////////////////////////////
+
+#endif // FDM_BLADE_H
