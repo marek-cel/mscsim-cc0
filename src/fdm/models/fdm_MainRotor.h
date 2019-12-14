@@ -141,7 +141,7 @@ namespace fdm
 {
 
 /**
- * @brief Helicopter main rotor base class.
+ * @brief Helicopter main rotor actuator disc model class.
  *
  * <h3>Coordinate Systems Used for Rotor Calculations</h3>
  *
