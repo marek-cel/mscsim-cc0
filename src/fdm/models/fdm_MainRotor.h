@@ -141,7 +141,9 @@ namespace fdm
 {
 
 /**
- * @brief Helicopter main rotor actuator disc model class.
+ * @brief Helicopter main rotor model class.
+ *
+ * This model is based on actuator disc theory.
  *
  * <h3>Coordinate Systems Used for Rotor Calculations</h3>
  *
@@ -188,7 +190,7 @@ namespace fdm
  *   <number_of_blades> { number of blades } </number_of_blades>
  *   <blade_mass> { [kg] single blade mass } </blade_mass>
  *   <rotor_radius> { [m] rotor radius } </rotor_radius>
- *   <blades_chord> { [m] blades chord } </blades_chord>
+ *   <blade_chord> { [m] blades chord } </blade_chord>
  *   <hinge_offset> { [m] flapping hinge offset } </hinge_offset>
  *   <lift_slope> { [1/rad] blade section lift curve slope } </lift_slope>
  *   <tip_losses> { [-] tip losses coefficient } </tip_losses>

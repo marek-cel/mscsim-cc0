@@ -141,7 +141,9 @@ namespace fdm
 {
 
 /**
- * @brief Helicopter tail rotor actuator disc model class.
+ * @brief Helicopter tail rotor model class.
+ *
+ * This model is based on actuator disc theory.
  *
  * <h3>XML configuration file format:</h3>
  * @code
@@ -151,7 +153,7 @@ namespace fdm
  *   <number_of_blades> { number of blades } </number_of_blades>
  *   <blade_mass> { [kg] single blade mass } </blade_mass>
  *   <rotor_radius> { [m] rotor radius } </rotor_radius>
- *   <blades_chord> { [m] blades chord } </blades_chord>
+ *   <blade_chord> { [m] blades chord } </blade_chord>
  *   <lift_slope> { [1/rad] blade section lift curve slope } </lift_slope>
  *   <tip_losses> { [-] tip losses coefficient } </tip_losses>
  *   <delta_0> { [-] drag coefficient constant component } </delta_0>
