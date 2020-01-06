@@ -124,34 +124,52 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <gui/ComboUnitsLength.h>
-
-#include <fdm/utils/fdm_Units.h>
+#ifndef FDM_SIMPLEROTOR_H
+#define FDM_SIMPLEROTOR_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-ComboUnitsLength::ComboUnitsLength( QWidget *parent ) :
-    ComboUnits ( parent )
+#include <fdm/fdm_Base.h>
+
+#include <fdm/utils/fdm_Matrix3x3.h>
+
+#include <fdm/xml/fdm_XmlNode.h>
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace fdm
 {
-    _coefs.push_back( 1.0 );
-    _names.push_back( QString( "m" ) );
 
-    _coefs.push_back( fdm::Units::m2ft() );
-    _names.push_back( QString( "ft" ) );
+/**
+ * @brief Helicopter main rotor simplified model class.
+ */
+class FDMEXPORT SimpleRotor : public Base
+{
+public:
 
-    _coefs.push_back( fdm::Units::m2km() );
-    _names.push_back( QString( "km" ) );
+    /** Constructor. */
+    SimpleRotor();
 
-    _coefs.push_back( fdm::Units::m2mi() );
-    _names.push_back( QString( "mi" ) );
+    /** Destructor. */
+    virtual ~SimpleRotor();
 
-    _coefs.push_back( fdm::Units::m2nmi() );
-    _names.push_back( QString( "nmi" ) );
+    /**
+     * Reads data.
+     * @param dataNode XML node
+     */
+    virtual void readData( XmlNode &dataNode );
 
-    for ( size_t i = 0; i < _names.size(); i++ ) addItem( _names[ i ] );
-}
+    inline const Vector3& getFor_BAS() const { return _for_bas; }
+    inline const Vector3& getMom_BAS() const { return _mom_bas; }
+
+protected:
+
+    Vector3 _for_bas;           ///< [N] total force vector expressed in BAS
+    Vector3 _mom_bas;           ///< [N*m] total moment vector expressed in BAS
+};
+
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
-    
-ComboUnitsLength::~ComboUnitsLength() {}
+
+#endif // FDM_SIMPLEROTOR_H

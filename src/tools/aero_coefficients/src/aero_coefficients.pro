@@ -13,6 +13,7 @@ TARGET = aero_coefficients
 ################################################################################
 
 DEFINES += \
+    QT_DEPRECATED_WARNINGS
 
 win32: QMAKE_LFLAGS += \
     /INCREMENTAL:NO

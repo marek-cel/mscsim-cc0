@@ -1,5 +1,5 @@
 /****************************************************************************//*
- * Copyright (C) 2019 Marek M. Cel
+ * Copyright (C) 2020 Marek M. Cel
  *
  * Creative Commons Legal Code
  *
@@ -174,6 +174,9 @@ public:
 
     /** */
     float getRandom( float min, float max );
+
+    /** */
+    double getRandom( double min, double max );
 
 private:
 

@@ -125,33 +125,35 @@
  *
  ******************************************************************************/
 
-#include <gui/ComboUnitsLength.h>
+#include <fdm/models/fdm_SimpleRotor.h>
 
-#include <fdm/utils/fdm_Units.h>
+#include <fdm/xml/fdm_XmlUtils.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-ComboUnitsLength::ComboUnitsLength( QWidget *parent ) :
-    ComboUnits ( parent )
+using namespace fdm;
+
+////////////////////////////////////////////////////////////////////////////////
+
+SimpleRotor::SimpleRotor()
+{}
+
+////////////////////////////////////////////////////////////////////////////////
+
+SimpleRotor::~SimpleRotor() {}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void SimpleRotor::readData( XmlNode &dataNode )
 {
-    _coefs.push_back( 1.0 );
-    _names.push_back( QString( "m" ) );
+    if ( dataNode.isValid() )
+    {
+        int result = FDM_SUCCESS;
 
-    _coefs.push_back( fdm::Units::m2ft() );
-    _names.push_back( QString( "ft" ) );
-
-    _coefs.push_back( fdm::Units::m2km() );
-    _names.push_back( QString( "km" ) );
-
-    _coefs.push_back( fdm::Units::m2mi() );
-    _names.push_back( QString( "mi" ) );
-
-    _coefs.push_back( fdm::Units::m2nmi() );
-    _names.push_back( QString( "nmi" ) );
-
-    for ( size_t i = 0; i < _names.size(); i++ ) addItem( _names[ i ] );
+        // TODO
+    }
+    else
+    {
+        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
+    }
 }
-
-////////////////////////////////////////////////////////////////////////////////
-    
-ComboUnitsLength::~ComboUnitsLength() {}
