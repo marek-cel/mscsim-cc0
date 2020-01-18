@@ -153,6 +153,10 @@ public:
 
     inline static std::ostream& out() { return _out; }
 
+    /**
+     * Creates time tag.
+     * @return output stream
+     */
     static std::ostream& timeTag();
 };
 

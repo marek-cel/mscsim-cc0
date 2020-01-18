@@ -124,76 +124,123 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm/models/fdm_MainRotor2.h>
-
-#include <fdm/xml/fdm_XmlUtils.h>
+#ifndef FDM_MAINROTORBE_H
+#define FDM_MAINROTORBE_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using namespace fdm;
+#include <fdm/models/fdm_MainRotor.h>
+
+#include <fdm/models/fdm_Blade.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-MainRotor2::MainRotor2() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-MainRotor2::~MainRotor2()
+namespace fdm
 {
-    Blades::iterator it = _blades.begin();
 
-    while ( it != _blades.end() )
-    {
-        FDM_DELPTR( (*it) );
-        it = _blades.erase( it );
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void MainRotor2::readData( XmlNode &dataNode )
+/**
+ * @brief Helicopter main rotor model class.
+ *
+ * This model is based on blade element theory.
+ *
+ * <h3>Coordinate Systems Used for Rotor Calculations</h3>
+ *
+ * <h4>Rotor Axes System</h4>
+ * <p>Abbreviated as RAS.</p>
+ * <p>Origin of the Rotor Axes System is coincident with the rotor hub center,
+ * the x-axis is positive forwards, the y-axis is positive right and z-axis
+ * is positive downwards and coincident with the rotor shaft axis.</p>
+ *
+ * <h4>Individual Blade Coordinates</h4>
+ * <p>Abbreviated as IBC.</p>
+ *
+ * <h3>XML configuration file format:</h3>
+ * @code
+ * <main_rotor>
+ *   <hub_center> { [m] x-coordinate } { [m] y-coordinate } { [m] z-coordinate } </hub_center>
+ *   <inclination> { [rad] rotor inclination angle (positive if forward) } </inclination>
+ *   <number_of_blades> { number of blades } </number_of_blades>
+ *   <blade>
+ *     { blade data }
+ *   </blade>
+ * </main_rotor>
+ * @endcode
+ */
+class FDMEXPORT MainRotorBE : public MainRotor
 {
-    if ( dataNode.isValid() )
-    {
-        int result = FDM_SUCCESS;
+public:
 
-        double inclination = 0.0;
+    typedef std::vector< Blade* > Blades;
 
-        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _r_hub_bas, "hub_center" );
+    /** Constructor. */
+    MainRotorBE();
 
-        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, inclination, "inclination" );
+    /** Destructor. */
+    virtual ~MainRotorBE();
 
-        if ( result == FDM_SUCCESS )
-        {
-            _bas2ras = Matrix3x3( Angles( 0.0, -inclination, 0.0 ) );
-            _ras2bas = _bas2ras.getTransposed();
-        }
-        else
-        {
-            XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-        }
-    }
-    else
-    {
-        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-    }
-}
+    /**
+     * Reads data.
+     * @param dataNode XML node
+     */
+    virtual void readData( XmlNode &dataNode );
 
-////////////////////////////////////////////////////////////////////////////////
+    /**
+     * Integrates model.
+     * @param timeStep [s] time step
+     * @param vel_bas [m/s] aircraft linear velocity vector expressed in BAS
+     * @param omg_bas [rad/s] aircraft angular velocity expressed in BAS
+     * @param acc_bas [m/s^2] aircraft linear acceleration vector expressed in BAS
+     * @param eps_bas [rad/s^2] aircraft angular acceleration vector expressed in BAS
+     * @param grav_bas [m/s^2] gravity acceleration vector expressed in BAS
+     * @param vel_air_bas [m/s] aircraft linear velocity relative to the air expressed in BAS
+     * @param omg_air_bas [rad/s] aircraft angular velocity relative to the air expressed in BAS
+     * @param airDensity [kg/m^3] air density
+     */
+    virtual void integrate( double timeStep,
+                            const Vector3 &vel_bas,
+                            const Vector3 &omg_bas,
+                            const Vector3 &acc_bas,
+                            const Vector3 &eps_bas,
+                            const Vector3 &grav_bas,
+                            const Vector3 &vel_air_bas,
+                            const Vector3 &omg_air_bas,
+                            double airDensity );
 
-void MainRotor2::update( double omega,
-                         const Vector3 &vel_air_bas,
-                         const Vector3 &omg_air_bas,
+    /**
+     * @brief Updates main rotor model.
+     * @param omega [rad/s] rotor revolution speed
+     * * @param azimuth [rad]
+     * @param collective [rad] collective pitch angle
+     * @param cyclicLat [rad] cyclic lateral pitch angle
+     * @param cyclicLon [rad] cyclic longitudinal pitch angle
+     */
+    virtual void update( double omega,
+                         double azimuth,
                          double collective,
                          double cyclicLat,
-                         double cyclicLon )
-{
-    // velocity transformations
-    Vector3 vel_air_ras = _bas2ras * ( vel_air_bas + ( omg_air_bas ^ _r_hub_bas ) );
+                         double cyclicLon );
 
-    for ( Blades::iterator it = _blades.begin(); it != _blades.end(); it++ )
-    {
-        (*it)->update( omega );
-    }
-}
+    /**
+     * Returns rotor total inartia about shaft axis.
+     * @return [kg*m^2] rotor total inartia about shaft axis
+     */
+    inline double getInertia() const { return _ir; }
+
+protected:
+
+    Blades _blades;             ///< main rotor blades
+
+    double _ir;                 ///< [kg*m^2] rotor inartia about shaft axis
+
+    double _delta_psi;          ///< [rad]
+
+    double _theta_0;            ///< [rad] collective feathering angle
+    double _theta_1c;           ///< [rad]
+    double _theta_1s;           ///< [rad]
+};
+
+} // end of fdm namespace
+
+////////////////////////////////////////////////////////////////////////////////
+
+#endif // FDM_MAINROTORBE_H

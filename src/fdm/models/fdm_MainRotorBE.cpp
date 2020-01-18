@@ -124,79 +124,141 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_MAINROTOR2_H
-#define FDM_MAINROTOR2_H
+
+#include <fdm/models/fdm_MainRotorBE.h>
+
+#include <fdm/utils/fdm_String.h>
+
+#include <fdm/xml/fdm_XmlUtils.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/fdm_Base.h>
-
-#include <fdm/models/fdm_Blade.h>
-
-#include <fdm/utils/fdm_Matrix3x3.h>
-#include <fdm/utils/fdm_Vector3.h>
-
-#include <fdm/xml/fdm_XmlNode.h>
+using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
+MainRotorBE::MainRotorBE() :
+    _ir ( 0.0 ),
+
+    _delta_psi ( 0.0 ),
+
+    _theta_0  ( 0.0 ),
+    _theta_1c ( 0.0 ),
+    _theta_1s ( 0.0 )
+{}
+
+////////////////////////////////////////////////////////////////////////////////
+
+MainRotorBE::~MainRotorBE()
 {
+    Blades::iterator it = _blades.begin();
 
-/**
- * @brief Helicopter main rotor model class.
- *
- * This model is based on blade element theory.
- */
-class FDMEXPORT MainRotor2 : public Base
-{
-public:
-
-    typedef std::vector< Blade* > Blades;
-
-    /** Constructor. */
-    MainRotor2();
-
-    /** Destructor. */
-    virtual ~MainRotor2();
-
-    /**
-     * Reads data.
-     * @param dataNode XML node
-     */
-    virtual void readData( XmlNode &dataNode );
-
-    /**
-     * @brief update
-     * @param omega [rad/s]
-     */
-    virtual void update( double omega,
-                         const Vector3 &vel_air_bas,
-                         const Vector3 &omg_air_bas,
-                         double collective,
-                         double cyclicLat,
-                         double cyclicLon );
-
-    inline const Vector3& getFor_BAS() const { return _for_bas; }
-    inline const Vector3& getMom_BAS() const { return _mom_bas; }
-
-protected:
-
-    Vector3 _for_bas;           ///< [N] total force vector expressed in BAS
-    Vector3 _mom_bas;           ///< [N*m] total moment vector expressed in BAS
-
-    Vector3 _r_hub_bas;         ///< [m] rotor hub coordinates expressed in BAS
-
-    Matrix3x3 _bas2ras;         ///< matrix of rotation from BAS to RAS
-    Matrix3x3 _ras2bas;         ///< matrix of rotation from RAS to BAS
-
-    Blades _blades;             ///< main rotor blades
-
-    int _nb;                    ///< number of rotor blades
-};
-
-} // end of fdm namespace
+    while ( it != _blades.end() )
+    {
+        FDM_DELPTR( *it );
+        it = _blades.erase( it );
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // FDM_MAINROTOR2_H
+void MainRotorBE::readData( XmlNode &dataNode )
+{
+    ////////////////////////////////
+    MainRotor::readData( dataNode );
+    ////////////////////////////////
+
+    if ( dataNode.isValid() )
+    {
+        _delta_psi = ( 2.0 * M_PI ) / (double)( _nb );
+
+        XmlNode nodeBlade = dataNode.getFirstChildElement( "blade" );
+
+        for ( int i = 0; i < _nb; i++ )
+        {
+            Blade *blade = new Blade();
+            blade->readData( nodeBlade );
+
+            _ir += blade->getInertia();
+
+            _blades.push_back( blade );
+        }
+    }
+    else
+    {
+        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+#include <iostream>
+void MainRotorBE::integrate( double timeStep,
+                             const Vector3 &vel_bas,
+                             const Vector3 &omg_bas,
+                             const Vector3 &acc_bas,
+                             const Vector3 &eps_bas,
+                             const Vector3 &grav_bas,
+                             const Vector3 &vel_air_bas,
+                             const Vector3 &omg_air_bas,
+                             double airDensity )
+{
+    // velocity transformations
+    Vector3 vel_air_ras = _bas2ras * ( vel_air_bas + ( omg_air_bas % _r_hub_bas ) );
+    Vector3 omg_air_ras = _bas2ras * omg_air_bas;
+
+    // azimuth integration
+    _azimuth += _omega * timeStep;
+    _azimuth = Angles::normalize( _azimuth );
+
+    double thrust = 0.0;
+    double hforce = 0.0;
+    double torque = 0.0;
+
+    // rotor blades integration
+    for ( int i = 0; i < _nb; i++ )
+    {
+        _blades[ i ]->integrate( timeStep,
+                                 vel_bas,
+                                 omg_bas,
+                                 acc_bas,
+                                 eps_bas,
+                                 grav_bas,
+                                 vel_air_ras,
+                                 omg_air_ras,
+                                 airDensity,
+                                 _azimuth + i * _delta_psi,
+                                 _omega,
+                                 _theta_0,
+                                 _theta_1c,
+                                 _theta_1s );
+
+        thrust += _blades[ i ]->getThrust();
+        hforce += _blades[ i ]->getHForce();
+        torque += _blades[ i ]->getTorque();
+    }
+
+    //std::cout << thrust << std::endl;
+
+    _for_bas = _ras2bas * Vector3( 0.0, 0.0, -thrust );
+    _mom_bas = ( _r_hub_bas % _for_bas );
+             //+ _ras2bas * Vector3( 0.0, 0.0, _direction == CW ? -torque : torque );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void MainRotorBE::update( double omega,
+                          double azimuth,
+                          double collective,
+                          double cyclicLat,
+                          double cyclicLon )
+{
+    ////////////////////////////////////
+    MainRotor::update( omega, azimuth );
+    ////////////////////////////////////
+
+    // controls
+    _theta_0  = collective;
+    _theta_1c = _direction == CW ? cyclicLat : -cyclicLat;
+    _theta_1s = cyclicLon;
+}

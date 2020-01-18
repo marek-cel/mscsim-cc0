@@ -129,22 +129,19 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/fdm_Base.h>
+#include <fdm/main/fdm_Module.h>
 
 #include <fdm/utils/fdm_Vector3.h>
-#include <fdm/xml/fdm_XmlNode.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace fdm
 {
 
-class Aircraft; ///< aircraft class forward declaration
-
 /**
  * @brief Propulsion base class.
  */
-class FDMEXPORT Propulsion : public Base
+class FDMEXPORT Propulsion : public Module
 {
 public:
 
@@ -156,9 +153,8 @@ public:
 
     /**
      * @brief Initializes propulsion.
-     * @param engineOn specifies if engine is working at start
      */
-    virtual void init( bool engineOn );
+    virtual void init();
 
     /**
      * Reads data.
@@ -177,15 +173,13 @@ public:
 
 protected:
 
-    const Aircraft *_aircraft;  ///< aircraft model main object
-
     Vector3 _for_bas;           ///< [N] total force vector expressed in BAS
     Vector3 _mom_bas;           ///< [N*m] total moment vector expressed in BAS
 
 private:
 
     /** Using this constructor is forbidden. */
-    Propulsion( const Propulsion & ) {}
+    Propulsion( const Propulsion & ) : Module( FDM_NULLPTR ) {}
 };
 
 } // end of fdm namespace

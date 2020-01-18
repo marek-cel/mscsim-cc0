@@ -162,11 +162,13 @@ C130_Propulsion::~C130_Propulsion()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void C130_Propulsion::init( bool engineOn )
+void C130_Propulsion::init()
 {
-    /////////////////////////////
-    Propulsion::init( engineOn );
-    /////////////////////////////
+    ///////////////////
+    Propulsion::init();
+    ///////////////////
+
+    bool engineOn = _aircraft->getInitPropState() == Aircraft::Running;
 
     for ( int i = 0; i < _enginesCount; i++ )
     {
@@ -210,7 +212,7 @@ void C130_Propulsion::computeForceAndMoment()
 
         // thrust and moment due to thrust
         Vector3 for_bas( _propeller[ i ]->getThrust(), 0.0, 0.0 );
-        Vector3 mom_bas = _propeller[ i ]->getPos_BAS() ^ for_bas;
+        Vector3 mom_bas = _propeller[ i ]->getPos_BAS() % for_bas;
 
         // gyro effect
         Vector3 omega_bas;
@@ -225,7 +227,7 @@ void C130_Propulsion::computeForceAndMoment()
         }
 
         mom_bas += ( _propeller[ i ]->getInertia() + _engine[ i ]->getInertia() )
-                 * ( omega_bas ^ _aircraft->getOmg_BAS() );
+                 * ( omega_bas % _aircraft->getOmg_BAS() );
 
         _for_bas += for_bas;
         _mom_bas += mom_bas;

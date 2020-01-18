@@ -206,7 +206,7 @@ public:
     double operator* ( const Vector3 &vect ) const;
 
     /** Cross product operator. */
-    Vector3 operator^ ( const Vector3 &vect ) const;
+    Vector3 operator% ( const Vector3 &vect ) const;
 
     /** Unary addition operator. */
     Vector3& operator+= ( const Vector3 &vect );
@@ -221,7 +221,7 @@ public:
     Vector3& operator/= ( double val );
 
     /** Unary cross product operator. */
-    Vector3& operator^= ( const Vector3 &vect );
+    Vector3& operator%= ( const Vector3 &vect );
 
 private:
 
