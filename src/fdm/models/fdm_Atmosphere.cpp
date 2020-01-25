@@ -127,11 +127,11 @@
 
 #include <fdm/models/fdm_Atmosphere.h>
 
+#include <cmath>
+
 #include <fdm/fdm_Log.h>
 
 #include <fdm/utils/fdm_WGS84.h>
-
-#include <cmath>
 
 ////////////////////////////////////////////////////////////////////////////////
 

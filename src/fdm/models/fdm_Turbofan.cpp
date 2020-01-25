@@ -194,9 +194,12 @@ void Turbofan::integrate( double timeStep )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Turbofan::update( double throttle, double temperature,
-                       double machNumber, double densityAltitude,
-                       bool fuel, bool starter )
+void Turbofan::update( double throttle,
+                       double temperature,
+                       double machNumber,
+                       double densityAltitude,
+                       bool fuel,
+                       bool starter )
 {
     computeThrust( machNumber, densityAltitude );
     // TODO

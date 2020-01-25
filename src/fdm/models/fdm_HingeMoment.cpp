@@ -172,7 +172,7 @@ void HingeMoment::readData( XmlNode &dataNode )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double HingeMoment::getHingeMoment( double dynamicPressure,
+double HingeMoment::getHingeMoment( double dynamicPress,
                                     double alpha,
                                     double delta,
                                     double delta_t ) const
@@ -182,5 +182,5 @@ double HingeMoment::getHingeMoment( double dynamicPressure,
               + _dch_ddelta   * delta
               + _dch_ddelta_t * delta_t;
 
-    return dynamicPressure * _area * _chord * ch;
+    return dynamicPress * _area * _chord * ch;
 }
