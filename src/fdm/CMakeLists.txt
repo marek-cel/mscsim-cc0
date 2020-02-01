@@ -1,7 +1,6 @@
 add_library( fdm STATIC
     fdm_Base.cpp
     fdm_Log.cpp
-    fdm_Manager.cpp
     fdm_Recorder.cpp
 
     auto/fdm_Autopilot.cpp
@@ -17,6 +16,7 @@ add_library( fdm STATIC
     main/fdm_Propulsion.cpp
     
     models/fdm_Atmosphere.cpp
+    models/fdm_Blade.cpp
     models/fdm_Fuselage.cpp
     models/fdm_Governor.cpp
     models/fdm_HingeMoment.cpp
@@ -25,7 +25,6 @@ add_library( fdm STATIC
     models/fdm_MainRotorBE.cpp
     models/fdm_PistonEngine.cpp
     models/fdm_Propeller.cpp
-    models/fdm_RotorBlade.cpp
     models/fdm_Schrenk.cpp
     models/fdm_SimpleRotor.cpp
     models/fdm_Stabilizer.cpp
