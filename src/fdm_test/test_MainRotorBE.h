@@ -19,19 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  ******************************************************************************/
-
-#include <fdm_test/test_MainRotor.h>
-
-////////////////////////////////////////////////////////////////////////////////
-
-using namespace fdm;
+#ifndef TEST_MAINROTORBE_H
+#define TEST_MAINROTORBE_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_MainRotor::TEST_MainRotor() :
-    MainRotorBE()
-{}
+#include <fdm/models/fdm_MainRotorBE.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_MainRotor::~TEST_MainRotor() {}
+namespace fdm
+{
+
+/** */
+class TEST_MainRotorBE : public MainRotorBE
+{
+public:
+
+    /** Constructor. */
+    TEST_MainRotorBE();
+
+    /** Destructor. */
+    ~TEST_MainRotorBE();
+};
+
+} // end of fdm namespace
+
+////////////////////////////////////////////////////////////////////////////////
+
+#endif // TEST_MAINROTORBE_H

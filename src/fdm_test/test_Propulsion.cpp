@@ -20,6 +20,7 @@
  * IN THE SOFTWARE.
  ******************************************************************************/
 
+#include <fdm_test/test_Propulsion.h>
 #include <fdm_test/test_Aircraft.h>
 
 #include <fdm/xml/fdm_XmlUtils.h>

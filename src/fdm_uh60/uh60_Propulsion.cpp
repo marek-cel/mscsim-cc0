@@ -125,6 +125,7 @@
  *
  ******************************************************************************/
 
+#include <fdm_uh60/uh60_Propulsion.h>
 #include <fdm_uh60/uh60_Aircraft.h>
 
 #include <fdm/xml/fdm_XmlUtils.h>

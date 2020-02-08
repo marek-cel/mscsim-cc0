@@ -154,9 +154,7 @@ public:
      * @param vel_air_bas [m/s] aircraft linear velocity relative to the air expressed in BAS
      * @param omg_air_bas [rad/s] aircraft angular velocity relative to the air expressed in BAS
      * @param airDensity [kg/m^3] air density
-     * @param angleOfAttackWing [rad] wing angle of attack
      * @param elevator [rad] elevator deflection
-     * @param elevatorTrim [rad] elevator trim deflection
      */
     void computeForceAndMoment( const Vector3 &vel_air_bas,
                                 const Vector3 &omg_air_bas,

@@ -124,17 +124,17 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_FUSELAGE_H
-#define FDM_FUSELAGE_H
+#ifndef FDM_MANAGER_H
+#define FDM_MANAGER_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/fdm_Base.h>
+#include <fdm/main/fdm_Aircraft.h>
 
-#include <fdm/utils/fdm_Table.h>
-#include <fdm/utils/fdm_Vector3.h>
+#include <fdm/fdm_DataInp.h>
+#include <fdm/fdm_DataOut.h>
 
-#include <fdm/xml/fdm_XmlNode.h>
+#include <fdm/fdm_Recorder.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -142,146 +142,111 @@ namespace fdm
 {
 
 /**
- * @brief Fuselage class.
- *
- * XML configuration file format:
- * @code
- * <fuselage>
- *   <aero_center> { [m] x-coordinate } { [m] y-coordinate } { [m] z-coordinate } </aero_center>
- *   <length> { [m] fuselage reference length } </length>
- *   <width> { [m] fuselage reference width } </width>
- *   <area> { [m^2] fuselage reference area } </area>
- *   <cx>
- *     { [rad] angle of attack } { [-] drag coefficient }
- *     ... { more entries }
- *   </cx>
- *   <cy>
- *     { [rad] angle of sideslip } { [-] sideforce coefficient }
- *     ... { more entries }
- *   </cy>
- *   <cz>
- *     { [rad] angle of attack } { [-] lift coefficient }
- *     ... { more entries }
- *   </cz>
- *   <cl>
- *     { [rad] angle of sideslip } { [-] rolling moment coefficient }
- *     ... { more entries }
- *   </cl>
- *   <cm>
- *     { [rad] angle of attack } { [-] pitching moment coefficient }
- *     ... { more entries }
- *   </cm>
- *   <cn>
- *     { [rad] angle of sideslip } { [-] yawing moment coefficient }
- *     ... { more entries }
- *   </cn>
- * </fuselage>
- * @endcode
- *
- * Optional elements: "cy", "cz", "cl", "cm", "cn"
- *
- * @see Talbot P., et al.: A Mathematical Model of a Single Main Rototr Helicopter for Piloted Simulation. NASA, TM-84281, 1982
+ * @brief Simulation manager class.
  */
-class FDMEXPORT Fuselage : public Base
+class Manager : public Base
 {
 public:
 
     /** Constructor. */
-    Fuselage();
+    Manager();
 
     /** Destructor. */
-    virtual ~Fuselage();
+    virtual ~Manager();
 
     /**
-     * Reads data.
-     * @param dataNode XML node
+     * Performs manager step.
+     * @param timeStep [s] simulation time step
+     * @param dataInp
+     * @param dataOut
      */
-    virtual void readData( XmlNode &dataNode );
+    void step( double timeStep, const DataInp &dataInp, DataOut &dataOut );
+
+    inline bool getVerbose() const { return _verbose; }
+
+    inline void setVerbose( bool verbose ) { _verbose = verbose; }
+
+private:
+
+    typedef DataInp::AircraftType AircraftType;
+
+    typedef DataInp::StateInp StateInp;
+    typedef DataOut::StateOut StateOut;
+
+    Aircraft *_aircraft;            ///< aircraft simulation object
+    Recorder *_recorder;            ///< recorder object
+
+    DataInp _dataInp;               ///< input data
+    DataOut _dataOut;               ///< output data
+
+    AircraftType _aircraftType;     ///< aircraft type
+
+    StateInp _stateInp;             ///< internal state input
+    StateOut _stateOut;             ///< internal state output
+
+    Vector3    _init_pos_wgs;       ///< [m] initial position expressed in WGS
+    Quaternion _init_att_wgs;       ///< initial attitude expressed as quaternion of rotation from WGS to BAS
+
+    UInt32 _initStep;               ///< initialization step number
+
+    double _init_phi;               ///< [rad] initial roll angle
+    double _init_tht;               ///< [rad] initial pitch angle
+    double _init_alt;               ///< [m] initial altitude above ground level
+
+    double _timeStep;               ///< [s] simulation time step
+    double _realTime;               ///< [s] simulation real time
+
+    unsigned int _timeSteps;        ///< number of time steps
+
+    double _timeStepMax;            ///< [s] simulation maximum time step
+
+    bool _verbose;                  ///< specifies if extra information should be printed
 
     /**
-     * Computes force and moment.
-     * @param vel_air_bas [m/s] aircraft linear velocity relative to the air expressed in BAS
-     * @param omg_air_bas [rad/s] aircraft angular velocity relative to the air expressed in BAS
-     * @param airDensity [kg/m^3] air density
-     * @param inducedVelocity [m/s] rotor induced velocity
-     * @param wakeSkewAngle [rad] rotor wake skew angle
+     * Creates aircraft object.
+     * @param aircraftType aircraft type
+     * @return aircraft object on success null pointer on failure
      */
-    virtual void computeForceAndMoment( const Vector3 &vel_air_bas,
-                                        const Vector3 &omg_air_bas,
-                                        double airDensity,
-                                        double inducedVelocity = 0.0,
-                                        double wakeSkewAngle = 0.0 );
-
-    inline const Vector3& getFor_BAS() const { return _for_bas; }
-    inline const Vector3& getMom_BAS() const { return _mom_bas; }
-
-protected:
-
-    Vector3 _for_bas;           ///< [N] total force vector expressed in BAS
-    Vector3 _mom_bas;           ///< [N*m] total moment vector expressed in BAS
-
-    Vector3 _r_ac_bas;          ///< [m] fuselage aerodynamic center expressed in BAS
-
-    Table _cx;                  ///< [-] drag coefficient vs [rad] angle of attack
-    Table _cy;                  ///< [-] sideforce coefficient vs [rad] angle of sideslip
-    Table _cz;                  ///< [-] lift coefficient vs [rad] angle of attack
-    Table _cl;                  ///< [-] rolling moment coefficient vs [rad] angle of sideslip
-    Table _cm;                  ///< [-] pitching moment coefficient vs [rad] angle of attack
-    Table _cn;                  ///< [-] yawing moment coefficient vs [rad] angle of sideslip
-
-    double _length;             ///< [m] reference length
-    double _area;               ///< [m^2] reference area
-
-    double _sl;                 ///< [m^3] S*l where S is reference area and l is reference length
-
-    double _angleOfAttack;      ///< [rad] angle of attack
-    double _sideslipAngle;      ///< [rad] angle of sideslip
+    Aircraft* createAircraft( AircraftType aircraftType );
 
     /**
-     * Computes drag coefficient.
-     * @param angleOfAttack [rad] angle of attack
-     * @return [-] drag coefficient
+     * Computes aircraft equilibrium in flight.
      */
-    virtual double getCx( double angleOfAttack ) const;
+    void initInFlight();
 
     /**
-     * Computes sideforce coefficient.
-     * @param sideslipAngle [rad] angle of sideslip
-     * @return [-] sideforce coefficient
+     * Computes aircraft equilibrium on ground.
      */
-    virtual double getCy( double sideslipAngle ) const;
+    void initOnGround();
 
     /**
-     * Computes lift coefficient.
-     * @param angleOfAttack [rad] angle of attack
-     * @return [-] lift coefficient
+     * Initializes recorder.
      */
-    virtual double getCz( double angleOfAttack ) const;
+    void initRecorder();
 
     /**
-     * Computes rolling moment coefficient.
-     * @param sideslipAngle [rad] angle of sideslip
-     * @return [-] rolling moment coefficient
+     * Updates initial position and attitude.
      */
-    virtual double getCl( double sideslipAngle ) const;
+    void updateInitialPositionAndAttitude();
 
     /**
-     * Computes pitching moment coefficient.
-     * @param angleOfAttack [rad] angle of attack
-     * @return [-] pitching moment coefficient
+     * Updates internal state input.
      */
-    virtual double getCm( double angleOfAttack ) const;
+    void updateStateInp();
 
-    /**
-     * Computes yawing moment coefficient.
-     * @param sideslipAngle [rad] angle of sideslip
-     * @return [-] yawing moment coefficient
-     */
-    virtual double getCn( double sideslipAngle ) const;
+    void updateStateIdle();
+    void updateStateInit();
+    void updateStateWork();
+    void updateStateFreeze();
+    void updateStatePause();
+    void updateStateStop();
+
+    void printFlightEndInfo();
+    void printState();
 };
 
 } // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // FDM_FUSELAGE_H
+#endif // FDM_MANAGER_H

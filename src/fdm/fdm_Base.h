@@ -138,8 +138,6 @@
 namespace fdm
 {
 
-class XmlNode;  ///< XmlNode forward declaration
-
 /**
  * @brief Base class.
  */

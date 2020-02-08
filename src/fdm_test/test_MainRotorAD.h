@@ -19,76 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  ******************************************************************************/
-#ifndef TEST_AERODYNAMICS_H
-#define TEST_AERODYNAMICS_H
+#ifndef TEST_MAINROTORAD_H
+#define TEST_MAINROTORAD_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/main/fdm_Aerodynamics.h>
-
-
-#include <fdm/models/fdm_Stabilizer.h>
-
-#include <fdm_test/test_MainRotorAD.h>
-#include <fdm_test/test_MainRotorBE.h>
-#include <fdm_test/test_TailRotor.h>
-#include <fdm_test/test_Fuselage.h>
-#include <fdm_test/test_StabilizerHor.h>
-#include <fdm_test/test_StabilizerVer.h>
+#include <fdm/models/fdm_MainRotorAD.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace fdm
 {
 
-class TEST_Aircraft;    ///< aircraft class forward declaration
-
 /** */
-class TEST_Aerodynamics : public Aerodynamics
+class TEST_MainRotorAD : public MainRotorAD
 {
 public:
 
     /** Constructor. */
-    TEST_Aerodynamics( const TEST_Aircraft *aircraft );
+    TEST_MainRotorAD();
 
     /** Destructor. */
-    ~TEST_Aerodynamics();
-
-    /** Initializes aerodynamics. */
-    void init();
-
-    /**
-     * Reads data.
-     * @param dataNode XML node
-     */
-    void readData( XmlNode &dataNode );
-
-    /** Computes force and moment. */
-    void computeForceAndMoment();
-
-    /** Updates model. */
-    void update();
-
-    inline const MainRotor* getMainRotor() const { return _mainRotor; }
-    inline const TEST_MainRotorAD* getMainRotorAD() const { return _mainRotorAD; }
-    inline const TEST_MainRotorBE* getMainRotorBE() const { return _mainRotorBE; }
-
-private:
-
-    const TEST_Aircraft *_aircraft;     ///< aircraft model main object
-
-    MainRotor          *_mainRotor;
-    TEST_MainRotorAD   *_mainRotorAD;   ///<
-    TEST_MainRotorBE   *_mainRotorBE;   ///<
-
-    TEST_TailRotor     *_tailRotor;     ///<
-    TEST_Fuselage      *_fuselage;      ///<
-    TEST_StabilizerHor *_stabHor;       ///<
-    TEST_StabilizerVer *_stabVer;       ///<
+    ~TEST_MainRotorAD();
 };
 
 } // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // TEST_AERODYNAMICS_H
+#endif // TEST_MAINROTORAD_H

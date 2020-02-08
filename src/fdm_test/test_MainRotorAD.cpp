@@ -19,32 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  ******************************************************************************/
-#ifndef TEST_TAILROTOR_H
-#define TEST_TAILROTOR_H
+
+#include <fdm_test/test_MainRotorAD.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/models/fdm_TailRotor.h>
+using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
-{
-
-/** */
-class TEST_TailRotor : public TailRotor
-{
-public:
-
-    /** Constructor. */
-    TEST_TailRotor();
-
-    /** Destructor. */
-    ~TEST_TailRotor();
-};
-
-} // end of fdm namespace
+TEST_MainRotorAD::TEST_MainRotorAD() :
+    MainRotorAD()
+{}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // TEST_TAILROTOR_H
+TEST_MainRotorAD::~TEST_MainRotorAD() {}
