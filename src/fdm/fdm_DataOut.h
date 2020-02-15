@@ -159,7 +159,7 @@ struct DataOut
         NoCrash = 0,                    ///< no crash
         Collision,                      ///< collision with terrain or obstacle
         Overspeed,                      ///< airspeed too high
-        Overstressed                    ///< load factor too high
+        Overstress                      ///< load factor too high
     };
 
     /** Flight data. */

@@ -136,6 +136,8 @@ using namespace fdm;
 ////////////////////////////////////////////////////////////////////////////////
 
 UH60_StabilizerHor::UH60_StabilizerHor() :
+    Stabilizer( Horizontal ),
+
     _elevator ( 0.0 )
 {}
 
