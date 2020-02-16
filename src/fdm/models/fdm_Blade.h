@@ -139,6 +139,10 @@
 
 #include <fdm/xml/fdm_XmlNode.h>
 
+#ifdef SIM_ROTOR_TEST
+#   include <Data.h>
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace fdm
@@ -169,9 +173,26 @@ class FDMEXPORT Blade
 {
 public:
 
+#   ifdef SIM_ROTOR_TEST
+    struct Vect
+    {
+        bool visible;
+
+        Vector3 b_sra;
+        Vector3 v_sra;
+
+        char label[ 64 ];
+    };
+
+    Vect main[ VECT_MAIN ];
+    Vect span[ VECT_SPAN ];
+#   endif
+
     typedef MainRotor::Direction Direction;
 
     static Matrix3x3 getRAS2SRA( double psi, Direction direction = MainRotor::CW );
+
+    static Matrix3x3 getSRA2BSA( double beta, Direction direction = MainRotor::CW );
 
     /** Constructor. */
     Blade( Direction direction = MainRotor::CW );
@@ -195,9 +216,16 @@ public:
      * @param azimuth [rad] blade azimuth
      */
     virtual void update( double timeStep,
+                         const Vector3 &vel_air_ras,
+                         const Vector3 &omg_air_ras,
+                         const Vector3 &omg_ras,
                          const Vector3 &grav_ras,
                          double omega,
-                         double azimuth );
+                         double azimuth,
+                         double airDensity,
+                         double theta_0,
+                         double theta_1c,
+                         double theta_1s );
 
     inline double getInertia() const { return _ib; }
 
@@ -256,9 +284,12 @@ protected:
 
     double _theta;              ///< [rad] feathering angle
 
-    void xxx( const Vector3 &grav_ras,
+    void xxx( const Vector3 &vel_air_ras,
+              const Vector3 &omg_air_ras,
+              const Vector3 &omg_ras,
+              const Vector3 &grav_ras,
               double omega,
-              double azimuth );
+              double airDensity );
 };
 
 } // end of fdm namespace
