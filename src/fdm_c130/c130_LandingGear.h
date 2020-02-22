@@ -151,6 +151,7 @@ public:
     /** Destructor. */
     ~C130_LandingGear();
 
+    /** Initializes landing gear. */
     void init();
 
     /** Updates landing gear. */
