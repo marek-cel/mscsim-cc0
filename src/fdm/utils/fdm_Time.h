@@ -124,99 +124,41 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_DEFINES_H
-#define FDM_DEFINES_H
+#ifndef FDM_TIME_H
+#define FDM_TIME_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#if defined(_MSC_VER)
-#   if defined(FDM_DLL_EXPORTS)
-#       define FDM_DLL_SPEC __declspec(dllexport)
-#   elif defined(FDM_DLL_IMPORTS)
-#       define FDM_DLL_SPEC __declspec(dllimport)
-#   else
-#       define FDM_DLL_SPEC
-#   endif
-#else
-#   define FDM_DLL_SPEC
-#endif
+#include <ctime>
 
-#if defined(__cplusplus)
-#   define FDMEXPORT FDM_DLL_SPEC
-#endif
-
-#if !defined(FDMEXPORT)
-#   define FDMEXPORT
-#endif
+#include <fdm/fdm_Defines.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define FDM_TIME_STEP 0.01  /* 100 Hz */
-//#define FDM_TIME_STEP 0.005 /* 200 Hz */
+namespace fdm
+{
 
-#define FDM_TIME_STEP_MIN 0.001
-#define FDM_TIME_STEP_MAX 0.1
+/** */
+class FDMEXPORT Time
+{
+public:
 
-////////////////////////////////////////////////////////////////////////////////
+    static inline double get()
+    {
+#       ifdef _LINUX_
+        timespec ts;
+        clock_gettime( CLOCK_MONOTONIC_RAW, &ts );
+        return ts.tv_sec + 1.0e-9 * ts.tv_nsec;
+#       endif
 
-#define FDM_MAX_PILOTS  2
-#define FDM_MAX_TANKS   4
-#define FDM_MAX_ENGINES 4
-#define FDM_MAX_BLADES  8
+#       ifdef WIN32
+        return (double)( clock() ) / (double)( CLOCKS_PER_SEC );
+#       endif
+    }
+};
 
-////////////////////////////////////////////////////////////////////////////////
-
-#define FDM_MIN_INIT_ALTITUDE 30.0
-#define FDM_MAX_INIT_STEPS 20000
-
-////////////////////////////////////////////////////////////////////////////////
-
-#define FDM_SUCCESS 0
-#define FDM_FAILURE 1
-
-////////////////////////////////////////////////////////////////////////////////
-
-#define FDM_STATE_DIMENSION 13
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#if __cplusplus >= 201103L
-#   define FDM_NULLPTR nullptr
-#   define FDM_CONSTEXPR constexpr
-#else
-#   define FDM_NULLPTR 0
-#   define FDM_CONSTEXPR
-#endif
-
-////////////////////////////////////////////////////////////////////////////////
-
-#define FDM_FL __FILE__ << "(" << __LINE__ << ") "
-
-////////////////////////////////////////////////////////////////////////////////
-
-#define FDM_DELPTR( ptr ) \
-{ \
-    if ( ptr ) delete ptr; \
-    ptr = FDM_NULLPTR; \
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-#define FDM_DELTAB( ptr ) \
-{ \
-    if ( ptr ) delete [] ptr; \
-    ptr = FDM_NULLPTR; \
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-#define FDM_THROW( e ) \
-{ \
-    e.setFile( __FILE__ ); \
-    e.setLine( __LINE__ ); \
-    throw e; \
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-#endif // FDM_DEFINES_H
+#endif // FDM_TIME_H
