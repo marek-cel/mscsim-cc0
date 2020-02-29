@@ -19,67 +19,86 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  ******************************************************************************/
-#ifndef TEST_AERODYNAMICS_H
-#define TEST_AERODYNAMICS_H
+#ifndef SFX_MANAGER_H
+#define SFX_MANAGER_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/main/fdm_Aerodynamics.h>
+#include <AL/al.h>
+#include <AL/alc.h>
 
-#include <fdm_test/test_MainRotorBE.h>
-#include <fdm_test/test_TailRotor.h>
-#include <fdm_test/test_Fuselage.h>
-#include <fdm_test/test_StabilizerHor.h>
-#include <fdm_test/test_StabilizerVer.h>
+#include <Data.h>
+#include <Defines.h>
+
+#include <sfx/sfx_Sample.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
+namespace sfx
 {
 
-class TEST_Aircraft;    ///< aircraft class forward declaration
-
-/** */
-class TEST_Aerodynamics : public Aerodynamics
+/**
+ * @brief SFX manager class.
+ */
+class Manager
 {
 public:
 
     /** Constructor. */
-    TEST_Aerodynamics( const TEST_Aircraft *aircraft );
+    Manager();
 
     /** Destructor. */
-    ~TEST_Aerodynamics();
+    virtual ~Manager();
 
-    /** Initializes aerodynamics. */
-    void init();
-
-    /**
-     * Reads data.
-     * @param dataNode XML node
-     */
-    void readData( XmlNode &dataNode );
-
-    /** Computes force and moment. */
-    void computeForceAndMoment();
-
-    /** Updates model. */
-    void update();
-
-    inline const TEST_MainRotor* getMainRotor() const { return _mainRotor; }
+    /** Updates SFX. */
+    void update( const Data::DataBuf *data );
 
 private:
 
-    const TEST_Aircraft *_aircraft;     ///< aircraft model main object
+    ALCdevice  *_device;        ///<
+    ALCcontext *_context;       ///<
 
-    TEST_MainRotor     *_mainRotor;
-    TEST_TailRotor     *_tailRotor;     ///<
-    TEST_Fuselage      *_fuselage;      ///<
-    TEST_StabilizerHor *_stabHor;       ///<
-    TEST_StabilizerVer *_stabVer;       ///<
+    Sample *_explosion;         ///<
+    Sample *_touchdown;         ///<
+
+    Sample *_run_noise;         ///<
+
+    Sample *_gear_lock;         ///<
+    Sample *_gear_move;         ///<
+
+    Sample *_prop_c130;         ///<
+    Sample *_prop_c172;         ///<
+    Sample *_prop_p51;          ///<
+    Sample *_prop_f16;          ///<
+    Sample *_prop_f16ab;        ///<
+    Sample *_prop_uh60;         ///<
+
+    double _volume;             ///<
+
+    double _afterburner;        ///<
+
+    int _prev_state;            ///<
+
+    double _prev_gear;          ///<
+
+    bool _prev_ground;          ///<
+    bool _prev_crash;           ///<
+
+    void init( const Data::DataBuf *data );
+    void stop();
+
+    void updateLandingGear( const Data::DataBuf *data );
+    void updateTouchdown( const Data::DataBuf *data, double vel_max );
+
+    void updateAircraft_C130 ( const Data::DataBuf *data );
+    void updateAircraft_C172 ( const Data::DataBuf *data );
+    void updateAircraft_F16  ( const Data::DataBuf *data );
+    void updateAircraft_P51  ( const Data::DataBuf *data );
+    void updateAircraft_UH60 ( const Data::DataBuf *data );
 };
 
-} // end of fdm namespace
+} // end of sfx namepsace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // TEST_AERODYNAMICS_H
+#endif // SFX_MANAGER_H

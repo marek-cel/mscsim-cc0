@@ -185,6 +185,7 @@ struct DataOut
 
         double airspeed;                ///< [m/s] airspeed
         double ias;                     ///< [m/s] indicated airspeed
+        double groundSpeed;             ///< [m/s] ground speed (horizontal velocity)
         double machNumber;              ///< [-]   Mach number
         double climbRate;               ///< [m/s] climb rate
 
@@ -274,6 +275,7 @@ struct DataOut
     /** Rotor data. */
     struct Rotor
     {
+        double mainRotor_omega;         ///< [rad/s] main rotor rotation speed
         double mainRotor_azimuth;       ///< [rad] main rotor rotation angle (azimuth)
         double mainRotor_coningAngle;   ///< [rad] main rotor coning angle
         double mainRotor_diskRoll;      ///< [rad] main rotor disk roll angle

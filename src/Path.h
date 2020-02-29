@@ -19,67 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  ******************************************************************************/
-#ifndef TEST_AERODYNAMICS_H
-#define TEST_AERODYNAMICS_H
+#ifndef PATH_H
+#define PATH_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/main/fdm_Aerodynamics.h>
-
-#include <fdm_test/test_MainRotorBE.h>
-#include <fdm_test/test_TailRotor.h>
-#include <fdm_test/test_Fuselage.h>
-#include <fdm_test/test_StabilizerHor.h>
-#include <fdm_test/test_StabilizerVer.h>
+#include <fdm/fdm_Path.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
-{
-
-class TEST_Aircraft;    ///< aircraft class forward declaration
-
-/** */
-class TEST_Aerodynamics : public Aerodynamics
-{
-public:
-
-    /** Constructor. */
-    TEST_Aerodynamics( const TEST_Aircraft *aircraft );
-
-    /** Destructor. */
-    ~TEST_Aerodynamics();
-
-    /** Initializes aerodynamics. */
-    void init();
-
-    /**
-     * Reads data.
-     * @param dataNode XML node
-     */
-    void readData( XmlNode &dataNode );
-
-    /** Computes force and moment. */
-    void computeForceAndMoment();
-
-    /** Updates model. */
-    void update();
-
-    inline const TEST_MainRotor* getMainRotor() const { return _mainRotor; }
-
-private:
-
-    const TEST_Aircraft *_aircraft;     ///< aircraft model main object
-
-    TEST_MainRotor     *_mainRotor;
-    TEST_TailRotor     *_tailRotor;     ///<
-    TEST_Fuselage      *_fuselage;      ///<
-    TEST_StabilizerHor *_stabHor;       ///<
-    TEST_StabilizerVer *_stabVer;       ///<
-};
-
-} // end of fdm namespace
+class Path : public fdm::Path {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // TEST_AERODYNAMICS_H
+#endif // PATH_H

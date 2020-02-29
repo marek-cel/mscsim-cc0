@@ -124,102 +124,57 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_GAUSSJORDAN_H
-#define FDM_GAUSSJORDAN_H
+
+#include <cgi/cgi_Utils.h>
+
+#include <osg/LineWidth>
+
+#include <cgi/cgi_Colors.h>
+#include <cgi/cgi_Geometry.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/utils/fdm_Matrix.h>
-#include <fdm/utils/fdm_Vector.h>
+using namespace cgi;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
+void Utils::drawVector( osg::Group *parent, const osg::Vec3 &b, const osg::Vec3 &v )
 {
+    osg::Vec3 ev = b + v;
+    osg::Vec3 ex = b + osg::Vec3( v.x(), 0.0, 0.0 );
+    osg::Vec3 ey = b + osg::Vec3( 0.0, v.y(), 0.0 );
+    osg::Vec3 ez = b + osg::Vec3( 0.0, 0.0, v.z() );
 
-/**
- * @brief This class implements Gauss-Jordan method.
- *
- * @see Press W., et al.: Numerical Recipes: The Art of Scientific Computing, 2007, p.41
- * @see Baron B., Piatek L.: Metody numeryczne w C++ Builder, 2004, p.34. [in Polish]
- * @see https://en.wikipedia.org/wiki/Gaussian_elimination
- */
-template < unsigned int SIZE >
-class GaussJordan
-{
-public:
+    osg::ref_ptr<osg::Geode> geodev = new osg::Geode();
+    osg::ref_ptr<osg::Geode> geodex = new osg::Geode();
+    osg::ref_ptr<osg::Geode> geodey = new osg::Geode();
+    osg::ref_ptr<osg::Geode> geodez = new osg::Geode();
 
-    /**
-     * Solves system of linear equations using Gauss-Jordan method.
-     * @param mtr left hand side matrix
-     * @param rhs right hand size vector
-     * @param x result vector
-     * @param eps minimum value treated as not-zero
-     * @return FDM_SUCCESS on success and FDM_FAILURE on failure
-     */
-    static int solve( const Matrix< SIZE, SIZE > &mtr, const Vector< SIZE > &rhs,
-                      Vector< SIZE > *x, double eps = 1.0e-14 )
-    {
-        Matrix< SIZE, SIZE > mtr_temp = mtr;
-        Vector< SIZE > rhs_temp = rhs;
+    parent->addChild( geodev.get() );
+    parent->addChild( geodex.get() );
+    parent->addChild( geodey.get() );
+    parent->addChild( geodez.get() );
 
-        for ( unsigned int r = 0; r < SIZE; r++ )
-        {
-            // run along diagonal, swapping rows to move zeros (outside the diagonal) downwards
-            if ( fabs( mtr_temp(r,r) ) < fabs( eps ) )
-            {
-                if ( r < SIZE - 1 )
-                {
-                    mtr_temp.swapRows( r, r+1 );
-                    rhs_temp.swapRows( r, r+1 );
-                }
-                else
-                {
-                    return FDM_FAILURE;
-                }
-            }
+    osg::ref_ptr<osg::Geometry> geometryv = new osg::Geometry();
+    osg::ref_ptr<osg::Geometry> geometryx = new osg::Geometry();
+    osg::ref_ptr<osg::Geometry> geometryy = new osg::Geometry();
+    osg::ref_ptr<osg::Geometry> geometryz = new osg::Geometry();
 
-            // value on diagonal A(r,r)
-            double a_rr = mtr_temp(r,r);
-            double a_rr_inv = 1.0 / a_rr;
+    geodev->addDrawable( geometryv.get() );
+    geodex->addDrawable( geometryx.get() );
+    geodey->addDrawable( geometryy.get() );
+    geodez->addDrawable( geometryz.get() );
 
-            // deviding current row by value on diagonal
-            for ( unsigned int c = 0; c < SIZE; c++ )
-            {
-                mtr_temp(r,c) *= a_rr_inv;
-            }
+    Geometry::createLine( geometryv.get(), b, ev, Colors::_amber );
+    Geometry::createLine( geometryx.get(), b, ex, Colors::_red   );
+    Geometry::createLine( geometryy.get(), b, ey, Colors::_lime  );
+    Geometry::createLine( geometryz.get(), b, ez, Colors::_blue  );
 
-            rhs_temp(r) *= a_rr_inv;
+    osg::ref_ptr<osg::LineWidth> lineWidth = new osg::LineWidth();
+    lineWidth->setWidth( 2.0f );
 
-            // substracting current row from others rows
-            // for every row current row is multiplied by A(i,r)
-            // where r stands for row that is substracted from other rows
-            // and i stands for row that is substracting from
-            for ( unsigned int i = 0; i < SIZE; i++ )
-            {
-                if ( i != r )
-                {
-                    double a_ir = mtr_temp(i,r);
-
-                    for ( unsigned int c = 0; c < SIZE; c++ )
-                    {
-                        mtr_temp(i,c) -= a_ir * mtr_temp(r,c);
-                    }
-
-                    rhs_temp(i) -= a_ir * rhs_temp(r);
-                }
-            }
-        }
-
-        // rewritting results
-        (*x) = rhs_temp;
-
-        return FDM_SUCCESS;
-    }
-};
-
-} // end of fdm namespace
-
-////////////////////////////////////////////////////////////////////////////////
-
-#endif // FDM_GAUSSJORDAN_H
+    geodev->getOrCreateStateSet()->setAttributeAndModes( lineWidth, osg::StateAttribute::ON );
+    geodex->getOrCreateStateSet()->setAttributeAndModes( lineWidth, osg::StateAttribute::ON );
+    geodey->getOrCreateStateSet()->setAttributeAndModes( lineWidth, osg::StateAttribute::ON );
+    geodez->getOrCreateStateSet()->setAttributeAndModes( lineWidth, osg::StateAttribute::ON );
+}

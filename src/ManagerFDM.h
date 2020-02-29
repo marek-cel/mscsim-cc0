@@ -124,13 +124,17 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_GAUSSJORDAN_H
-#define FDM_GAUSSJORDAN_H
+#ifndef MANAGER_FDM_H
+#define MANAGER_FDM_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/utils/fdm_Matrix.h>
-#include <fdm/utils/fdm_Vector.h>
+#include <fdm/main/fdm_Aircraft.h>
+
+#include <fdm/fdm_DataInp.h>
+#include <fdm/fdm_DataOut.h>
+
+#include <fdm/fdm_Recorder.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -138,88 +142,118 @@ namespace fdm
 {
 
 /**
- * @brief This class implements Gauss-Jordan method.
- *
- * @see Press W., et al.: Numerical Recipes: The Art of Scientific Computing, 2007, p.41
- * @see Baron B., Piatek L.: Metody numeryczne w C++ Builder, 2004, p.34. [in Polish]
- * @see https://en.wikipedia.org/wiki/Gaussian_elimination
+ * @brief Simulation manager class.
  */
-template < unsigned int SIZE >
-class GaussJordan
+class Manager : public Base
 {
 public:
 
+    /** Constructor. */
+    Manager();
+
+    /** Destructor. */
+    virtual ~Manager();
+
     /**
-     * Solves system of linear equations using Gauss-Jordan method.
-     * @param mtr left hand side matrix
-     * @param rhs right hand size vector
-     * @param x result vector
-     * @param eps minimum value treated as not-zero
-     * @return FDM_SUCCESS on success and FDM_FAILURE on failure
+     * Performs manager step.
+     * @param timeStep [s] simulation time step
+     * @param dataInp
+     * @param dataOut
      */
-    static int solve( const Matrix< SIZE, SIZE > &mtr, const Vector< SIZE > &rhs,
-                      Vector< SIZE > *x, double eps = 1.0e-14 )
-    {
-        Matrix< SIZE, SIZE > mtr_temp = mtr;
-        Vector< SIZE > rhs_temp = rhs;
+    void step( double timeStep, const DataInp &dataInp, DataOut &dataOut );
 
-        for ( unsigned int r = 0; r < SIZE; r++ )
-        {
-            // run along diagonal, swapping rows to move zeros (outside the diagonal) downwards
-            if ( fabs( mtr_temp(r,r) ) < fabs( eps ) )
-            {
-                if ( r < SIZE - 1 )
-                {
-                    mtr_temp.swapRows( r, r+1 );
-                    rhs_temp.swapRows( r, r+1 );
-                }
-                else
-                {
-                    return FDM_FAILURE;
-                }
-            }
+    inline bool getVerbose() const { return _verbose; }
 
-            // value on diagonal A(r,r)
-            double a_rr = mtr_temp(r,r);
-            double a_rr_inv = 1.0 / a_rr;
+    inline void setVerbose( bool verbose ) { _verbose = verbose; }
 
-            // deviding current row by value on diagonal
-            for ( unsigned int c = 0; c < SIZE; c++ )
-            {
-                mtr_temp(r,c) *= a_rr_inv;
-            }
+private:
 
-            rhs_temp(r) *= a_rr_inv;
+    typedef DataInp::AircraftType AircraftType;
 
-            // substracting current row from others rows
-            // for every row current row is multiplied by A(i,r)
-            // where r stands for row that is substracted from other rows
-            // and i stands for row that is substracting from
-            for ( unsigned int i = 0; i < SIZE; i++ )
-            {
-                if ( i != r )
-                {
-                    double a_ir = mtr_temp(i,r);
+    typedef DataInp::StateInp StateInp;
+    typedef DataOut::StateOut StateOut;
 
-                    for ( unsigned int c = 0; c < SIZE; c++ )
-                    {
-                        mtr_temp(i,c) -= a_ir * mtr_temp(r,c);
-                    }
+    Aircraft *_aircraft;            ///< aircraft simulation object
+    Recorder *_recorder;            ///< recorder object
 
-                    rhs_temp(i) -= a_ir * rhs_temp(r);
-                }
-            }
-        }
+    DataInp _dataInp;               ///< input data
+    DataOut _dataOut;               ///< output data
 
-        // rewritting results
-        (*x) = rhs_temp;
+    AircraftType _aircraftType;     ///< aircraft type
 
-        return FDM_SUCCESS;
-    }
+    StateInp _stateInp;             ///< internal state input
+    StateOut _stateOut;             ///< internal state output
+
+    Vector3    _init_pos_wgs;       ///< [m] initial position expressed in WGS
+    Quaternion _init_att_wgs;       ///< initial attitude expressed as quaternion of rotation from WGS to BAS
+
+    UInt32 _initStep;               ///< initialization step number
+
+    double _init_phi;               ///< [rad] initial roll angle
+    double _init_tht;               ///< [rad] initial pitch angle
+    double _init_alt;               ///< [m] initial altitude above ground level
+
+    double _timeStep;               ///< [s] simulation time step
+    double _realTime;               ///< [s] simulation real time
+
+    double _compTimeTot;            ///< [s] computations time - total
+    double _compTimeMax;            ///< [s] computations time - maximum
+
+    double _timeStepMax;            ///< [s] simulation maximum time step
+
+    unsigned int _timeSteps;        ///< number of time steps
+
+    bool _verbose;                  ///< specifies if extra information should be printed
+
+    /**
+     * Creates aircraft object.
+     * @param aircraftType aircraft type
+     * @return aircraft object on success null pointer on failure
+     */
+    Aircraft* createAircraft( AircraftType aircraftType );
+
+    /**
+     * Computes aircraft equilibrium in flight.
+     */
+    void initInFlight();
+
+    /**
+     * Computes aircraft equilibrium on ground.
+     */
+    void initOnGround();
+
+    /**
+     * Initializes recorder.
+     */
+    void initRecorder();
+
+    /**
+     * Updates initial position and attitude.
+     */
+    void updateInitialPositionAndAttitude();
+
+    /**
+     * Updates internal state input.
+     */
+    void updateStateInp();
+
+    void updateStateIdle();
+    void updateStateInit();
+    void updateStateWork();
+    void updateStateFreeze();
+    void updateStatePause();
+    void updateStateStop();
+
+    void printFlightEndInfo();
+    void printState();
 };
 
 } // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // FDM_GAUSSJORDAN_H
+typedef fdm::Manager ManagerFDM;
+
+////////////////////////////////////////////////////////////////////////////////
+
+#endif // MANAGER_FDM_H

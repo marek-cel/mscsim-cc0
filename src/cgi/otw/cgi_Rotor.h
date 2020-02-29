@@ -124,102 +124,77 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_GAUSSJORDAN_H
-#define FDM_GAUSSJORDAN_H
+#ifndef CGI_ROTOR_H
+#define CGI_ROTOR_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/utils/fdm_Matrix.h>
-#include <fdm/utils/fdm_Vector.h>
+#include <osg/PositionAttitudeTransform>
+#include <osg/Switch>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
+namespace cgi
 {
 
 /**
- * @brief This class implements Gauss-Jordan method.
- *
- * @see Press W., et al.: Numerical Recipes: The Art of Scientific Computing, 2007, p.41
- * @see Baron B., Piatek L.: Metody numeryczne w C++ Builder, 2004, p.34. [in Polish]
- * @see https://en.wikipedia.org/wiki/Gaussian_elimination
+ * @brief Helicopter rotor class.
  */
-template < unsigned int SIZE >
-class GaussJordan
+class Rotor
 {
 public:
 
-    /**
-     * Solves system of linear equations using Gauss-Jordan method.
-     * @param mtr left hand side matrix
-     * @param rhs right hand size vector
-     * @param x result vector
-     * @param eps minimum value treated as not-zero
-     * @return FDM_SUCCESS on success and FDM_FAILURE on failure
-     */
-    static int solve( const Matrix< SIZE, SIZE > &mtr, const Vector< SIZE > &rhs,
-                      Vector< SIZE > *x, double eps = 1.0e-14 )
-    {
-        Matrix< SIZE, SIZE > mtr_temp = mtr;
-        Vector< SIZE > rhs_temp = rhs;
+    typedef std::vector< osg::ref_ptr<osg::Vec3Array> > Paths;
 
-        for ( unsigned int r = 0; r < SIZE; r++ )
-        {
-            // run along diagonal, swapping rows to move zeros (outside the diagonal) downwards
-            if ( fabs( mtr_temp(r,r) ) < fabs( eps ) )
-            {
-                if ( r < SIZE - 1 )
-                {
-                    mtr_temp.swapRows( r, r+1 );
-                    rhs_temp.swapRows( r, r+1 );
-                }
-                else
-                {
-                    return FDM_FAILURE;
-                }
-            }
+    /** Constructor. */
+    Rotor( const osg::Vec3 &center, int blades_count,
+           double radius, double offset, double inclination );
 
-            // value on diagonal A(r,r)
-            double a_rr = mtr_temp(r,r);
-            double a_rr_inv = 1.0 / a_rr;
+    /** Destructor. */
+    virtual ~Rotor();
 
-            // deviding current row by value on diagonal
-            for ( unsigned int c = 0; c < SIZE; c++ )
-            {
-                mtr_temp(r,c) *= a_rr_inv;
-            }
+    /** Updates rotor. */
+    void update();
 
-            rhs_temp(r) *= a_rr_inv;
+    /** Returns module OSG root node.  */
+    inline osg::Group* getNode() { return _root.get(); }
 
-            // substracting current row from others rows
-            // for every row current row is multiplied by A(i,r)
-            // where r stands for row that is substracted from other rows
-            // and i stands for row that is substracting from
-            for ( unsigned int i = 0; i < SIZE; i++ )
-            {
-                if ( i != r )
-                {
-                    double a_ir = mtr_temp(i,r);
+private:
 
-                    for ( unsigned int c = 0; c < SIZE; c++ )
-                    {
-                        mtr_temp(i,c) -= a_ir * mtr_temp(r,c);
-                    }
+    const osg::Vec3 _center;        ///< [m] rotor hub center
 
-                    rhs_temp(i) -= a_ir * rhs_temp(r);
-                }
-            }
-        }
+    const int _blades_count;        ///< number of rotor blades
 
-        // rewritting results
-        (*x) = rhs_temp;
+    const double _radius;           ///< [m] rotor radius
+    const double _offset;           ///< [m] flapping hinge offset from rotor shaft
+    const double _inclination;      ///< [rad] rotor inclination angle
 
-        return FDM_SUCCESS;
-    }
+    osg::ref_ptr<osg::Group> _root;
+
+    osg::ref_ptr<osg::PositionAttitudeTransform> _pat;
+    osg::ref_ptr<osg::PositionAttitudeTransform> _patDatum;
+
+    osg::ref_ptr<osg::Switch> _switchBlur;
+    osg::ref_ptr<osg::Switch> _switchDatum;
+    osg::ref_ptr<osg::Switch> _switchPaths;
+    osg::ref_ptr<osg::Switch> _switchVectors;
+
+    Paths _paths;
+
+    void createDatum();
+
+    void updateBlur();
+
+    void updateDatum();
+
+    void updatePaths();
+    void updatePath( osg::Group *parent, osg::Vec3Array *positions );
+
+    void updateVectors();
 };
 
-} // end of fdm namespace
+} // end of cgi namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // FDM_GAUSSJORDAN_H
+#endif // CGI_ROTOR_H

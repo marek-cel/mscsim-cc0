@@ -135,8 +135,6 @@
 
 #include <Common.h>
 
-#include <fdm/fdm_Path.h>
-
 ////////////////////////////////////////////////////////////////////////////////
 
 using namespace cgi;
@@ -153,7 +151,7 @@ osg::Node* Models::get( const std::string &objectFile, bool straight )
         }
     }
 
-    std::string filePath = fdm::Path::get( objectFile );
+    std::string filePath = Path::get( objectFile );
     osg::ref_ptr<osg::Node> object = ( straight ) ? osgDB::readNodeFile( filePath ) : readNodeFile( filePath );
 
     if ( object.valid() )

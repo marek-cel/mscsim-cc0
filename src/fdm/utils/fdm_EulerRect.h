@@ -152,7 +152,7 @@ class EulerRect : public Integrator< SIZE, TYPE >
 public:
 
     /** Constructor. */
-    EulerRect( TYPE *obj = 0, void (TYPE::*fun)(const Vector< SIZE > &, Vector< SIZE > &) = 0 ) :
+    EulerRect( TYPE *obj = 0, void (TYPE::*fun)(const Vector< SIZE > &, Vector< SIZE > *) = 0 ) :
         Integrator< SIZE, TYPE > ( obj, fun )
     {}
 
@@ -165,7 +165,7 @@ public:
      * @param step integration time step [s]
      * @param vect integrating vector
      */
-    void integrate( double step, Vector< SIZE > &vect )
+    void integrate( double step, Vector< SIZE > *vect )
     {
         _xt = vect;
         _k0 = Vector< SIZE >();

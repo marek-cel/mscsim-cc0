@@ -131,8 +131,6 @@
 
 #include <Common.h>
 
-#include <fdm/fdm_Path.h>
-
 ////////////////////////////////////////////////////////////////////////////////
 
 using namespace cgi;
@@ -151,7 +149,7 @@ osg::Texture2D* Textures::get( const std::string &textureFile, float maxAnisotro
         }
     }
 
-    std::string filePath = fdm::Path::get( textureFile );
+    std::string filePath = Path::get( textureFile );
     osg::ref_ptr<osg::Image> image = osgDB::readImageFile( filePath );
 
     if ( image.valid() )

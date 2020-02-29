@@ -19,67 +19,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  ******************************************************************************/
-#ifndef TEST_AERODYNAMICS_H
-#define TEST_AERODYNAMICS_H
+#ifndef SFX_SAMPLE_H
+#define SFX_SAMPLE_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/main/fdm_Aerodynamics.h>
+#include <string>
 
-#include <fdm_test/test_MainRotorBE.h>
-#include <fdm_test/test_TailRotor.h>
-#include <fdm_test/test_Fuselage.h>
-#include <fdm_test/test_StabilizerHor.h>
-#include <fdm_test/test_StabilizerVer.h>
+#include <AL/al.h>
+#include <AL/alc.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
+namespace sfx
 {
 
-class TEST_Aircraft;    ///< aircraft class forward declaration
-
 /** */
-class TEST_Aerodynamics : public Aerodynamics
+class Sample
 {
 public:
 
     /** Constructor. */
-    TEST_Aerodynamics( const TEST_Aircraft *aircraft );
+    Sample( const std::string &file, bool looping = false );
 
     /** Destructor. */
-    ~TEST_Aerodynamics();
+    virtual ~Sample();
 
-    /** Initializes aerodynamics. */
-    void init();
+    void play();
 
-    /**
-     * Reads data.
-     * @param dataNode XML node
-     */
-    void readData( XmlNode &dataNode );
+    void stop();
 
-    /** Computes force and moment. */
-    void computeForceAndMoment();
-
-    /** Updates model. */
-    void update();
-
-    inline const TEST_MainRotor* getMainRotor() const { return _mainRotor; }
+    void setLooping( bool looping );
+    void setPitch( double pitch );
+    void setVolume( double vol );
 
 private:
 
-    const TEST_Aircraft *_aircraft;     ///< aircraft model main object
+    ALuint _source;         ///<
+    ALuint _buffer;         ///<
 
-    TEST_MainRotor     *_mainRotor;
-    TEST_TailRotor     *_tailRotor;     ///<
-    TEST_Fuselage      *_fuselage;      ///<
-    TEST_StabilizerHor *_stabHor;       ///<
-    TEST_StabilizerVer *_stabVer;       ///<
+    bool checkForErrors();
+
+    bool loadFile( const std::string &file );
 };
 
-} // end of fdm namespace
+} // end of sfx namepsace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // TEST_AERODYNAMICS_H
+#endif // SFX_SAMPLE_H

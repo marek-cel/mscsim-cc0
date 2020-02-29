@@ -124,132 +124,30 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_MANAGER_H
-#define FDM_MANAGER_H
+
+#include <fdm/fdm_Test.h>
+
+#ifdef FDM_TEST
+#   include <Data.h>
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/main/fdm_Aircraft.h>
-
-#include <fdm/fdm_DataInp.h>
-#include <fdm/fdm_DataOut.h>
-
-#include <fdm/fdm_Recorder.h>
+using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
+void Test::setVector( const Vector3 &b, const Vector3 &v )
 {
+#   ifdef FDM_TEST
+    Data::get()->cgi.vector.visible = true;
 
-/**
- * @brief Simulation manager class.
- */
-class Manager : public Base
-{
-public:
+    Data::get()->cgi.vector.b_x = b.x();
+    Data::get()->cgi.vector.b_y = b.y();
+    Data::get()->cgi.vector.b_z = b.z();
 
-    /** Constructor. */
-    Manager();
-
-    /** Destructor. */
-    virtual ~Manager();
-
-    /**
-     * Performs manager step.
-     * @param timeStep [s] simulation time step
-     * @param dataInp
-     * @param dataOut
-     */
-    void step( double timeStep, const DataInp &dataInp, DataOut &dataOut );
-
-    inline bool getVerbose() const { return _verbose; }
-
-    inline void setVerbose( bool verbose ) { _verbose = verbose; }
-
-private:
-
-    typedef DataInp::AircraftType AircraftType;
-
-    typedef DataInp::StateInp StateInp;
-    typedef DataOut::StateOut StateOut;
-
-    Aircraft *_aircraft;            ///< aircraft simulation object
-    Recorder *_recorder;            ///< recorder object
-
-    DataInp _dataInp;               ///< input data
-    DataOut _dataOut;               ///< output data
-
-    AircraftType _aircraftType;     ///< aircraft type
-
-    StateInp _stateInp;             ///< internal state input
-    StateOut _stateOut;             ///< internal state output
-
-    Vector3    _init_pos_wgs;       ///< [m] initial position expressed in WGS
-    Quaternion _init_att_wgs;       ///< initial attitude expressed as quaternion of rotation from WGS to BAS
-
-    UInt32 _initStep;               ///< initialization step number
-
-    double _init_phi;               ///< [rad] initial roll angle
-    double _init_tht;               ///< [rad] initial pitch angle
-    double _init_alt;               ///< [m] initial altitude above ground level
-
-    double _timeStep;               ///< [s] simulation time step
-    double _realTime;               ///< [s] simulation real time
-
-    double _compTimeTot;            ///< [s] computations time - total
-    double _compTimeMax;            ///< [s] computations time - maximum
-
-    double _timeStepMax;            ///< [s] simulation maximum time step
-
-    unsigned int _timeSteps;        ///< number of time steps
-
-    bool _verbose;                  ///< specifies if extra information should be printed
-
-    /**
-     * Creates aircraft object.
-     * @param aircraftType aircraft type
-     * @return aircraft object on success null pointer on failure
-     */
-    Aircraft* createAircraft( AircraftType aircraftType );
-
-    /**
-     * Computes aircraft equilibrium in flight.
-     */
-    void initInFlight();
-
-    /**
-     * Computes aircraft equilibrium on ground.
-     */
-    void initOnGround();
-
-    /**
-     * Initializes recorder.
-     */
-    void initRecorder();
-
-    /**
-     * Updates initial position and attitude.
-     */
-    void updateInitialPositionAndAttitude();
-
-    /**
-     * Updates internal state input.
-     */
-    void updateStateInp();
-
-    void updateStateIdle();
-    void updateStateInit();
-    void updateStateWork();
-    void updateStateFreeze();
-    void updateStatePause();
-    void updateStateStop();
-
-    void printFlightEndInfo();
-    void printState();
-};
-
-} // end of fdm namespace
-
-////////////////////////////////////////////////////////////////////////////////
-
-#endif // FDM_MANAGER_H
+    Data::get()->cgi.vector.v_x = v.x();
+    Data::get()->cgi.vector.v_y = v.y();
+    Data::get()->cgi.vector.v_z = v.z();
+#   endif
+}

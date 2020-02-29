@@ -19,67 +19,61 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  ******************************************************************************/
-#ifndef TEST_AERODYNAMICS_H
-#define TEST_AERODYNAMICS_H
+#ifndef SFX_THREAD_H
+#define SFX_THREAD_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/main/fdm_Aerodynamics.h>
+#include <QThread>
+#include <QTimer>
 
-#include <fdm_test/test_MainRotorBE.h>
-#include <fdm_test/test_TailRotor.h>
-#include <fdm_test/test_Fuselage.h>
-#include <fdm_test/test_StabilizerHor.h>
-#include <fdm_test/test_StabilizerVer.h>
+#include <Data.h>
+
+#include <sfx/sfx_Manager.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
+namespace sfx
 {
-
-class TEST_Aircraft;    ///< aircraft class forward declaration
 
 /** */
-class TEST_Aerodynamics : public Aerodynamics
+class Thread : public QThread
 {
+    Q_OBJECT
+
 public:
 
     /** Constructor. */
-    TEST_Aerodynamics( const TEST_Aircraft *aircraft );
+    Thread();
 
     /** Destructor. */
-    ~TEST_Aerodynamics();
+    virtual ~Thread();
 
-    /** Initializes aerodynamics. */
+    /** */
     void init();
 
-    /**
-     * Reads data.
-     * @param dataNode XML node
-     */
-    void readData( XmlNode &dataNode );
+    /** */
+    void run();
 
-    /** Computes force and moment. */
-    void computeForceAndMoment();
+public slots:
 
-    /** Updates model. */
-    void update();
-
-    inline const TEST_MainRotor* getMainRotor() const { return _mainRotor; }
+    /** */
+    void onDataInpUpdated( const Data::DataBuf *data );
 
 private:
 
-    const TEST_Aircraft *_aircraft;     ///< aircraft model main object
+    Data::DataBuf _data;        ///
 
-    TEST_MainRotor     *_mainRotor;
-    TEST_TailRotor     *_tailRotor;     ///<
-    TEST_Fuselage      *_fuselage;      ///<
-    TEST_StabilizerHor *_stabHor;       ///<
-    TEST_StabilizerVer *_stabVer;       ///<
+    QTimer *_timer;             ///<
+    sfx::Manager *_sfx;         ///< SFX
+
+private slots:
+
+    void update();
 };
 
-} // end of fdm namespace
+} // end of sfx namepsace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // TEST_AERODYNAMICS_H
+#endif // SFX_THREAD_H

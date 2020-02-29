@@ -19,67 +19,76 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  ******************************************************************************/
-#ifndef TEST_AERODYNAMICS_H
-#define TEST_AERODYNAMICS_H
+
+#include <sfx/sfx_Thread.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/main/fdm_Aerodynamics.h>
-
-#include <fdm_test/test_MainRotorBE.h>
-#include <fdm_test/test_TailRotor.h>
-#include <fdm_test/test_Fuselage.h>
-#include <fdm_test/test_StabilizerHor.h>
-#include <fdm_test/test_StabilizerVer.h>
+using namespace sfx;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
+Thread::Thread() :
+    QThread ( NULLPTR ),
+    _timer ( NULLPTR ),
+    _sfx ( NULLPTR )
 {
-
-class TEST_Aircraft;    ///< aircraft class forward declaration
-
-/** */
-class TEST_Aerodynamics : public Aerodynamics
-{
-public:
-
-    /** Constructor. */
-    TEST_Aerodynamics( const TEST_Aircraft *aircraft );
-
-    /** Destructor. */
-    ~TEST_Aerodynamics();
-
-    /** Initializes aerodynamics. */
-    void init();
-
-    /**
-     * Reads data.
-     * @param dataNode XML node
-     */
-    void readData( XmlNode &dataNode );
-
-    /** Computes force and moment. */
-    void computeForceAndMoment();
-
-    /** Updates model. */
-    void update();
-
-    inline const TEST_MainRotor* getMainRotor() const { return _mainRotor; }
-
-private:
-
-    const TEST_Aircraft *_aircraft;     ///< aircraft model main object
-
-    TEST_MainRotor     *_mainRotor;
-    TEST_TailRotor     *_tailRotor;     ///<
-    TEST_Fuselage      *_fuselage;      ///<
-    TEST_StabilizerHor *_stabHor;       ///<
-    TEST_StabilizerVer *_stabVer;       ///<
-};
-
-} // end of fdm namespace
+    memset( &_data, 0, sizeof(Data::DataBuf) );
+    moveToThread( this );
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // TEST_AERODYNAMICS_H
+Thread::~Thread()
+{
+    DELPTR( _timer );
+    DELPTR( _sfx );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Thread::init()
+{
+    start();
+    setPriority( QThread::HighPriority );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Thread::run()
+{
+    _timer = new QTimer();
+
+    connect( _timer, SIGNAL(timeout()), this, SLOT(update()) );
+
+    _timer->start( 1000.0 * FDM_TIME_STEP );
+
+    ///////////////
+    QThread::run();
+    ///////////////
+
+    disconnect( _timer, SIGNAL(timeout()), 0, 0 );
+
+    _timer->stop();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Thread::onDataInpUpdated( const Data::DataBuf *data )
+{
+    memcpy( &_data, data, sizeof(Data::DataBuf) );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Thread::update()
+{
+    if ( _sfx )
+    {
+        _sfx->update( &_data );
+    }
+    else
+    {
+        _sfx = new sfx::Manager();
+    }
+}

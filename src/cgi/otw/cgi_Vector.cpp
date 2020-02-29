@@ -124,102 +124,47 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_GAUSSJORDAN_H
-#define FDM_GAUSSJORDAN_H
+
+#include <cgi/otw/cgi_Vector.h>
+
+#include <Data.h>
+
+#include <cgi/cgi_Utils.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/utils/fdm_Matrix.h>
-#include <fdm/utils/fdm_Vector.h>
+using namespace cgi;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
+Vector::Vector()
 {
+    _root = new osg::Group();
+}
 
-/**
- * @brief This class implements Gauss-Jordan method.
- *
- * @see Press W., et al.: Numerical Recipes: The Art of Scientific Computing, 2007, p.41
- * @see Baron B., Piatek L.: Metody numeryczne w C++ Builder, 2004, p.34. [in Polish]
- * @see https://en.wikipedia.org/wiki/Gaussian_elimination
- */
-template < unsigned int SIZE >
-class GaussJordan
+////////////////////////////////////////////////////////////////////////////////
+
+Vector::~Vector() {}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Vector::update()
 {
-public:
-
-    /**
-     * Solves system of linear equations using Gauss-Jordan method.
-     * @param mtr left hand side matrix
-     * @param rhs right hand size vector
-     * @param x result vector
-     * @param eps minimum value treated as not-zero
-     * @return FDM_SUCCESS on success and FDM_FAILURE on failure
-     */
-    static int solve( const Matrix< SIZE, SIZE > &mtr, const Vector< SIZE > &rhs,
-                      Vector< SIZE > *x, double eps = 1.0e-14 )
+    if ( _root->getNumChildren() > 0 )
     {
-        Matrix< SIZE, SIZE > mtr_temp = mtr;
-        Vector< SIZE > rhs_temp = rhs;
-
-        for ( unsigned int r = 0; r < SIZE; r++ )
-        {
-            // run along diagonal, swapping rows to move zeros (outside the diagonal) downwards
-            if ( fabs( mtr_temp(r,r) ) < fabs( eps ) )
-            {
-                if ( r < SIZE - 1 )
-                {
-                    mtr_temp.swapRows( r, r+1 );
-                    rhs_temp.swapRows( r, r+1 );
-                }
-                else
-                {
-                    return FDM_FAILURE;
-                }
-            }
-
-            // value on diagonal A(r,r)
-            double a_rr = mtr_temp(r,r);
-            double a_rr_inv = 1.0 / a_rr;
-
-            // deviding current row by value on diagonal
-            for ( unsigned int c = 0; c < SIZE; c++ )
-            {
-                mtr_temp(r,c) *= a_rr_inv;
-            }
-
-            rhs_temp(r) *= a_rr_inv;
-
-            // substracting current row from others rows
-            // for every row current row is multiplied by A(i,r)
-            // where r stands for row that is substracted from other rows
-            // and i stands for row that is substracting from
-            for ( unsigned int i = 0; i < SIZE; i++ )
-            {
-                if ( i != r )
-                {
-                    double a_ir = mtr_temp(i,r);
-
-                    for ( unsigned int c = 0; c < SIZE; c++ )
-                    {
-                        mtr_temp(i,c) -= a_ir * mtr_temp(r,c);
-                    }
-
-                    rhs_temp(i) -= a_ir * rhs_temp(r);
-                }
-            }
-        }
-
-        // rewritting results
-        (*x) = rhs_temp;
-
-        return FDM_SUCCESS;
+        _root->removeChildren( 0, _root->getNumChildren() );
     }
-};
 
-} // end of fdm namespace
+    if ( Data::get()->cgi.vector.visible )
+    {
+        osg::Vec3 b( Data::get()->cgi.vector.b_x,
+                     Data::get()->cgi.vector.b_y,
+                     Data::get()->cgi.vector.b_z );
 
-////////////////////////////////////////////////////////////////////////////////
+        osg::Vec3 v( Data::get()->cgi.vector.v_x,
+                     Data::get()->cgi.vector.v_y,
+                     Data::get()->cgi.vector.v_z );
 
-#endif // FDM_GAUSSJORDAN_H
+        Utils::drawVector( _root.get(), b, v );
+    }
+}
