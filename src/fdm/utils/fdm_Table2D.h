@@ -134,6 +134,8 @@
 
 #include <fdm/fdm_Defines.h>
 
+#include <fdm/utils/fdm_Table.h>
+
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace fdm
@@ -145,6 +147,12 @@ namespace fdm
 class FDMEXPORT Table2D
 {
 public:
+
+    /**
+     * @brief Creates table with only one record.
+     * @param val record value
+     */
+    static Table2D createOneRecordTable( double val = 0.0 );
 
     /** Constructor. */
     Table2D();
@@ -162,6 +170,13 @@ public:
 
     inline unsigned int getCols() const { return _cols; }
     inline unsigned int getRows() const { return _rows; }
+
+    /**
+     * Returns 1-dimensional table for the given col value.
+     * @param colValue column key value
+     * @return 1-dimensional table
+     */
+    Table getTable( double colValue ) const;
 
     /**
      * Returns table value for the given keys values using bilinear
