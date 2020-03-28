@@ -145,7 +145,7 @@ C130_Mass::~C130_Mass() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void C130_Mass::init()
+void C130_Mass::initialize()
 {
     VarMass *pilot_l     = getVariableMassByName( "pilot_l" );
     VarMass *pilot_r     = getVariableMassByName( "pilot_r" );
@@ -173,7 +173,7 @@ void C130_Mass::init()
         FDM_THROW( e );
     }
 
-    /////////////
-    Mass::init();
-    /////////////
+    ///////////////////
+    Mass::initialize();
+    ///////////////////
 }

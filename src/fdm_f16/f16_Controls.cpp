@@ -231,7 +231,7 @@ void F16_Controls::readData( XmlNode &dataNode )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void F16_Controls::init()
+void F16_Controls::initialize()
 {
     _channelRoll      = getChannelByName( "roll"       );
     _channelPitch     = getChannelByName( "pitch"      );
@@ -276,9 +276,9 @@ void F16_Controls::init()
         FDM_THROW( e );
     }
 
-    /////////////////
-    Controls::init();
-    /////////////////
+    ///////////////////////
+    Controls::initialize();
+    ///////////////////////
 }
 
 ////////////////////////////////////////////////////////////////////////////////

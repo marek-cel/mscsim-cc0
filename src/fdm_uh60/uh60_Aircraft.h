@@ -164,10 +164,7 @@ public:
      * Initializes aircraft.
      * @param engineOn specifies if engine is running on startup
      */
-    void init( bool engineOn = false );
-
-    /** Updates output data. */
-    void updateOutputData();
+    void initialize( bool engineOn = false );
 
     inline UH60_Aerodynamics* getAero() { return _aero; }
     inline UH60_Controls*     getCtrl() { return _ctrl; }
@@ -188,6 +185,9 @@ private:
     UH60_LandingGear  *_gear;   ///< landing gear model
     UH60_Mass         *_mass;   ///< mass and inertia model
     UH60_Propulsion   *_prop;   ///< propulsion model
+
+    /** Updates output data. */
+    void updateOutputData();
 };
 
 } // end of fdm namespace

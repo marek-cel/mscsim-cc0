@@ -159,14 +159,14 @@ public:
     /** Destructor. */
     virtual ~Autopilot();
 
-    /** Initializes autopilot. */
-    virtual void init();
-
     /**
      * Reads data.
      * @param dataNode XML node
      */
     virtual void readData( XmlNode &dataNode );
+
+    /** Initializes autopilot. */
+    virtual void initialize();
 
     /**
      * @brief Updates autopilot.

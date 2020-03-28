@@ -145,7 +145,7 @@ F16_LandingGear::~F16_LandingGear() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void F16_LandingGear::init()
+void F16_LandingGear::initialize()
 {
     Wheel *wheel_n = getWheelByName( "wheel_n" );
     Wheel *wheel_l = getWheelByName( "wheel_l" );
@@ -167,9 +167,9 @@ void F16_LandingGear::init()
         FDM_THROW( e );
     }
 
-    ////////////////////
-    LandingGear::init();
-    ////////////////////
+    //////////////////////////
+    LandingGear::initialize();
+    //////////////////////////
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -192,14 +192,14 @@ public:
     /** Destructor. */
     virtual ~Mass();
 
-    /** Initializes mass. */
-    virtual void init();
-
     /**
      * Reads data.
      * @param dataNode XML node
      */
     virtual void readData( XmlNode &dataNode );
+
+    /** Initializes mass. */
+    virtual void initialize();
 
     /** Computes force and moment. */
     virtual void computeForceAndMoment();

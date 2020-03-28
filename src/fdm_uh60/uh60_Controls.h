@@ -154,7 +154,7 @@ public:
     ~UH60_Controls();
 
     /** Initializes controls. */
-    void init();
+    void initialize();
 
     /** Updates model. */
     void update();

@@ -171,7 +171,7 @@ void Autopilot::init()
                 break;
             }
 
-            if ( _autopilot ) _autopilot->init();
+            if ( _autopilot ) _autopilot->initialize();
         }
     }
     catch ( fdm::Exception &e )

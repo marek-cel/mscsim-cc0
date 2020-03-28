@@ -152,7 +152,7 @@ public:
     ~F16_LandingGear();
 
     /** Initializes landing gear. */
-    virtual void init();
+    virtual void initialize();
 
     /** Updates model. */
     void update();

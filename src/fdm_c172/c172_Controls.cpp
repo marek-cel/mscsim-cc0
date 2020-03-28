@@ -163,7 +163,7 @@ C172_Controls::~C172_Controls() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void C172_Controls::init()
+void C172_Controls::initialize()
 {
     _channelAilerons     = getChannelByName( "ailerons"      );
     _channelElevator     = getChannelByName( "elevator"      );
@@ -202,9 +202,9 @@ void C172_Controls::init()
         FDM_THROW( e );
     }
 
-    /////////////////
-    Controls::init();
-    /////////////////
+    ///////////////////////
+    Controls::initialize();
+    ///////////////////////
 }
 
 ////////////////////////////////////////////////////////////////////////////////

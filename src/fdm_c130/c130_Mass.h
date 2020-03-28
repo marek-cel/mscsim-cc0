@@ -152,7 +152,7 @@ public:
     ~C130_Mass();
 
     /** Initializes mass. */
-    void init();
+    void initialize();
 
 private:
 

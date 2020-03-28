@@ -168,7 +168,7 @@ UH60_Controls::~UH60_Controls()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void UH60_Controls::init()
+void UH60_Controls::initialize()
 {
     _channelCyclicLat  = getChannelByName( "cyclic_lat" );
     _channelCyclicLon  = getChannelByName( "cyclic_lon" );
@@ -204,9 +204,9 @@ void UH60_Controls::init()
         FDM_THROW( e );
     }
 
-    /////////////////
-    Controls::init();
-    /////////////////
+    ///////////////////////
+    Controls::initialize();
+    ///////////////////////
 }
 
 ////////////////////////////////////////////////////////////////////////////////

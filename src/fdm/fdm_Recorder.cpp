@@ -176,7 +176,7 @@ void Recorder::addVariable( VariableBase *var )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Recorder::init( Mode mode, const std::string &file )
+void Recorder::initialize( Mode mode, const std::string &file )
 {
     _mode = mode;
 
@@ -203,7 +203,7 @@ void Recorder::init( Mode mode, const std::string &file )
 
                 for ( Variables::iterator it = _variables.begin(); it != _variables.end(); it++ )
                 {
-                    (*it)->init();
+                    (*it)->initialize();
                 }
             }
         }

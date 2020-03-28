@@ -145,7 +145,7 @@ UH60_Mass::~UH60_Mass() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void UH60_Mass::init()
+void UH60_Mass::initialize()
 {
     VarMass *pilot_l   = getVariableMassByName( "pilot_l" );
     VarMass *pilot_r   = getVariableMassByName( "pilot_r" );
@@ -169,7 +169,7 @@ void UH60_Mass::init()
         FDM_THROW( e );
     }
 
-    /////////////
-    Mass::init();
-    /////////////
+    ///////////////////
+    Mass::initialize();
+    ///////////////////
 }

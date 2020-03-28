@@ -152,7 +152,7 @@ public:
     ~C172_Controls();
 
     /** Initializes controls. */
-    void init();
+    void initialize();
 
     /** Updates controls. */
     void update();
