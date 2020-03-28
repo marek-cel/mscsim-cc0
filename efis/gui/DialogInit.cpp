@@ -1,0 +1,569 @@
+/****************************************************************************//*
+ * Copyright (C) 2020 Marek M. Cel
+ *
+ * Creative Commons Legal Code
+ *
+ * CC0 1.0 Universal
+ *
+ *     CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE
+ *     LEGAL SERVICES. DISTRIBUTION OF THIS DOCUMENT DOES NOT CREATE AN
+ *     ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS
+ *     INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES
+ *     REGARDING THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS
+ *     PROVIDED HEREUNDER, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM
+ *     THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS PROVIDED
+ *     HEREUNDER.
+ *
+ * Statement of Purpose
+ *
+ * The laws of most jurisdictions throughout the world automatically confer
+ * exclusive Copyright and Related Rights (defined below) upon the creator
+ * and subsequent owner(s) (each and all, an "owner") of an original work of
+ * authorship and/or a database (each, a "Work").
+ *
+ * Certain owners wish to permanently relinquish those rights to a Work for
+ * the purpose of contributing to a commons of creative, cultural and
+ * scientific works ("Commons") that the public can reliably and without fear
+ * of later claims of infringement build upon, modify, incorporate in other
+ * works, reuse and redistribute as freely as possible in any form whatsoever
+ * and for any purposes, including without limitation commercial purposes.
+ * These owners may contribute to the Commons to promote the ideal of a free
+ * culture and the further production of creative, cultural and scientific
+ * works, or to gain reputation or greater distribution for their Work in
+ * part through the use and efforts of others.
+ *
+ * For these and/or other purposes and motivations, and without any
+ * expectation of additional consideration or compensation, the person
+ * associating CC0 with a Work (the "Affirmer"), to the extent that he or she
+ * is an owner of Copyright and Related Rights in the Work, voluntarily
+ * elects to apply CC0 to the Work and publicly distribute the Work under its
+ * terms, with knowledge of his or her Copyright and Related Rights in the
+ * Work and the meaning and intended legal effect of CC0 on those rights.
+ *
+ * 1. Copyright and Related Rights. A Work made available under CC0 may be
+ * protected by copyright and related or neighboring rights ("Copyright and
+ * Related Rights"). Copyright and Related Rights include, but are not
+ * limited to, the following:
+ *
+ *   i. the right to reproduce, adapt, distribute, perform, display,
+ *      communicate, and translate a Work;
+ *  ii. moral rights retained by the original author(s) and/or performer(s);
+ * iii. publicity and privacy rights pertaining to a person's image or
+ *      likeness depicted in a Work;
+ *  iv. rights protecting against unfair competition in regards to a Work,
+ *      subject to the limitations in paragraph 4(a), below;
+ *   v. rights protecting the extraction, dissemination, use and reuse of data
+ *      in a Work;
+ *  vi. database rights (such as those arising under Directive 96/9/EC of the
+ *      European Parliament and of the Council of 11 March 1996 on the legal
+ *      protection of databases, and under any national implementation
+ *      thereof, including any amended or successor version of such
+ *      directive); and
+ * vii. other similar, equivalent or corresponding rights throughout the
+ *      world based on applicable law or treaty, and any national
+ *      implementations thereof.
+ *
+ * 2. Waiver. To the greatest extent permitted by, but not in contravention
+ * of, applicable law, Affirmer hereby overtly, fully, permanently,
+ * irrevocably and unconditionally waives, abandons, and surrenders all of
+ * Affirmer's Copyright and Related Rights and associated claims and causes
+ * of action, whether now known or unknown (including existing as well as
+ * future claims and causes of action), in the Work (i) in all territories
+ * worldwide, (ii) for the maximum duration provided by applicable law or
+ * treaty (including future time extensions), (iii) in any current or future
+ * medium and for any number of copies, and (iv) for any purpose whatsoever,
+ * including without limitation commercial, advertising or promotional
+ * purposes (the "Waiver"). Affirmer makes the Waiver for the benefit of each
+ * member of the public at large and to the detriment of Affirmer's heirs and
+ * successors, fully intending that such Waiver shall not be subject to
+ * revocation, rescission, cancellation, termination, or any other legal or
+ * equitable action to disrupt the quiet enjoyment of the Work by the public
+ * as contemplated by Affirmer's express Statement of Purpose.
+ *
+ * 3. Public License Fallback. Should any part of the Waiver for any reason
+ * be judged legally invalid or ineffective under applicable law, then the
+ * Waiver shall be preserved to the maximum extent permitted taking into
+ * account Affirmer's express Statement of Purpose. In addition, to the
+ * extent the Waiver is so judged Affirmer hereby grants to each affected
+ * person a royalty-free, non transferable, non sublicensable, non exclusive,
+ * irrevocable and unconditional license to exercise Affirmer's Copyright and
+ * Related Rights in the Work (i) in all territories worldwide, (ii) for the
+ * maximum duration provided by applicable law or treaty (including future
+ * time extensions), (iii) in any current or future medium and for any number
+ * of copies, and (iv) for any purpose whatsoever, including without
+ * limitation commercial, advertising or promotional purposes (the
+ * "License"). The License shall be deemed effective as of the date CC0 was
+ * applied by Affirmer to the Work. Should any part of the License for any
+ * reason be judged legally invalid or ineffective under applicable law, such
+ * partial invalidity or ineffectiveness shall not invalidate the remainder
+ * of the License, and in such case Affirmer hereby affirms that he or she
+ * will not (i) exercise any of his or her remaining Copyright and Related
+ * Rights in the Work or (ii) assert any associated claims and causes of
+ * action with respect to the Work, in either case contrary to Affirmer's
+ * express Statement of Purpose.
+ *
+ * 4. Limitations and Disclaimers.
+ *
+ *  a. No trademark or patent rights held by Affirmer are waived, abandoned,
+ *     surrendered, licensed or otherwise affected by this document.
+ *  b. Affirmer offers the Work as-is and makes no representations or
+ *     warranties of any kind concerning the Work, express, implied,
+ *     statutory or otherwise, including without limitation warranties of
+ *     title, merchantability, fitness for a particular purpose, non
+ *     infringement, or the absence of latent or other defects, accuracy, or
+ *     the present or absence of errors, whether or not discoverable, all to
+ *     the greatest extent permissible under applicable law.
+ *  c. Affirmer disclaims responsibility for clearing rights of other persons
+ *     that may apply to the Work or any use thereof, including without
+ *     limitation any person's Copyright and Related Rights in the Work.
+ *     Further, Affirmer disclaims responsibility for obtaining any necessary
+ *     consents, permissions or other rights required for any use of the
+ *     Work.
+ *  d. Affirmer understands and acknowledges that Creative Commons is not a
+ *     party to this document and has no duty or obligation with respect to
+ *     this CC0 or use of the Work.
+ *
+ ******************************************************************************/
+
+#include <gui/DialogInit.h>
+#include <ui_DialogInit.h>
+
+#include <cmath>
+
+#include <fdm/utils/fdm_Units.h>
+#include <fdm/utils/fdm_WGS84.h>
+
+#include <gui/Airports.h>
+
+#include <Defines.h>
+
+////////////////////////////////////////////////////////////////////////////////
+
+DialogInit::DialogInit( QWidget *parent ) :
+    QDialog ( parent ),
+    _ui ( new Ui::DialogInit ),
+
+    _lat ( 0.0f ),
+    _lon ( 0.0f ),
+    _alt ( 0.0f ),
+    _psi ( 0.0f ),
+    _ias ( 0.0f )
+{
+    _ui->setupUi( this );
+
+    for ( int i = 0; i < Airports::instance()->getCount(); i++ )
+    {
+        _ui->comboAirports->addItem( QIcon(), Airports::instance()->getAirport( i ).name );
+    }
+
+    _ui->comboAirports->setCurrentIndex( -1 );
+
+    settingsRead();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+DialogInit::~DialogInit()
+{
+    settingsSave();
+
+    DELPTR( _ui );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::readData()
+{
+    _ui->comboAirports->setCurrentIndex( -1 );
+    _ui->comboLocations->setCurrentIndex( -1 );
+
+    _ui->spinDistance->setEnabled( false );
+    _ui->spinDistance->setValue( 0.0 );
+
+    _ui->spinInitLat->setValue( _ui->comboInitLat->convert( _lat ) );
+    _ui->spinInitLon->setValue( _ui->comboInitLon->convert( _lon ) );
+    _ui->spinInitAlt->setValue( _ui->comboInitAlt->convert( _alt ) );
+    _ui->spinInitPsi->setValue( _ui->comboInitPsi->convert( _psi ) );
+    _ui->spinInitIAS->setValue( _ui->comboInitIAS->convert( _ias ) );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::saveData()
+{
+    if ( _ui->spinDistance->value() > 0.0 )
+    {
+        int indexApt = _ui->comboAirports->currentIndex();
+        int indexLoc = _ui->comboLocations->currentIndex();
+
+        Airports::Airport airport;
+
+        if ( indexApt >= 0 && indexApt < Airports::instance()->getCount() )
+        {
+            airport = Airports::instance()->getAirport( indexApt );
+        }
+
+        if ( indexLoc >= 0 && indexLoc < airport.locations.count() )
+        {
+            double dist = _ui->comboDistance->invert( _ui->spinDistance->value() );
+
+            fdm::Vector3 pos_bas( -dist, 0.0, 0.0 );
+
+            double psi = _ui->comboInitPsi->invert( _ui->spinInitPsi->value() );
+
+            fdm::Vector3 pos_ned = fdm::Matrix3x3( fdm::Angles( 0.0, 0.0, -psi ) ) * pos_bas;
+
+            fdm::WGS84::Geo pos_geo;
+
+            pos_geo.lat = _ui->comboInitLat->invert( _ui->spinInitLat->value() );
+            pos_geo.lon = _ui->comboInitLon->invert( _ui->spinInitLon->value() );
+            pos_geo.alt = 0.0;//Locations::instance()->getLocation( index ).elev;
+
+            fdm::WGS84 wgs( pos_geo );
+
+            fdm::Vector3 pos_wgs = wgs.getPos_WGS() + wgs.getNED2WGS() * pos_ned;
+
+            wgs.setPos_WGS( pos_wgs );
+
+            _lat = wgs.getPos_Geo().lat;
+            _lon = wgs.getPos_Geo().lon;
+
+            double slope = airport.locations.at( indexLoc ).slope;
+
+            if ( dist < 0.0 ) slope = 0.0;
+
+            _alt = airport.locations.at( indexLoc ).elev + dist * tan( slope );
+        }
+    }
+    else
+    {
+        _lat = _ui->comboInitLat->invert( _ui->spinInitLat->value() );
+        _lon = _ui->comboInitLon->invert( _ui->spinInitLon->value() );
+        _alt = _ui->comboInitAlt->invert( _ui->spinInitAlt->value() );
+    }
+
+    _psi = _ui->comboInitPsi->invert( _ui->spinInitPsi->value() );
+    _ias = _ui->comboInitIAS->invert( _ui->spinInitIAS->value() );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::settingsRead()
+{
+    QSettings settings( SIM_ORG_NAME, SIM_APP_NAME );
+
+    settings.beginGroup( "dialog_init" );
+
+    restoreGeometry( settings.value( "geometry" ).toByteArray() );
+
+    settingsRead_InitData( settings );
+    settingsRead_UnitCombos( settings );
+
+    settings.endGroup();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::settingsRead_InitData( QSettings &settings )
+{
+    settings.beginGroup( "init_data" );
+
+    Airports::Location location = Airports::instance()->getDefault();
+
+    _lat = settings.value( "lat", location.lat ).toFloat();
+    _lon = settings.value( "lon", location.lon ).toFloat();
+    _alt = settings.value( "alt", location.alt ).toFloat();
+    _psi = settings.value( "psi", location.hdg ).toFloat();
+    _ias = settings.value( "ias", 0.0 ).toFloat();
+
+    _ui->spinInitLat->setValue( _ui->comboInitLat->convert( _lat ) );
+    _ui->spinInitLon->setValue( _ui->comboInitLon->convert( _lon ) );
+    _ui->spinInitAlt->setValue( _ui->comboInitAlt->convert( _alt ) );
+    _ui->spinInitPsi->setValue( _ui->comboInitPsi->convert( _psi ) );
+    _ui->spinInitIAS->setValue( _ui->comboInitIAS->convert( _ias ) );
+
+    settings.endGroup();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::settingsRead_UnitCombos( QSettings &settings )
+{
+    settings.beginGroup( "unit_combos" );
+
+    _ui->comboDistance->setCurrentIndex( settings.value( "distance", 0 ).toInt() );
+
+    _ui->comboInitLat->setCurrentIndex( settings.value( "lat", 1 ).toInt() );
+    _ui->comboInitLon->setCurrentIndex( settings.value( "lon", 1 ).toInt() );
+    _ui->comboInitAlt->setCurrentIndex( settings.value( "alt", 0 ).toInt() );
+    _ui->comboInitPsi->setCurrentIndex( settings.value( "psi", 1 ).toInt() );
+    _ui->comboInitIAS->setCurrentIndex( settings.value( "ias", 0 ).toInt() );
+
+    settings.endGroup();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::settingsSave()
+{
+    QSettings settings( SIM_ORG_NAME, SIM_APP_NAME );
+
+    settings.beginGroup( "dialog_init" );
+
+    settings.setValue( "geometry" , saveGeometry() );
+
+    settingsSave_InitData( settings );
+    settingsSave_UnitCombos( settings );
+
+    settings.endGroup();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::settingsSave_InitData( QSettings &settings )
+{
+    settings.beginGroup( "init_data" );
+
+    settings.setValue( "lat", _lat );
+    settings.setValue( "lon", _lon );
+    settings.setValue( "alt", _alt );
+    settings.setValue( "psi", _psi );
+    settings.setValue( "ias", _ias );
+
+    settings.endGroup();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::settingsSave_UnitCombos( QSettings &settings )
+{
+    settings.beginGroup( "unit_combos" );
+
+    settings.setValue( "distance", _ui->comboDistance->currentIndex() );
+
+    settings.setValue( "lat", _ui->comboInitLat->currentIndex() );
+    settings.setValue( "lon", _ui->comboInitLon->currentIndex() );
+    settings.setValue( "alt", _ui->comboInitAlt->currentIndex() );
+    settings.setValue( "psi", _ui->comboInitPsi->currentIndex() );
+    settings.setValue( "ias", _ui->comboInitIAS->currentIndex() );
+
+    settings.endGroup();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::on_comboAirports_currentIndexChanged( int index )
+{
+    _ui->comboLocations->clear();
+
+    if ( index >= 0 && index < Airports::instance()->getCount() )
+    {
+        Airports::Airport airport = Airports::instance()->getAirport( index );
+
+        for ( int i = 0; i < airport.locations.count(); i++ )
+        {
+            _ui->comboLocations->addItem( QIcon(), airport.locations.at( i ).name );
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::on_comboLocations_currentIndexChanged( int index )
+{
+    int indexApt = _ui->comboAirports->currentIndex();
+
+    Airports::Airport airport;
+
+    if ( indexApt >= 0 && indexApt < Airports::instance()->getCount() )
+    {
+        airport = Airports::instance()->getAirport( indexApt );
+    }
+
+    if ( index >= 0 && index < airport.locations.count() )
+    {
+        Airports::Location location = airport.locations.at( index );
+
+        double lat = location.lat;
+        double lon = location.lon;
+        double alt = location.alt;
+        double hdg = location.hdg;
+
+        _ui->spinInitLat->setValue( _ui->comboInitLat->convert( lat ) );
+        _ui->spinInitLon->setValue( _ui->comboInitLon->convert( lon ) );
+        _ui->spinInitAlt->setValue( _ui->comboInitAlt->convert( ( alt > 1.0e-3 ) ? alt : 0.0f ) );
+        _ui->spinInitPsi->setValue( _ui->comboInitPsi->convert( hdg ) );
+
+        if ( location.runway )
+        {
+            _ui->labelDistance ->setEnabled( true );
+            _ui->spinDistance  ->setEnabled( true );
+            _ui->comboDistance ->setEnabled( true );
+        }
+        else
+        {
+            _ui->labelDistance ->setEnabled( false );
+            _ui->spinDistance  ->setEnabled( false );
+            _ui->comboDistance ->setEnabled( false );
+
+            _ui->spinDistance->setValue( 0.0 );
+        }
+    }
+    else
+    {
+        _ui->labelDistance ->setEnabled( false );
+        _ui->spinDistance  ->setEnabled( false );
+        _ui->comboDistance ->setEnabled( false );
+
+        _ui->spinDistance->setValue( 0.0 );
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::on_spinInitLat_valueChanged( double /*arg1*/ )
+{
+    _ui->labelDistance ->setEnabled( false );
+    _ui->spinDistance  ->setEnabled( false );
+    _ui->comboDistance ->setEnabled( false );
+
+    _ui->spinDistance->setValue( 0.0 );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::on_spinInitLon_valueChanged( double /*arg1*/ )
+{
+    _ui->labelDistance ->setEnabled( false );
+    _ui->spinDistance  ->setEnabled( false );
+    _ui->comboDistance ->setEnabled( false );
+
+    _ui->spinDistance->setValue( 0.0 );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::on_spinInitAlt_valueChanged( double /*arg1*/ )
+{
+    _ui->labelDistance ->setEnabled( false );
+    _ui->spinDistance  ->setEnabled( false );
+    _ui->comboDistance ->setEnabled( false );
+
+    _ui->spinDistance->setValue( 0.0 );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::on_spinInitPsi_valueChanged( double /*arg1*/ )
+{
+    _ui->labelDistance ->setEnabled( false );
+    _ui->spinDistance  ->setEnabled( false );
+    _ui->comboDistance ->setEnabled( false );
+
+    _ui->spinDistance->setValue( 0.0 );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::on_comboDistance_currentIndexChanged( int )
+{
+    float value = _ui->comboDistance->invertPrev( _ui->spinDistance->value() );
+
+    float max  = fdm::Units::nmi2m( 10.0 );
+    float step = fdm::Units::nmi2m( 1.0 );
+
+    _ui->spinDistance->setMinimum( -_ui->comboDistance->convert( max ) );
+    _ui->spinDistance->setMaximum(  _ui->comboDistance->convert( max ) );
+
+    _ui->spinDistance->setSingleStep( _ui->comboDistance->convert( step ) );
+
+    _ui->spinDistance->setValue( _ui->comboDistance->convert( value ) );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::on_comboInitLat_currentIndexChanged( int index )
+{
+    float value = _ui->comboInitLat->invertPrev( _ui->spinInitLat->value() );
+
+    if ( index == 0 )
+    {
+        // rad
+        _ui->spinInitLat->setDecimals( 8 );
+        _ui->spinInitLat->setMinimum( -M_PI / 2.0 );
+        _ui->spinInitLat->setMaximum(  M_PI / 2.0 );
+    }
+    else
+    {
+        // deg
+        _ui->spinInitLat->setDecimals( 6 );
+        _ui->spinInitLat->setMinimum( -90.0 );
+        _ui->spinInitLat->setMaximum(  90.0 );
+    }
+
+    _ui->spinInitLat->setValue( _ui->comboInitLat->convert( value ) );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::on_comboInitLon_currentIndexChanged( int index )
+{
+    float value = _ui->comboInitLon->invertPrev( _ui->spinInitLon->value() );
+
+    if ( index == 0 )
+    {
+        // rad
+        _ui->spinInitLon->setDecimals( 8 );
+        _ui->spinInitLon->setMinimum( -M_PI );
+        _ui->spinInitLon->setMaximum(  M_PI );
+    }
+    else
+    {
+        // deg
+        _ui->spinInitLon->setDecimals( 6 );
+        _ui->spinInitLon->setMinimum( -180.0 );
+        _ui->spinInitLon->setMaximum(  180.0 );
+    }
+
+    _ui->spinInitLon->setValue( _ui->comboInitLon->convert( value ) );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::on_comboInitAlt_currentIndexChanged( int /*index*/ )
+{
+    float value = _ui->comboInitAlt->invertPrev( _ui->spinInitAlt->value() );
+
+    _ui->spinInitAlt->setValue( _ui->comboInitAlt->convert( value ) );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::on_comboInitPsi_currentIndexChanged( int index )
+{
+    float value = _ui->comboInitPsi->invertPrev( _ui->spinInitPsi->value() );
+
+    if ( index == 0 )
+    {
+        // rad
+        _ui->spinInitPsi->setDecimals( 3 );
+        _ui->spinInitPsi->setMaximum( 2.0 * M_PI );
+    }
+    else
+    {
+        // deg
+        _ui->spinInitPsi->setDecimals( 1 );
+        _ui->spinInitPsi->setMaximum( 360.0 );
+    }
+
+    _ui->spinInitPsi->setValue( _ui->comboInitPsi->convert( value ) );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DialogInit::on_comboInitIAS_currentIndexChanged( int /*index*/ )
+{
+    float value = _ui->comboInitIAS->invertPrev( _ui->spinInitIAS->value() );
+
+    _ui->spinInitIAS->setValue( _ui->comboInitIAS->convert( value ) );
+}

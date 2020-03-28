@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="46"
+   height="46"
+   viewBox="0 0 12.170833 12.170834"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"
+   sodipodi:docname="knob_hdg.svg"
+   inkscape:export-filename="/home/cel/dev/sim/src/g1000/src/gui/images/g1000/knob_hdg.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
+  <defs
+     id="defs2">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient940">
+      <stop
+         style="stop-color:#111111;stop-opacity:1"
+         offset="0"
+         id="stop936" />
+      <stop
+         style="stop-color:#666666;stop-opacity:1"
+         offset="1"
+         id="stop938" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient940"
+       id="linearGradient1404-9"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(-1.0928014,-1.0928014,1.0928014,-1.0928014,-146.50729,419.60673)"
+       x1="17.627865"
+       y1="166.89114"
+       x2="23.448696"
+       y2="166.89114" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="3.9878741"
+     inkscape:cx="-25.211901"
+     inkscape:cy="22.909184"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     inkscape:window-width="1920"
+     inkscape:window-height="1012"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     showguides="false"
+     inkscape:snap-midpoints="true"
+     inkscape:snap-center="true" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="Background"
+     transform="translate(0,-126.47083)" />
+  <g
+     inkscape:label="Buttons"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-284.82914)"
+     style="display:inline">
+    <g
+       id="g829"
+       transform="matrix(1.3529412,0,0,1.3529411,0,-104.8235)">
+      <g
+         transform="translate(-8.9279202,77.718461)"
+         id="g1130">
+        <g
+           id="g2222-0"
+           transform="translate(4.8930273,23.187017)"
+           style="fill:#222222;fill-opacity:1">
+          <circle
+             style="opacity:1;fill:#222222;fill-opacity:1;stroke:none;stroke-width:0.19140071;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+             id="circle2214-8"
+             cx="-141.51285"
+             cy="-129.44563"
+             r="4.4979167"
+             transform="rotate(-135)" />
+        </g>
+        <path
+           inkscape:connector-curvature="0"
+           style="display:inline;opacity:1;fill:url(#linearGradient1404-9);fill-opacity:1;stroke:none;stroke-width:0.19140071;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="m 13.493015,210.2861 a 4.4979166,4.4979166 0 0 0 -2.209684,0.5457 3.2172566,3.2172566 0 0 1 0.143145,0.93897 3.2172566,3.2172566 0 0 1 -2.4933883,3.13055 4.4979166,4.4979166 0 0 0 1.3136143,3.06286 4.4979166,4.4979166 0 0 0 0.83354,0.65009 3.2172566,3.2172566 0 0 1 2.347145,-1.02267 3.2172566,3.2172566 0 0 1 2.348178,1.02216 4.4979166,4.4979166 0 0 0 0.832506,-0.64958 4.4979166,4.4979166 0 0 0 1.310515,-3.06234 3.2172566,3.2172566 0 0 1 -2.490287,-3.13107 3.2172566,3.2172566 0 0 1 0.141076,-0.94 4.4979166,4.4979166 0 0 0 -2.07636,-0.54467 z"
+           id="circle2214-8-6-9" />
+      </g>
+    </g>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Screen"
+     style="display:inline"
+     transform="translate(0,-126.47083)" />
+</svg>
