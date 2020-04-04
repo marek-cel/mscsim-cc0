@@ -137,8 +137,9 @@
 #include <gui/Airports.h>
 
 #include <gui/DialogTime.h>
-
 #include <gui/gui_Defines.h>
+
+#include <hid/hid_Manager.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 

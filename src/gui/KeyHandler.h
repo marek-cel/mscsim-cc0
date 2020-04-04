@@ -135,7 +135,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class WidgetCGI;
+class WidgetOTW;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -145,7 +145,7 @@ class KeyHandler : public osgGA::GUIEventHandler
 public:
 
     /** */
-    KeyHandler( WidgetCGI *widgetCGI );
+    KeyHandler( WidgetOTW *widgetOTW );
 
     /** */
     bool handle( const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter & );
@@ -158,7 +158,7 @@ public:
 
 private:
 
-    WidgetCGI *_widgetCGI;
+    WidgetOTW *_widgetOTW;
 
     bool _keysState[ HID_MAX_KEYS ];
 

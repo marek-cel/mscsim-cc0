@@ -130,6 +130,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <string>
+#include <vector>
 
 #include <fdm/fdm_Defines.h>
 
@@ -226,6 +227,9 @@ public:
     /** */
     void setKeysState( bool keysState[] );
 
+    /** */
+    void setNotches( const std::vector< double > &notches );
+
 private:
 
     static Manager *_instance;                  ///<  instance of Manager singleton class
@@ -268,6 +272,8 @@ private:
     double _mixture   [ FDM_MAX_ENGINES ];      ///< [0.0,1.0]
     double _propeller [ FDM_MAX_ENGINES ];      ///< [0.0,1.0]
 
+    bool _prevFlapsExtend;
+    bool _prevFlapsRetract;
     bool _prevLandingGearToggle;                ///<
     bool _prevParkingBrakeToggle;               ///<
     bool _prevSpoilersToggle;                   ///<
@@ -275,6 +281,10 @@ private:
     bool _stateLandingGear;                     ///<
     bool _stateParkingBrake;                    ///<
     bool _stateSpoilers;                        ///<
+
+    int _notch;                                 ///< current flaps notch
+
+    std::vector< double > _notches;             ///< flaps notches
 
     /**
      * You should use static function instance() due to get refernce
