@@ -131,8 +131,8 @@
 
 #include <QDockWidget>
 
-#include "Autopilot.h"
-#include "gui_Defines.h"
+#include <Autopilot.h>
+#include <Defines.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 

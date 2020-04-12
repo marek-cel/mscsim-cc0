@@ -134,8 +134,6 @@
 
 #include <g1000/g1000_Data.h>
 
-#include <g1000/xml/g1000_XmlNode.h>
-
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace g1000
@@ -153,9 +151,6 @@ public:
 
     /** Destructor. */
     virtual ~Module();
-
-    /** Initializes module. */
-    virtual void init( XmlNode &node ) = 0;
 
     /** Updates module. */
     virtual void update( const Data &data ) = 0;

@@ -137,6 +137,8 @@
 
 #include <g1000/gdu/g1000_Module.h>
 
+#include <g1000/xml/g1000_XmlNode.h>
+
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace g1000
@@ -173,13 +175,10 @@ public:
     static const int _depth_sorted_bin_disk;
 
     /** Constructor. */
-    ASI();
+    ASI( XmlNode &node );
 
     /** Destructor. */
     virtual ~ASI();
-
-    /** Initializes. */
-    void init( XmlNode &node );
 
     /** Updates. */
     void update( const Data &data );

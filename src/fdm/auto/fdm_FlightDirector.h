@@ -140,6 +140,8 @@
 namespace fdm
 {
 
+class Autopilot;
+
 /**
  * @brief Flight director class.
  */
@@ -148,7 +150,7 @@ class FDMEXPORT FlightDirector
 public:
 
     /** Constructor. */
-    FlightDirector();
+    FlightDirector( const Autopilot *ap );
 
     /** Destructor. */
     virtual ~FlightDirector();
@@ -194,6 +196,8 @@ public:
     void setPitch( double pitch );
 
 protected:
+
+    const Autopilot *_ap;   ///< autopilot
 
     double _cmd_roll;       ///< [rad] roll command
     double _cmd_pitch;      ///< [rad] pitch command

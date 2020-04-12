@@ -165,9 +165,6 @@ public:
     /** Destructor. */
     virtual ~HSI();
 
-    /** Initializes. */
-    void init( XmlNode &node );
-
     /** Updates. */
     void update( const Data &data );
 

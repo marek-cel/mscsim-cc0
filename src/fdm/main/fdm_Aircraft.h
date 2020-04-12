@@ -4,6 +4,8 @@
  *
  * @section LICENSE
  *
+ * Copyright (C) 2020 Marek M. Cel
+ *
  * Creative Commons Legal Code
  *
  * CC0 1.0 Universal

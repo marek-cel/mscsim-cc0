@@ -135,7 +135,7 @@
 #include <fdm/fdm_DataInp.h>
 #include <fdm/fdm_DataOut.h>
 
-#include "gui_Defines.h"
+#include <Defines.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 

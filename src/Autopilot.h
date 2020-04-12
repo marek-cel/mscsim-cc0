@@ -161,11 +161,15 @@ public:
     void onPressedIAS();
     void onPressedENG();
     void onPressedARM();
+    void onPressedVNV();
+    void onPressedFLC();
+    void onPressedVS();
 
     void onPressedHDG( double hdg );
     void onPressedNAV( double crs );
     void onPressedAPR();
     void onPressedBC();
+    void onPressedREV();
 
     void onPressedYD();
 

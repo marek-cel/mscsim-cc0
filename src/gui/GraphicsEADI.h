@@ -133,7 +133,7 @@
 #include <QGraphicsRectItem>
 #include <QGraphicsSvgItem>
 
-#include "gui_Defines.h"
+#include <Defines.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 

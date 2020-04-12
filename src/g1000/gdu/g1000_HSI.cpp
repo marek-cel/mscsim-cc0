@@ -132,8 +132,9 @@
 #include <osg/Geode>
 #include <osg/Geometry>
 
-#include <g1000/gdu/g1000_Colors.h>
 #include <g1000/g1000_Defines.h>
+
+#include <g1000/gdu/g1000_Colors.h>
 #include <g1000/gdu/g1000_Fonts.h>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -170,16 +171,7 @@ HSI::HSI()
 
     _patCRS = new osg::PositionAttitudeTransform();
     _pat->addChild( _patCRS.get() );
-}
 
-////////////////////////////////////////////////////////////////////////////////
-
-HSI::~HSI() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void HSI::init( XmlNode &node )
-{
     createAircraftSymbol();
     createBoxCRS();
     createBoxHDG();
@@ -188,6 +180,10 @@ void HSI::init( XmlNode &node )
     createHeadingBox();
     createHeadingBug();
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+HSI::~HSI() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
