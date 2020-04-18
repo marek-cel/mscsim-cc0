@@ -124,25 +124,20 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef G1000_MISC_H
-#define G1000_MISC_H
+#ifndef G1000_ASI_H
+#define G1000_ASI_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <cmath>
+#include <osg/Material>
+#include <osg/PositionAttitudeTransform>
+#include <osg/Switch>
 
-#ifdef _MSC_VER
-#   include <float.h>
-#endif
+#include <osgText/Text>
 
-#ifdef _MSC_VER
-#   ifdef max
-#       undef max
-#   endif
-#   ifdef min
-#       undef min
-#   endif
-#endif
+#include <g1000/cgi/g1000_Module.h>
+
+#include <g1000/xml/g1000_XmlNode.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -150,138 +145,83 @@ namespace g1000
 {
 
 /**
- * @brief Miscellaneous utilities.
+ * @brief PFD Airspeed Indicator.
  */
-class Misc
+class ASI : public Module
 {
 public:
 
-    /**
-     * Firt order inertia.
-     * @param u desired value
-     * @param y current value
-     * @param dt [s] time step
-     * @param tc [s] time constant
-     * @return firt order inertia output
-     */
-    inline static double inertia( double u, double y, double dt, double tc )
-    {
-        return y + ( 1.0 - exp( -dt / tc ) ) * ( u - y );
-    }
+    static const double _x_offset;
+    static const double _y_offset;
 
-    /**
-     * Checks if given varaible is Infinite.
-     * @param val double precision value to test
-     * @return function returns TRUE if tested value is Infinite
-     */
-    inline static bool isInf( const double &val )
-    {
-#       ifdef _MSC_VER
-        return !( _finite( val ) );
-#       else
-        return std::isinf( val );
-#       endif
-    }
+    static const osg::Vec3 _colorBack;
 
-    /**
-     * Checks if given varaible is NaN.
-     * @param val double precision value to test
-     * @return function returns TRUE if tested value is NaN
-     */
-    inline static bool isNaN( const double &val )
-    {
-        return ( val != val );
-    }
+    static const double _z_back;
+    static const double _z_box;
+    static const double _z_bug;
+    static const double _z_frame;
+    static const double _z_scale;
 
-    /**
-     * Checks if given varaible is Infinite or NaN.
-     * @param val double precision value to test
-     * @return function returns FALSE if tested value is Infinite or NaN
-     */
-    inline static bool isValid( const double &val )
-    {
-        return !( isNaN( val ) || isInf( val ) );
-    }
+    static const double _ias2pt;
 
-    /**
-     * Checks if given array is Infinite or NaN.
-     * @param array double precision array to test
-     * @param size the size of given array
-     * @return function returns FALSE if tested array is Infinite or NaN
-     */
-    inline static bool isValid( const double array[], unsigned int size )
-    {
-        for ( unsigned int i = 0; i < size; i++ )
-        {
-            if ( isNaN( array[ i ] ) || isInf( array[ i ] ) ) return false;
-        }
+    static const double _ias_min;
+    static const double _ias_red;
+    static const double _ias_stall;
+    static const double _ias_white;
+    static const double _ias_green;
+    static const double _ias_vne;
 
-        return true;
-    }
+    static const int _depth_sorted_bin_scale;
+    static const int _depth_sorted_bin_disk;
 
-    /**
-     * Maximum.
-     * @param v1 first value to compare
-     * @param v2 second value to campare
-     * @return maximum value
-     */
-    inline static double max( const double &v1, const double &v2 )
-    {
-        return ( v1 > v2 ) ? v1 : v2;
-    }
+    /** Constructor. */
+    ASI( IFD *ifd, XmlNode &node );
 
-    /**
-     * Minimum.
-     * @param v1 first value to compare
-     * @param v2 second value to campare
-     * @return minimum value
-     */
-    inline static double min( const double &v1, const double &v2 )
-    {
-        return ( v1 < v2 ) ? v1 : v2;
-    }
+    /** Destructor. */
+    virtual ~ASI();
 
-    /**
-     * Power 2 (square) function.
-     * @param val argument
-     * @return power 2 (square)
-     */
-    inline static double pow2( const double &val )
-    {
-        return val * val;
-    }
+    /** Updates. */
+    void update();
 
-    /**
-     * Saturation function. Returns value limited to the given range.
-     * @param min minimum possible value
-     * @param max maximum possible value
-     * @param val variable to test
-     * @return min if val less than min, max if val larger than max, val if val larger than min and less than max
-     */
-    inline static double satur( const double &min, const double &max, const double &val )
-    {
-        if      ( val < min ) return min;
-        else if ( val > max ) return max;
+private:
 
-        return val;
-    }
+    osg::ref_ptr<osg::PositionAttitudeTransform> _pat;
+    osg::ref_ptr<osg::PositionAttitudeTransform> _patDisk;
+    osg::ref_ptr<osg::PositionAttitudeTransform> _patScale;
+    osg::ref_ptr<osg::PositionAttitudeTransform> _patBug;
 
-    /**
-     * Signum function.
-     * @param val input value
-     * @return 1 if val is possitive, -1 when val is negative, 0 if val is zero
-     */
-    inline static double sign( const double &val )
-    {
-        if      ( val < 0.0 ) return -1.0;
-        else if ( val > 0.0 ) return  1.0;
+    osg::ref_ptr<osg::Switch> _switchIAS;
 
-        return 0.0;
-    }
+    osg::ref_ptr<osg::Group> _groupIAS;
+    osg::ref_ptr<osg::Group> _groupRed;
+
+    osg::ref_ptr<osg::Material> _materialBlack;
+    osg::ref_ptr<osg::Material> _materialRed;
+
+    osg::ref_ptr<osgText::Text> _textIAS_10;
+    osg::ref_ptr<osgText::Text> _textTAS;
+    osg::ref_ptr<osgText::Text> _textSelect;
+
+    void createAirspeedBug();
+    void createBack();
+    void createBar( double x, double z, double min, double max, osg::Vec3 color );
+    void createBarRed();
+    void createBarGreen();
+    void createBarWhite();
+    void createBarYellow();
+    void createBarVne();
+    void createBox();
+    void createBoxSelect();
+    void createBoxTAS();
+    void createDisk();
+    void createDiskMask();
+    void createFrame();
+    void createScale();
+    void createScaleMask();
 };
 
 } // end of g1000 namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // G1000_MISC_H
+#endif // G1000_ASI_H

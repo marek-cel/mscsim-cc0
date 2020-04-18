@@ -124,164 +124,62 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef G1000_MISC_H
-#define G1000_MISC_H
+
+#include <g1000/cgi/g1000_WYPT.h>
+
+#include <g1000/cgi/g1000_Colors.h>
+#include <g1000/cgi/g1000_Fonts.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <cmath>
-
-#ifdef _MSC_VER
-#   include <float.h>
-#endif
-
-#ifdef _MSC_VER
-#   ifdef max
-#       undef max
-#   endif
-#   ifdef min
-#       undef min
-#   endif
-#endif
+using namespace g1000;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace g1000
+const double WYPT::_z_text = -40.0;
+
+////////////////////////////////////////////////////////////////////////////////
+
+WYPT::WYPT( IFD *ifd ) :
+    Module( ifd )
+{
+    create();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+WYPT::~WYPT() {}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void WYPT::update()
 {
 
-/**
- * @brief Miscellaneous utilities.
- */
-class Misc
-{
-public:
-
-    /**
-     * Firt order inertia.
-     * @param u desired value
-     * @param y current value
-     * @param dt [s] time step
-     * @param tc [s] time constant
-     * @return firt order inertia output
-     */
-    inline static double inertia( double u, double y, double dt, double tc )
-    {
-        return y + ( 1.0 - exp( -dt / tc ) ) * ( u - y );
-    }
-
-    /**
-     * Checks if given varaible is Infinite.
-     * @param val double precision value to test
-     * @return function returns TRUE if tested value is Infinite
-     */
-    inline static bool isInf( const double &val )
-    {
-#       ifdef _MSC_VER
-        return !( _finite( val ) );
-#       else
-        return std::isinf( val );
-#       endif
-    }
-
-    /**
-     * Checks if given varaible is NaN.
-     * @param val double precision value to test
-     * @return function returns TRUE if tested value is NaN
-     */
-    inline static bool isNaN( const double &val )
-    {
-        return ( val != val );
-    }
-
-    /**
-     * Checks if given varaible is Infinite or NaN.
-     * @param val double precision value to test
-     * @return function returns FALSE if tested value is Infinite or NaN
-     */
-    inline static bool isValid( const double &val )
-    {
-        return !( isNaN( val ) || isInf( val ) );
-    }
-
-    /**
-     * Checks if given array is Infinite or NaN.
-     * @param array double precision array to test
-     * @param size the size of given array
-     * @return function returns FALSE if tested array is Infinite or NaN
-     */
-    inline static bool isValid( const double array[], unsigned int size )
-    {
-        for ( unsigned int i = 0; i < size; i++ )
-        {
-            if ( isNaN( array[ i ] ) || isInf( array[ i ] ) ) return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Maximum.
-     * @param v1 first value to compare
-     * @param v2 second value to campare
-     * @return maximum value
-     */
-    inline static double max( const double &v1, const double &v2 )
-    {
-        return ( v1 > v2 ) ? v1 : v2;
-    }
-
-    /**
-     * Minimum.
-     * @param v1 first value to compare
-     * @param v2 second value to campare
-     * @return minimum value
-     */
-    inline static double min( const double &v1, const double &v2 )
-    {
-        return ( v1 < v2 ) ? v1 : v2;
-    }
-
-    /**
-     * Power 2 (square) function.
-     * @param val argument
-     * @return power 2 (square)
-     */
-    inline static double pow2( const double &val )
-    {
-        return val * val;
-    }
-
-    /**
-     * Saturation function. Returns value limited to the given range.
-     * @param min minimum possible value
-     * @param max maximum possible value
-     * @param val variable to test
-     * @return min if val less than min, max if val larger than max, val if val larger than min and less than max
-     */
-    inline static double satur( const double &min, const double &max, const double &val )
-    {
-        if      ( val < min ) return min;
-        else if ( val > max ) return max;
-
-        return val;
-    }
-
-    /**
-     * Signum function.
-     * @param val input value
-     * @return 1 if val is possitive, -1 when val is negative, 0 if val is zero
-     */
-    inline static double sign( const double &val )
-    {
-        if      ( val < 0.0 ) return -1.0;
-        else if ( val > 0.0 ) return  1.0;
-
-        return 0.0;
-    }
-};
-
-} // end of g1000 namespace
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // G1000_MISC_H
+void WYPT::create()
+{
+    const double h = 11.0;
+
+    const double dx_freq = 51.0;
+
+    const double x_ap = -G1000_GDU_WIDTH_2 + dx_freq + 25.0;
+
+    const double y = G1000_GDU_HEIGHT_2 - 0.4 * h;
+
+    osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+    _root->addChild( geode.get() );
+
+    _textWYPT = new osgText::Text();
+    _textWYPT->setFont( Fonts::get( "data/fonts/g1000.ttf" ) );
+    _textWYPT->setColor( osg::Vec4( Colors::_magenta, 1.0 ) );
+    _textWYPT->setCharacterSize( 5.0 );
+    _textWYPT->setAxisAlignment( osgText::TextBase::XY_PLANE );
+    _textWYPT->setPosition( osg::Vec3( x_ap, y, _z_text ) );
+    _textWYPT->setLayout( osgText::Text::LEFT_TO_RIGHT );
+    _textWYPT->setAlignment( osgText::Text::LEFT_BOTTOM );
+    _textWYPT->setText( "D" );
+    geode->addDrawable( _textWYPT );
+}

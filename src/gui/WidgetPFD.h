@@ -134,7 +134,7 @@
 #include <Autopilot.h>
 #include <Defines.h>
 
-#include <g1000/gdu/g1000_PFD.h>
+#include <g1000/cgi/g1000_PFD.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -156,15 +156,22 @@ public:
 
     ~WidgetPFD();
 
-    void update( const g1000::Data &data );
+    void setup( Autopilot *ap, g1000::IFD *ifd );
 
-    void setAutopilot( Autopilot *ap );
+    void init();
+
+protected:
+
+    /** */
+    void timerEvent( QTimerEvent *event );
 
 private:
 
     Ui::WidgetPFD *_ui;
 
     g1000::PFD *_pfd;
+
+    int _timerId;
 
     void settingsRead();
     void settingsSave();

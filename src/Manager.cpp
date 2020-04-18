@@ -149,6 +149,8 @@ Manager::Manager() :
     _sim ( NULLPTR ),
     _win ( NULLPTR ),
 
+    _g1000_ifd ( NULLPTR ),
+
     _timer ( 0 ),
     _timerId ( 0 ),
     _timeStep ( 0.0 )
@@ -158,6 +160,9 @@ Manager::Manager() :
     _sfx = new sfx::Thread();
     _sim = new Simulation();
     _win = new MainWindow();
+
+    _g1000_ifd = new g1000::IFD();
+    memset( &_g1000_input, 0, sizeof( g1000::Input ) );
 
     _timer = new QElapsedTimer();
 }
@@ -191,6 +196,8 @@ Manager::~Manager()
     DELPTR( _sfx );
     DELPTR( _sim );
     DELPTR( _win );
+
+    DELPTR( _g1000_ifd );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -210,7 +217,7 @@ void Manager::init()
     _sfx->init();
     _sim->init();
 
-    _win->setAutopilot( _ap );
+    _win->setup( _ap, _g1000_ifd );
     _win->show();
     _win->init();
 
@@ -241,6 +248,9 @@ void Manager::timerEvent( QTimerEvent *event )
     hid::Manager::instance()->update( _timeStep );
 
     _ap->update( _timeStep );
+
+    updatedInputG1000();
+    _g1000_ifd->update( _timeStep, _g1000_input );
 
     _nav->setCourse( fdm::Units::deg2rad( _win->getCourse() ) );
     _nav->setFreqNAV( 1000 * _win->getFreqNav() );
@@ -296,8 +306,54 @@ void Manager::timerEvent( QTimerEvent *event )
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void Manager::updatedInputG1000()
+{
+    _g1000_input.ref_pressure = 101325.0;
+
+    _g1000_input.fd_visible = false;
+    _g1000_input.fd_pitch = 0.0;
+    _g1000_input.fd_roll  = 0.0;
+
+    _g1000_input.sel_course    = 0.0;
+    _g1000_input.sel_heading   = 0.0;
+    _g1000_input.sel_airspeed  = 0.0;
+    _g1000_input.sel_altitude  = 0.0;
+    _g1000_input.sel_climbRate = 0.0;
+
+    _g1000_input.com_1_act = 118.000;
+    _g1000_input.com_1_sby = 118.000;
+    _g1000_input.com_2_act = 136.975;
+    _g1000_input.com_2_sby = 136.975;
+
+    _g1000_input.nav_1_act = 108.00;
+    _g1000_input.nav_1_sby = 108.00;
+    _g1000_input.nav_2_act = 117.95;
+    _g1000_input.nav_2_sby = 117.95;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Manager::updatedInputG1000( const fdm::DataOut &dataOut )
+{
+    _g1000_input.roll    = dataOut.flight.roll;
+    _g1000_input.pitch   = dataOut.flight.pitch;
+    _g1000_input.heading = dataOut.flight.heading;
+
+    _g1000_input.airspeed_u_bas = dataOut.flight.airspeed_u_bas;
+    _g1000_input.airspeed_v_bas = dataOut.flight.airspeed_v_bas;
+    _g1000_input.airspeed_w_bas = dataOut.flight.airspeed_w_bas;
+
+    _g1000_input.air_pressure    = dataOut.environment.air_pressure;
+    _g1000_input.air_density     = dataOut.environment.air_density;
+    _g1000_input.air_temperature = dataOut.environment.air_temperature;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void Manager::onDataOutUpdated( const fdm::DataOut &dataOut )
 {
+    updatedInputG1000( dataOut );
+
     // hud
     Data::get()->cgi.hud.roll    = dataOut.flight.roll;
     Data::get()->cgi.hud.pitch   = dataOut.flight.pitch;

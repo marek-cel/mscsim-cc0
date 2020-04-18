@@ -181,6 +181,9 @@ public:
     virtual ~MainWindow();
 
     /** */
+    void setup( Autopilot *ap, g1000::IFD *ifd );
+
+    /** */
     void init();
 
     inline bool getABS() const { return _dockCtrl->getABS(); }
@@ -188,9 +191,6 @@ public:
 
     inline double getCourse()  const { return _dockAuto->getCourse();  }
     inline double getFreqNav() const { return _dockAuto->getFreqNav(); }
-
-    /** */
-    void setAutopilot( Autopilot *ap );
 
 protected:
 
@@ -296,8 +296,6 @@ private:
     void updateDockEFIS();
     void updateDockMain();
     void updateDockProp();
-
-    void updateGarmin();
 
     void updateMenu();
     void updateStatusBar();
