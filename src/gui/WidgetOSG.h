@@ -124,76 +124,49 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <gui/WidgetCGI.h>
-
-#include <osg/PositionAttitudeTransform>
-#include <osgDB/ReadFile>
-#include <osgGA/TrackballManipulator>
-#include <osgViewer/ViewerEventHandlers>
-
-#include <g1000/g1000_Defines.h>
+#ifndef WIDGETOSG_H
+#define WIDGETOSG_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-WidgetCGI::WidgetCGI( QWidget *parent ) :
-    WidgetOSG ( parent ),
-    _layout ( NULLPTR )
+#include <QDateTime>
+#include <QGridLayout>
+#include <QWidget>
+
+#include <osgViewer/Viewer>
+#include <osgGA/GUIEventHandler>
+#include <osgQt/GraphicsWindowQt>
+
+#include <Defines.h>
+
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief OSG common widget class.
+ */
+class WidgetOSG : public QWidget, public osgViewer::Viewer
 {
-    QWidget *widget = addViewWidget();
+    Q_OBJECT
 
-    _layout = new QGridLayout( this );
-    _layout->setContentsMargins( 1, 1, 1, 1 );
-    _layout->addWidget( widget, 0, 0 );
+public:
 
-    setLayout( _layout );
-}
+    /** Constructor. */
+    WidgetOSG( QWidget *parent = NULLPTR );
 
-////////////////////////////////////////////////////////////////////////////////
+    /** Destructor. */
+    virtual ~WidgetOSG();
 
-WidgetCGI::~WidgetCGI() {}
+protected:
 
-////////////////////////////////////////////////////////////////////////////////
+    osg::ref_ptr<osgQt::GraphicsWindowQt> _gwin;
 
-QWidget* WidgetCGI::addViewWidget()
-{
-    createCamera();
+    /** */
+    virtual void paintEvent( QPaintEvent *event );
 
-    setSceneData( new osg::Group() );
-    addEventHandler( new osgViewer::StatsHandler );
-    //setCameraManipulator( new osgGA::TrackballManipulator() );
-
-    setKeyEventSetsDone( 0 );
-
-    assignSceneDataToCameras();
-
-    return _gwin->getGLWidget();
-}
+    /** */
+    virtual osg::ref_ptr<osgQt::GraphicsWindowQt> createGraphicsWindow( int x, int y, int w, int h );
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void WidgetCGI::createCamera()
-{
-    osg::ref_ptr<osg::Camera> camera = getCamera();
-
-    camera->setGraphicsContext( _gwin );
-
-    const osg::GraphicsContext::Traits *traits = _gwin->getTraits();
-
-    double w2h = (double)(traits->width) / (double)(traits->height);
-
-    camera->setClearColor( osg::Vec4( 0.0, 0.0, 0.0, 1.0 ) );
-    camera->setViewport( new osg::Viewport( 0, 0, traits->width, traits->height ) );
-
-    if ( 0 )
-    {
-        camera->setProjectionMatrixAsPerspective( G1000_GDU_FOV_V, w2h, 1.0, 10000.0 );
-    }
-    else
-    {
-        camera->setViewport( new osg::Viewport( 0, 0, traits->width, traits->height ) );
-        camera->setProjectionMatrixAsOrtho2D( -G1000_GDU_HEIGHT_2 * w2h , G1000_GDU_HEIGHT_2 * w2h,
-                                              -G1000_GDU_HEIGHT_2       , G1000_GDU_HEIGHT_2 );
-        camera->setViewMatrix( osg::Matrix::identity() );
-    }
-}
+#endif // WIDGETOSG_H

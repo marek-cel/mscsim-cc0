@@ -129,22 +129,14 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <QDateTime>
-#include <QGridLayout>
-#include <QWidget>
-
-#include <osgViewer/Viewer>
-#include <osgGA/GUIEventHandler>
-#include <osgQt/GraphicsWindowQt>
-
-#include <Defines.h>
+#include <gui/WidgetOSG.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
  * @brief CGI widget class.
  */
-class WidgetCGI : public QWidget, public osgViewer::Viewer
+class WidgetCGI : public WidgetOSG
 {
     Q_OBJECT
 
@@ -156,25 +148,15 @@ public:
     /** Destructor. */
     virtual ~WidgetCGI();
 
-protected:
-
-    /** */
-    void paintEvent( QPaintEvent *event );
-
 private:
 
-    QGridLayout *_gridLayout;
-
-    osg::ref_ptr<osgQt::GraphicsWindowQt> _graphicsWindow;
+    QGridLayout *_layout;
 
     /** */
     QWidget* addViewWidget();
 
     /** */
     void createCamera();
-
-    /** */
-    osg::ref_ptr<osgQt::GraphicsWindowQt> createGraphicsWindow( int x, int y, int w, int h );
 };
 
 ////////////////////////////////////////////////////////////////////////////////

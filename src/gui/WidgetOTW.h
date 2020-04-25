@@ -129,15 +129,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <QDateTime>
-#include <QGridLayout>
-#include <QWidget>
-
-#include <osgViewer/Viewer>
-#include <osgGA/GUIEventHandler>
-#include <osgQt/GraphicsWindowQt>
-
-#include <Defines.h>
+#include <gui/WidgetOSG.h>
 
 #include <gui/KeyHandler.h>
 #include <hid/hid_Assignment.h>
@@ -147,7 +139,7 @@
 /**
  * @brief Out-the-Window widget class.
  */
-class WidgetOTW : public QWidget, public osgViewer::Viewer
+class WidgetOTW : public WidgetOSG
 {
     Q_OBJECT
 
@@ -186,16 +178,12 @@ public:
 protected:
 
     /** */
-    void paintEvent( QPaintEvent *event );
-
-    /** */
     void timerEvent( QTimerEvent *event );
 
 private:
 
-    QGridLayout *_gridLayout;
+    QGridLayout *_layout;
 
-    osg::ref_ptr<osgQt::GraphicsWindowQt> _graphicsWindow;
     osg::ref_ptr<KeyHandler> _keyHandler;
 
     int _timerId;                   ///< timer ID
@@ -209,9 +197,6 @@ private:
 
     /** */
     void createCameraHUD();
-
-    /** */
-    osg::ref_ptr<osgQt::GraphicsWindowQt> createGraphicsWindow( int x, int y, int w, int h );
 };
 
 ////////////////////////////////////////////////////////////////////////////////
