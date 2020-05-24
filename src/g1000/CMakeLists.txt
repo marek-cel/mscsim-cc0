@@ -1,6 +1,7 @@
-add_library( g1000 STATIC
+set( MODULE_NAME g1000 )
+
+set( CPP_FILES
     g1000_Log.cpp
-    g1000_Main.cpp
 
     cgi/g1000_ADI.cpp
     cgi/g1000_AFCS.cpp
@@ -24,11 +25,11 @@ add_library( g1000 STATIC
     sim/g1000_GMU.cpp
     sim/g1000_GRS.cpp
     sim/g1000_GTX.cpp
-    
+    sim/g1000_IFD.cpp
+
+    utils/g1000_Const.cpp
     utils/g1000_String.cpp
     utils/g1000_Units.cpp
-    
-    xml/g1000_XmlDoc.cpp
-    xml/g1000_XmlNode.cpp
-    xml/g1000_XmlUtils.cpp
 )
+
+add_library( ${MODULE_NAME} STATIC ${CPP_FILES} )

@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 2.8.11 )
+cmake_minimum_required( VERSION 3.5 )
 
 project( mscsim )
 
@@ -8,13 +8,10 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin )
 
 ################################################################################
 
-# set( CMAKE_VERBOSE_MAKEFILE ON )
-
 set( CMAKE_INCLUDE_CURRENT_DIR ON )
 
-# set( CMAKE_AUTOMOC ON )
-# set( CMAKE_AUTORCC ON )
-# set( CMAKE_AUTOUIC ON )
+set(CMAKE_CXX_STANDARD 11 )
+set(CMAKE_CXX_STANDARD_REQUIRED ON )
 
 ################################################################################
 
@@ -38,7 +35,7 @@ endif()
 
 ################################################################################
 
-set( CMAKE_CXX_FLAGS "-Wall -std=c++0x -O3" )
+set( CMAKE_CXX_FLAGS "-Wall -O3" )
 
 ################################################################################
 
@@ -55,16 +52,37 @@ endif()
 
 ################################################################################
 
-find_package( Qt4 REQUIRED
-    QtCore
-    QtGui
-    QtOpenGL
-    QtSvg
-    QtXml
-    qtmain
-)
-include( ${QT_USE_FILE} )
-add_definitions( ${QT_DEFINITIONS} )
+if( NOT USE_QT4 )
+    if( WIN32 )
+        set( USE_QT4 false )
+    endif()
+    
+    if( UNIX )
+        set( USE_QT4 true )
+    endif()
+endif()
+
+if( USE_QT4 )
+    find_package( Qt4 REQUIRED
+        QtCore
+        QtGui
+        QtOpenGL
+        QtSvg
+        QtXml
+        qtmain
+    )
+    
+    include( ${QT_USE_FILE} )
+    add_definitions( ${QT_DEFINITIONS} )
+else()
+    set( CMAKE_AUTOMOC ON )
+    set( CMAKE_AUTORCC ON )
+    set( CMAKE_AUTOUIC ON )
+
+    find_package( Qt5 COMPONENTS Core Widgets OpenGL Svg Xml REQUIRED )
+endif()
+
+################################################################################
 
 find_package( OpenSceneGraph REQUIRED
     OpenThreads
@@ -81,10 +99,16 @@ find_package( OpenSceneGraph REQUIRED
 )
 include_directories( ${OPENSCENEGRAPH_INCLUDE_DIRS} )
 
+################################################################################
+
 find_package( LibXml2 REQUIRED )
+
+################################################################################
 
 find_package( OpenAL REQUIRED )
 include_directories( ${OPENAL_INCLUDE_DIR} )
+
+################################################################################
 
 find_library( ALUT_LIBRARY alut )
 
@@ -106,16 +130,7 @@ add_subdirectory( sfx )
 
 ################################################################################
 
-qt4_wrap_cpp( MOC_SRCS
-    Manager.h
-    Simulation.h
-)
-
-qt4_add_resources( RES_SOURCES
-    mscsim.qrc
-)
-
-set( SOURCES
+set( CPP_FILES
     Autopilot.cpp
     main.cpp
     Manager.cpp
@@ -123,18 +138,31 @@ set( SOURCES
     Simulation.cpp
 )
 
-if (WIN32)
+set( MOC_SRC_FILES
+    Manager.h
+    Simulation.h
+)
+
+set( RCC_SRC_FILES
+    mscsim.qrc
+)
+
+if( USE_QT4 )
+    qt4_wrap_cpp( MOC_SRCS ${MOC_SRC_FILES} )
+    qt4_add_resources( RES_SOURCES ${RCC_SRC_FILES} )
+    set( SOURCES ${CPP_FILES} ${MOC_SRCS} ${RES_SOURCES} )
+else()
+    set( SOURCES ${CPP_FILES} ${MOC_SRC_FILES} ${RCC_SRC_FILES} )
+endif()
+
+if( WIN32 )
     ENABLE_LANGUAGE(RC)
-    set(SOURCES mscsim.rc ${SOURCES})
+    set( SOURCES mscsim.rc ${SOURCES} )
 endif()
 
 ################################################################################
 
-add_executable( ${PROJECT_NAME} WIN32
-    ${SOURCES}
-    ${MOC_SRCS}
-    ${RES_SOURCES}
-)
+add_executable( ${PROJECT_NAME} WIN32 ${SOURCES} )
 
 ################################################################################
 
