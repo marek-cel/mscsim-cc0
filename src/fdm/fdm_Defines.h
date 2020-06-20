@@ -160,7 +160,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #define FDM_MAX_PILOTS  2
-#define FDM_MAX_TANKS   4
+#define FDM_MAX_TANKS   8
 #define FDM_MAX_ENGINES 4
 #define FDM_MAX_BLADES  8
 #define FDM_MAX_VECTORS 16
