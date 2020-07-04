@@ -124,8 +124,8 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_BLADE_H
-#define FDM_BLADE_H
+#ifndef FDM_ROTORBLADE_H
+#define FDM_ROTORBLADE_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -198,7 +198,7 @@ namespace fdm
  * </blade>
  * @endcode
  */
-class FDMEXPORT Blade
+class FDMEXPORT RotorBlade
 {
 public:
 
@@ -223,10 +223,10 @@ public:
     static Matrix3x3 getSRA2BSA( double beta, Direction direction = MainRotor::CW );
 
     /** Constructor. */
-    Blade( Direction direction = MainRotor::CW );
+    RotorBlade( Direction direction = MainRotor::CW );
 
     /** Destructor. */
-    virtual ~Blade();
+    virtual ~RotorBlade();
 
     /**
      * Reads data.
@@ -408,4 +408,4 @@ protected:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // FDM_BLADE_H
+#endif // FDM_ROTORBLADE_H

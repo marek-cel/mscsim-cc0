@@ -125,7 +125,7 @@
  *
  ******************************************************************************/
 
-#include <fdm/models/fdm_Blade.h>
+#include <fdm/models/fdm_RotorBlade.h>
 
 #include <iostream>
 
@@ -140,7 +140,7 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Matrix3x3 Blade::getRAS2SRA( double psi, Direction direction )
+Matrix3x3 RotorBlade::getRAS2SRA( double psi, Direction direction )
 {
     double ccw = ( direction == MainRotor::CCW ) ? 1.0 : -1.0;
 
@@ -180,7 +180,7 @@ Matrix3x3 Blade::getRAS2SRA( double psi, Direction direction )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Matrix3x3 Blade::getSRA2BSA( double beta, Direction direction )
+Matrix3x3 RotorBlade::getSRA2BSA( double beta, Direction direction )
 {
     double ccw = ( direction == MainRotor::CCW ) ? 1.0 : -1.0;
 
@@ -206,7 +206,7 @@ Matrix3x3 Blade::getSRA2BSA( double beta, Direction direction )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Blade::Blade( Direction direction ) :
+RotorBlade::RotorBlade( Direction direction ) :
     _direction ( direction ),
     _dirFactor ( _direction == MainRotor::CCW ? 1.0 : -1.0 ),
 
@@ -245,11 +245,11 @@ Blade::Blade( Direction direction ) :
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Blade::~Blade() {}
+RotorBlade::~RotorBlade() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Blade::readData( XmlNode &dataNode )
+void RotorBlade::readData( XmlNode &dataNode )
 {
     if ( dataNode.isValid() )
     {
@@ -289,7 +289,7 @@ void Blade::readData( XmlNode &dataNode )
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifdef SIM_ROTOR_TEST
-void Blade::TEST_INIT()
+void RotorBlade::TEST_INIT()
 {
     //_beta_0 = _beta_max;
     _beta = _beta_min;
@@ -300,18 +300,18 @@ void Blade::TEST_INIT()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Blade::computeForceAndMoment( const Vector3 &vel_air_ras,
-                                   const Vector3 &omg_air_ras,
-                                   const Vector3 &omg_ras,
-                                   const Vector3 &acc_ras,
-                                   const Vector3 &eps_ras,
-                                   const Vector3 &grav_ras,
-                                   double omega,
-                                   double azimuth,
-                                   double airDensity,
-                                   double theta_0,
-                                   double theta_1c,
-                                   double theta_1s )
+void RotorBlade::computeForceAndMoment( const Vector3 &vel_air_ras,
+                                        const Vector3 &omg_air_ras,
+                                        const Vector3 &omg_ras,
+                                        const Vector3 &acc_ras,
+                                        const Vector3 &eps_ras,
+                                        const Vector3 &grav_ras,
+                                        double omega,
+                                        double azimuth,
+                                        double airDensity,
+                                        double theta_0,
+                                        double theta_1c,
+                                        double theta_1s )
 {
     _ras2sra = getRAS2SRA( azimuth, _direction );
     _sra2ras = _ras2sra.getTransposed();
@@ -338,19 +338,19 @@ void Blade::computeForceAndMoment( const Vector3 &vel_air_ras,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Blade::integrate( double timeStep,
-                       const Vector3 &vel_air_ras,
-                       const Vector3 &omg_air_ras,
-                       const Vector3 &omg_ras,
-                       const Vector3 &acc_ras,
-                       const Vector3 &eps_ras,
-                       const Vector3 &grav_ras,
-                       double omega,
-                       double azimuth,
-                       double airDensity,
-                       double theta_0,
-                       double theta_1c,
-                       double theta_1s )
+void RotorBlade::integrate( double timeStep,
+                            const Vector3 &vel_air_ras,
+                            const Vector3 &omg_air_ras,
+                            const Vector3 &omg_ras,
+                            const Vector3 &acc_ras,
+                            const Vector3 &eps_ras,
+                            const Vector3 &grav_ras,
+                            double omega,
+                            double azimuth,
+                            double airDensity,
+                            double theta_0,
+                            double theta_1c,
+                            double theta_1s )
 {
     _ras2sra = getRAS2SRA( azimuth, _direction );
     _sra2ras = _ras2sra.getTransposed();
@@ -398,8 +398,8 @@ void Blade::integrate( double timeStep,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Blade::computeStateDeriv( const StateVector &stateVect,
-                               StateVector *derivVect )
+void RotorBlade::computeStateDeriv( const StateVector &stateVect,
+                                    StateVector *derivVect )
 {
     (*derivVect)( 0 ) = stateVect( 1 );
     (*derivVect)( 1 ) = _moment / _ib;
@@ -407,10 +407,10 @@ void Blade::computeStateDeriv( const StateVector &stateVect,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double Blade::getTheta( double azimuth,
-                        double theta_0,
-                        double theta_1c,
-                        double theta_1s )
+double RotorBlade::getTheta( double azimuth,
+                             double theta_0,
+                             double theta_1c,
+                             double theta_1s )
 {
     double cosPsi = cos( azimuth );
     double sinPsi = sin( azimuth );
@@ -420,15 +420,15 @@ double Blade::getTheta( double azimuth,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Blade::integrateEulerRect( double timeStep,
-                                const Vector3 &vel_air_ras,
-                                const Vector3 &omg_air_ras,
-                                const Vector3 &omg_ras,
-                                const Vector3 &acc_ras,
-                                const Vector3 &eps_ras,
-                                const Vector3 &grav_ras,
-                                double omega,
-                                double airDensity )
+void RotorBlade::integrateEulerRect( double timeStep,
+                                     const Vector3 &vel_air_ras,
+                                     const Vector3 &omg_air_ras,
+                                     const Vector3 &omg_ras,
+                                     const Vector3 &acc_ras,
+                                     const Vector3 &eps_ras,
+                                     const Vector3 &grav_ras,
+                                     double omega,
+                                     double airDensity )
 {
     integrateSpanwise( vel_air_ras,
                        omg_air_ras,
@@ -448,15 +448,15 @@ void Blade::integrateEulerRect( double timeStep,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Blade::integrateRungeKutta4( double timeStep,
-                                  const Vector3 &vel_air_ras,
-                                  const Vector3 &omg_air_ras,
-                                  const Vector3 &omg_ras,
-                                  const Vector3 &acc_ras,
-                                  const Vector3 &eps_ras,
-                                  const Vector3 &grav_ras,
-                                  double omega,
-                                  double airDensity )
+void RotorBlade::integrateRungeKutta4( double timeStep,
+                                       const Vector3 &vel_air_ras,
+                                       const Vector3 &omg_air_ras,
+                                       const Vector3 &omg_ras,
+                                       const Vector3 &acc_ras,
+                                       const Vector3 &eps_ras,
+                                       const Vector3 &grav_ras,
+                                       double omega,
+                                       double airDensity )
 {
     StateVector xt = _stateVect;
 
@@ -528,16 +528,16 @@ void Blade::integrateRungeKutta4( double timeStep,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Blade::integrateSpanwise( const Vector3 &vel_air_ras,
-                               const Vector3 &omg_air_ras,
-                               const Vector3 &omg_ras,
-                               const Vector3 &acc_ras,
-                               const Vector3 &eps_ras,
-                               const Vector3 &grav_ras,
-                               double omega,
-                               double airDensity,
-                               double beta,
-                               double beta_dot )
+void RotorBlade::integrateSpanwise( const Vector3 &vel_air_ras,
+                                    const Vector3 &omg_air_ras,
+                                    const Vector3 &omg_ras,
+                                    const Vector3 &acc_ras,
+                                    const Vector3 &eps_ras,
+                                    const Vector3 &grav_ras,
+                                    double omega,
+                                    double airDensity,
+                                    double beta,
+                                    double beta_dot )
 {
     Matrix3x3 sra2bsa = getSRA2BSA( beta, _direction );
     Matrix3x3 bsa2sra = sra2bsa.getTransposed();

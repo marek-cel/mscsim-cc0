@@ -169,7 +169,7 @@ public:
 #       endif
 
 #       ifdef WIN32
-        return path;
+        return "../" + path;
 #       endif
 
 #       endif // SIM_LOCAL_DATA_DIR
