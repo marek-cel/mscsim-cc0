@@ -124,293 +124,139 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <gui/Keys.h>
-
-#include <qnamespace.h>
+#ifndef GRAPHICSWINQT_H
+#define GRAPHICSWINQT_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-hid::Assignment::Key Keys::getKey( int key )
+#include <osgViewer/GraphicsWindow>
+
+#include <QEvent>
+#include <QGLWidget>
+#include <QInputEvent>
+#include <QMutex>
+#include <QQueue>
+#include <QSet>
+
+#include <Defines.h>
+
+////////////////////////////////////////////////////////////////////////////////
+
+class GraphicsWinQt : public osgViewer::GraphicsWindow
 {
-    switch ( key )
+    class GLWidget;
+
+    friend class GLWidget;
+
+public:
+
+    struct WinData : public osg::Referenced
     {
-    case Qt::Key_0:
-        return hid::Assignment::Key0;
-        break;
-
-    case Qt::Key_1:
-        return hid::Assignment::Key1;
-        break;
-
-    case Qt::Key_2:
-        return hid::Assignment::Key2;
-        break;
-
-    case Qt::Key_3:
-        return hid::Assignment::Key3;
-        break;
-
-    case Qt::Key_4:
-        return hid::Assignment::Key4;
-        break;
-
-    case Qt::Key_5:
-        return hid::Assignment::Key5;
-        break;
-
-    case Qt::Key_6:
-        return hid::Assignment::Key6;
-        break;
-
-    case Qt::Key_7:
-        return hid::Assignment::Key7;
-        break;
-
-    case Qt::Key_8:
-        return hid::Assignment::Key8;
-        break;
-
-    case Qt::Key_9:
-        return hid::Assignment::Key9;
-        break;
-
-    case Qt::Key_A:
-        return hid::Assignment::KeyA;
-        break;
-
-    case Qt::Key_B:
-        return hid::Assignment::KeyB;
-        break;
-
-    case Qt::Key_C:
-        return hid::Assignment::KeyC;
-        break;
-
-    case Qt::Key_D:
-        return hid::Assignment::KeyD;
-        break;
-
-    case Qt::Key_E:
-        return hid::Assignment::KeyE;
-        break;
-
-    case Qt::Key_F:
-        return hid::Assignment::KeyF;
-        break;
-
-    case Qt::Key_G:
-        return hid::Assignment::KeyG;
-        break;
-
-    case Qt::Key_H:
-        return hid::Assignment::KeyH;
-        break;
-
-    case Qt::Key_I:
-        return hid::Assignment::KeyI;
-        break;
-
-    case Qt::Key_J:
-        return hid::Assignment::KeyJ;
-        break;
-
-    case Qt::Key_K:
-        return hid::Assignment::KeyK;
-        break;
-
-    case Qt::Key_L:
-        return hid::Assignment::KeyL;
-        break;
-
-    case Qt::Key_M:
-        return hid::Assignment::KeyM;
-        break;
-
-    case Qt::Key_N:
-        return hid::Assignment::KeyN;
-        break;
-
-    case Qt::Key_O:
-        return hid::Assignment::KeyO;
-        break;
-
-    case Qt::Key_P:
-        return hid::Assignment::KeyP;
-        break;
-
-    case Qt::Key_Q:
-        return hid::Assignment::KeyQ;
-        break;
-
-    case Qt::Key_R:
-        return hid::Assignment::KeyR;
-        break;
-
-    case Qt::Key_S:
-        return hid::Assignment::KeyS;
-        break;
-
-    case Qt::Key_T:
-        return hid::Assignment::KeyT;
-        break;
-
-    case Qt::Key_U:
-        return hid::Assignment::KeyU;
-        break;
-
-    case Qt::Key_V:
-        return hid::Assignment::KeyV;
-        break;
-
-    case Qt::Key_W:
-        return hid::Assignment::KeyW;
-        break;
-
-    case Qt::Key_X:
-        return hid::Assignment::KeyX;
-        break;
-
-    case Qt::Key_Y:
-        return hid::Assignment::KeyY;
-        break;
-
-    case Qt::Key_Z:
-        return hid::Assignment::KeyZ;
-        break;
-
-    case Qt::Key_QuoteLeft:
-        return hid::Assignment::KeyBackquote;
-        break;
-
-    case Qt::Key_Minus:
-        return hid::Assignment::KeyMinus;
-        break;
-
-    case Qt::Key_Equal:
-        return hid::Assignment::KeyEquals;
-        break;
-
-    case Qt::Key_BraceLeft:
-        return hid::Assignment::KeyLeftBracket;
-        break;
-
-    case Qt::Key_BraceRight:
-        return hid::Assignment::KeyRightBracket;
-        break;
-
-    case Qt::Key_Semicolon:
-        return hid::Assignment::KeySemicolon;
-        break;
-
-    case Qt::Key_Apostrophe:
-        return hid::Assignment::KeyQuote;
-        break;
-
-    case Qt::Key_Comma:
-        return hid::Assignment::KeyComma;
-        break;
-
-    case Qt::Key_Period:
-        return hid::Assignment::KeyPeriod;
-        break;
-
-    case Qt::Key_Slash:
-        return hid::Assignment::KeySlash;
-        break;
-
-    case Qt::Key_Space:
-        return hid::Assignment::KeySpace;
-        break;
-
-    case Qt::Key_Left:
-        return hid::Assignment::KeyLeft;
-        break;
-
-    case Qt::Key_Right:
-        return hid::Assignment::KeyRight;
-        break;
-
-    case Qt::Key_Up:
-        return hid::Assignment::KeyUp;
-        break;
-
-    case Qt::Key_Down:
-        return hid::Assignment::KeyDown;
-        break;
-
-    case Qt::Key_Insert:
-        return hid::Assignment::KeyInsert;
-        break;
-
-    case Qt::Key_Delete:
-        return hid::Assignment::KeyDelete;
-        break;
-
-    case Qt::Key_Home:
-        return hid::Assignment::KeyHome;
-        break;
-
-    case Qt::Key_End:
-        return hid::Assignment::KeyEnd;
-        break;
-
-    case Qt::Key_PageUp:
-        return hid::Assignment::KeyPageUp;
-        break;
-
-    case Qt::Key_PageDown:
-        return hid::Assignment::KeyPageDown;
-        break;
-
-    case Qt::Key_F1:
-        return hid::Assignment::KeyF1;
-        break;
-
-    case Qt::Key_F2:
-        return hid::Assignment::KeyF2;
-        break;
-
-    case Qt::Key_F3:
-        return hid::Assignment::KeyF3;
-        break;
-
-    case Qt::Key_F4:
-        return hid::Assignment::KeyF4;
-        break;
-
-    case Qt::Key_F5:
-        return hid::Assignment::KeyF5;
-        break;
-
-    case Qt::Key_F6:
-        return hid::Assignment::KeyF6;
-        break;
-
-    case Qt::Key_F7:
-        return hid::Assignment::KeyF7;
-        break;
-
-    case Qt::Key_F8:
-        return hid::Assignment::KeyF8;
-        break;
-
-    case Qt::Key_F9:
-        return hid::Assignment::KeyF9;
-        break;
-
-    case Qt::Key_F10:
-        return hid::Assignment::KeyF10;
-        break;
-
-    case Qt::Key_F11:
-        return hid::Assignment::KeyF11;
-        break;
-
-    case Qt::Key_F12:
-        return hid::Assignment::KeyF12;
-        break;
-    }
-
-    return (hid::Assignment::Key)(-1);
-}
+        WinData( GLWidget *widget = NULLPTR, QWidget *parent = NULLPTR ) :
+            _widget ( widget ),
+            _parent ( parent )
+        {}
+
+        GLWidget *_widget;      ///<
+        QWidget  *_parent;      ///<
+    };
+
+    /**
+     * Constructor.
+     * @param traits
+     */
+    GraphicsWinQt( osg::GraphicsContext::Traits *traits );
+
+    /** Destructor. */
+    virtual ~GraphicsWinQt();
+
+    virtual bool setWindowRectangleImplementation( int x, int y, int w, int h );
+    virtual void getWindowRectangle( int &x, int &y, int &w, int &h );
+    virtual void grabFocus();
+    virtual void grabFocusIfPointerInWindow();
+    virtual void raiseWindow();
+    virtual void useCursor( bool cursorOn );
+    virtual void setCursor( MouseCursor cursor );
+
+    virtual bool valid() const;
+    virtual bool realizeImplementation();
+    virtual bool isRealizedImplementation() const;
+    virtual void closeImplementation();
+    virtual bool makeCurrentImplementation();
+    virtual bool releaseContextImplementation();
+    virtual void swapBuffersImplementation();
+    virtual void runOperations();
+
+    virtual void requestWarpPointer( float x, float y );
+
+    inline       GLWidget* getGLWidget()       { return _widget; }
+    inline const GLWidget* getGLWidget() const { return _widget; }
+
+private:
+
+    class GLWidget : public QGLWidget
+    {
+        friend class GraphicsWinQt;
+
+    public:
+
+        GLWidget( const QGLFormat &format,
+                  QWidget *parent = NULLPTR, const QGLWidget *shareWidget = NULLPTR,
+                  Qt::WindowFlags flags = 0 );
+
+        virtual ~GLWidget();
+
+        inline       GraphicsWinQt* getGraphicsWindow()       { return _gwin; }
+        inline const GraphicsWinQt* getGraphicsWindow() const { return _gwin; }
+
+        inline void setGraphicsWindow( GraphicsWinQt *gwin ) { _gwin = gwin; }
+
+        void setKeyboardModifiers( QInputEvent *event );
+
+    protected:
+
+        virtual bool event( QEvent *event );
+
+        virtual void keyPressEvent   ( QKeyEvent *event );
+        virtual void keyReleaseEvent ( QKeyEvent *event );
+
+        virtual void mousePressEvent       ( QMouseEvent *event );
+        virtual void mouseReleaseEvent     ( QMouseEvent *event );
+        virtual void mouseDoubleClickEvent ( QMouseEvent *event );
+        virtual void mouseMoveEvent        ( QMouseEvent *event );
+
+        virtual void moveEvent( QMoveEvent *event );
+
+        virtual void resizeEvent( QResizeEvent *event );
+
+        virtual void wheelEvent( QWheelEvent *event );
+
+        virtual void glDraw();
+
+    private:
+
+        GraphicsWinQt *_gwin;                           ///<
+
+        QMutex _deferredEventQueueMutex;                ///<
+
+        QQueue < QEvent::Type > _deferredEventQueue;    ///<
+        QSet   < QEvent::Type > _eventCompressor;       ///<
+
+        int getNumDeferredEvents();
+
+        void enqueueDeferredEvent( QEvent::Type eventType,
+                                   QEvent::Type removeEventType = QEvent::None );
+
+        void processDeferredEvents();
+    };
+
+    GLWidget *_widget;          ///<
+    QCursor _currentCursor;     ///<
+
+    bool _ownsWidget;           ///<
+    bool _realized;             ///<
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+#endif // GRAPHICSWINQT_H
