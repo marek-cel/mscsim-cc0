@@ -127,6 +127,9 @@
 
 #include <Manager.h>
 
+#include <QApplication>
+#include <QSplashScreen>
+
 #include <Common.h>
 #include <Data.h>
 
@@ -207,6 +210,12 @@ Manager::~Manager()
 
 void Manager::init()
 {
+    QPixmap pixmap(":/gui/images/splashscreen.png");
+    QSplashScreen splash( pixmap );
+    splash.show();
+    splash.showMessage( QString( SIM_APP_NAME ) + " " + QString( SIM_APP_VER ) );
+    qApp->processEvents();
+
     qRegisterMetaType< Data::DataBuf >( "Data::DataBuf" );
     qRegisterMetaType< fdm::DataOut  >( "fdm::DataOut"  );
 
@@ -222,6 +231,8 @@ void Manager::init()
 
     _win->setup( _ap, _g1000_ifd );
     _win->show();
+    //qApp->processEvents();
+
     _win->init();
 
     _timerId = startTimer( 1000.0 * FDM_TIME_STEP );

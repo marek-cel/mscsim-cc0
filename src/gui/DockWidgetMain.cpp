@@ -146,8 +146,6 @@ DockWidgetMain::DockWidgetMain( QWidget *parent ) :
     _blink ( false )
 {
     _ui->setupUi( this );
-
-    _timerId = startTimer( 400 );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -155,6 +153,13 @@ DockWidgetMain::DockWidgetMain( QWidget *parent ) :
 DockWidgetMain::~DockWidgetMain()
 {
     DELPTR( _ui );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DockWidgetMain::init()
+{
+    _timerId = startTimer( 1000.0 * GUI_TIME_STEP );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -160,6 +160,9 @@ public:
     /** Destructor. */
     virtual ~DockWidgetAuto();
 
+    /** */
+    void init();
+
     double getCourse() const;
     double getFreqNav() const;
 

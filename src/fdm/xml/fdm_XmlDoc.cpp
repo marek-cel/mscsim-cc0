@@ -135,7 +135,7 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-XmlDoc::XmlDoc( const std::string &fileName ) :
+XmlDoc::XmlDoc( const char *fileName ) :
     _doc  ( 0 ),
     _open ( false ),
     _root ( FDM_NULLPTR )
@@ -154,9 +154,9 @@ XmlDoc::~XmlDoc()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int XmlDoc::readFile( const std::string &fileName )
+int XmlDoc::readFile( const char *fileName )
 {
-    _doc = xmlParseFile( fileName.c_str() );
+    _doc = xmlParseFile( fileName );
 
     if ( _doc == 0 )
     {

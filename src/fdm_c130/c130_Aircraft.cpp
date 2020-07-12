@@ -148,7 +148,7 @@ C130_Aircraft::C130_Aircraft( const DataInp *dataInp, DataOut *dataOut ) :
     Aircraft::_mass = _mass = new C130_Mass( this );
     Aircraft::_prop = _prop = new C130_Propulsion( this );
 
-    readFile( Path::get( "data/fdm/c130/c130_fdm.xml" ) );
+    readFile( Path::get( "data/fdm/c130/c130_fdm.xml" ).c_str() );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

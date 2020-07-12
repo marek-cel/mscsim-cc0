@@ -141,9 +141,9 @@ using namespace cgi;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-osg::Node* Intersections::ReadCallback::readNodeFile( const std::string &filename )
+osg::ref_ptr<osg::Node> Intersections::ReadCallback::readNodeFile( const std::string& filename )
 {
-    return osgDB::readRefNodeFile( filename ).release();
+    return osgDB::readRefNodeFile( filename );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

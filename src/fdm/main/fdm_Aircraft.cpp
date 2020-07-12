@@ -296,7 +296,7 @@ void Aircraft::setStateVector( const StateVector &stateVector )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Aircraft::readFile( const std::string &dataFile )
+void Aircraft::readFile( const char *dataFile )
 {
     XmlDoc doc( dataFile );
 
@@ -313,7 +313,7 @@ void Aircraft::readFile( const std::string &dataFile )
             Exception e;
 
             e.setType( Exception::FileReadingError );
-            e.setInfo( "Reading file \"" + dataFile + "\" failed. Invalid root node." );
+            e.setInfo( "Reading file \"" + std::string( dataFile ) + "\" failed. Invalid root node." );
 
             FDM_THROW( e );
         }
@@ -323,7 +323,7 @@ void Aircraft::readFile( const std::string &dataFile )
         Exception e;
 
         e.setType( Exception::FileReadingError );
-        e.setInfo( "Reading file \"" + dataFile + "\" failed." );
+        e.setInfo( "Reading file \"" + std::string( dataFile ) + "\" failed." );
 
         FDM_THROW( e );
     }

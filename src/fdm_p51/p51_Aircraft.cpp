@@ -148,7 +148,7 @@ P51_Aircraft::P51_Aircraft( const DataInp *dataInp, DataOut *dataOut ) :
     Aircraft::_mass = _mass = new P51_Mass( this );
     Aircraft::_prop = _prop = new P51_Propulsion( this );
 
-    readFile( Path::get( "data/fdm/p51/p51_fdm.xml" ) );
+    readFile( Path::get( "data/fdm/p51/p51_fdm.xml" ).c_str() );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

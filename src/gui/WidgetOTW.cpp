@@ -152,8 +152,6 @@ WidgetOTW::WidgetOTW( QWidget *parent ) :
     _timerId ( 0 ),
     _camManipulatorInited ( false )
 {
-    cgi::Manager::instance()->setCameraManipulatorPilot();
-
     QWidget *widget = addViewWidget();
 
     _layout = new QGridLayout( this );
@@ -165,7 +163,7 @@ WidgetOTW::WidgetOTW( QWidget *parent ) :
 
     setLayout( _layout );
 
-    _timerId = startTimer( 1000.0 * CGI_TIME_STEP );
+    cgi::Manager::instance()->setCameraManipulatorPilot();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -173,6 +171,13 @@ WidgetOTW::WidgetOTW( QWidget *parent ) :
 WidgetOTW::~WidgetOTW()
 {
     if ( _timerId ) killTimer( _timerId );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void WidgetOTW::init()
+{
+    _timerId = startTimer( 1000.0 * CGI_TIME_STEP );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

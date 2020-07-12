@@ -145,7 +145,7 @@ class Sample
 public:
 
     /** Constructor. */
-    Sample( const std::string &file, bool looping = false );
+    Sample( const char *file, bool looping = false );
 
     /** Destructor. */
     virtual ~Sample();
@@ -165,7 +165,7 @@ private:
 
     bool checkForErrors();
 
-    bool loadFile( const std::string &file );
+    bool loadFile( const char *file );
 };
 
 } // end of sfx namepsace

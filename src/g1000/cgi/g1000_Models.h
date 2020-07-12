@@ -155,7 +155,7 @@ public:
      * @param objectFile
      * @return
      */
-    static osg::Node* get( const std::string &objectFile );
+    static osg::Node* get( const char *objectFile );
 
     /** Destructor. */
     virtual ~Models();
