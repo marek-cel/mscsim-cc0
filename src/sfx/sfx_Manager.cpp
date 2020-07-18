@@ -138,7 +138,7 @@ using namespace sfx;
 ////////////////////////////////////////////////////////////////////////////////
 
 Manager::Manager() :
-    _device ( NULLPTR ),
+    _device  ( NULLPTR ),
     _context ( NULLPTR ),
 
     _explosion ( NULLPTR ),
@@ -169,7 +169,7 @@ Manager::Manager() :
     _prev_ground ( false ),
     _prev_crash  ( false )
 {
-    _device = alcOpenDevice( NULL );
+    _device = alcOpenDevice( NULLPTR );
 
     if ( _device )
     {

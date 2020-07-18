@@ -124,8 +124,8 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef GRAPHICSWINQT_H
-#define GRAPHICSWINQT_H
+#ifndef GRAPHICSWINDOWQT_H
+#define GRAPHICSWINDOWQT_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -142,7 +142,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GraphicsWinQt : public osgViewer::GraphicsWindow
+class GraphicsWindowQt : public osgViewer::GraphicsWindow
 {
     class GLWidget;
 
@@ -165,10 +165,10 @@ public:
      * Constructor.
      * @param traits
      */
-    GraphicsWinQt( osg::GraphicsContext::Traits *traits );
+    GraphicsWindowQt( osg::GraphicsContext::Traits *traits );
 
     /** Destructor. */
-    virtual ~GraphicsWinQt();
+    virtual ~GraphicsWindowQt();
 
     virtual bool setWindowRectangleImplementation( int x, int y, int w, int h );
     virtual void getWindowRectangle( int &x, int &y, int &w, int &h );
@@ -196,7 +196,7 @@ private:
 
     class GLWidget : public QGLWidget
     {
-        friend class GraphicsWinQt;
+        friend class GraphicsWindowQt;
 
     public:
 
@@ -206,10 +206,10 @@ private:
 
         virtual ~GLWidget();
 
-        inline       GraphicsWinQt* getGraphicsWindow()       { return _gwin; }
-        inline const GraphicsWinQt* getGraphicsWindow() const { return _gwin; }
+        inline       GraphicsWindowQt* getGraphicsWindow()       { return _gwin; }
+        inline const GraphicsWindowQt* getGraphicsWindow() const { return _gwin; }
 
-        inline void setGraphicsWindow( GraphicsWinQt *gwin ) { _gwin = gwin; }
+        inline void setGraphicsWindow( GraphicsWindowQt *gwin ) { _gwin = gwin; }
 
         void setKeyboardModifiers( QInputEvent *event );
 
@@ -235,7 +235,7 @@ private:
 
     private:
 
-        GraphicsWinQt *_gwin;                           ///<
+        GraphicsWindowQt *_gwin;                        ///<
 
         QMutex _deferredEventQueueMutex;                ///<
 
@@ -259,4 +259,4 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // GRAPHICSWINQT_H
+#endif // GRAPHICSWINDOWQT_H

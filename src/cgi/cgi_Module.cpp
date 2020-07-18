@@ -163,7 +163,7 @@ void Module::addChild( Module *child )
 
 void Module::update()
 {
-    for ( List::iterator it = _children.begin(); it != _children.end(); it++ )
+    for ( List::iterator it = _children.begin(); it != _children.end(); ++it )
     {
         (*it)->update();
     }

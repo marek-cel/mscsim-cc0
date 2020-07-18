@@ -400,9 +400,6 @@ void Aircraft::anteIntegration()
 {
     updateVariables( _stateVect, _derivVect );
 
-    _envir->update( _altitude_asl );
-    _isect->update( _wgs.getPos_Geo().lat, _wgs.getPos_Geo().lon );
-
     _aero->update();
     _ctrl->update();
     _gear->update();
@@ -454,7 +451,7 @@ void Aircraft::detectCrash()
     // detect collisions
     if ( _crash == DataOut::NoCrash )
     {
-        for ( CollisionPoints::iterator it = _cp.begin(); it != _cp.end(); it++ )
+        for ( CollisionPoints::iterator it = _cp.begin(); it != _cp.end(); ++it )
         {
             if ( _isect->isIntersection( _pos_wgs, _pos_wgs + _bas2wgs * (*it) ) )
             {
@@ -685,6 +682,9 @@ void Aircraft::updateVariables( const StateVector &stateVect,
                   stateVect( _is_r ) );
 
     _wgs.setPos_WGS( _pos_wgs );
+
+    _envir->update( _wgs.getPos_Geo().alt );
+    _isect->update( _wgs.getPos_Geo().lat, _wgs.getPos_Geo().lon );
 
     _att_wgs.normalize();
 

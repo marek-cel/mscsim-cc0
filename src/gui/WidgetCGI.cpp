@@ -127,9 +127,9 @@
 
 #include <gui/WidgetCGI.h>
 
-#include <osg/PositionAttitudeTransform>
-#include <osgDB/ReadFile>
-#include <osgGA/TrackballManipulator>
+#include <osgGA/StateSetManipulator>
+
+#include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
 
 #include <g1000/g1000_Defines.h>
@@ -137,9 +137,48 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 WidgetCGI::WidgetCGI( QWidget *parent ) :
-    WidgetOSG ( parent ),
-    _layout ( NULLPTR )
+    WidgetOSG ( parent )
 {
+#   ifdef SIM_NEW_OSG_QT
+    QObject::connect( this, &osgQOpenGLWidget::initialized, [ this ]
+    {
+        getOsgViewer()->setThreadingModel( osgViewer::ViewerBase::SingleThreaded );
+        //getOsgViewer()->setThreadingModel( osgViewer::ViewerBase::ThreadPerContext );
+
+        createCameraCGI();
+
+        // add the state manipulator
+        getOsgViewer()->addEventHandler( new osgGA::StateSetManipulator( getOsgViewer()->getCamera()->getOrCreateStateSet() ) );
+
+        // add the thread model handler
+        getOsgViewer()->addEventHandler( new osgViewer::ThreadingHandler );
+
+        // add the window size toggle handler
+        getOsgViewer()->addEventHandler( new osgViewer::WindowSizeHandler );
+
+        // add the stats handler
+        getOsgViewer()->addEventHandler( new osgViewer::StatsHandler );
+
+        // add the record camera path handler
+        getOsgViewer()->addEventHandler( new osgViewer::RecordCameraPathHandler );
+
+        // add the LOD Scale handler
+        getOsgViewer()->addEventHandler( new osgViewer::LODScaleHandler );
+
+        // add the screen capture handler
+        getOsgViewer()->addEventHandler( new osgViewer::ScreenCaptureHandler );
+
+        getOsgViewer()->setKeyEventSetsDone( 0 );
+
+        /////////////////////////////////////////////////
+        getOsgViewer()->setSceneData( new osg::Group() );
+        /////////////////////////////////////////////////
+
+        getOsgViewer()->assignSceneDataToCameras();
+
+        _initialized = true;
+    });
+#   else
     QWidget *widget = addViewWidget();
 
     _layout = new QGridLayout( this );
@@ -147,6 +186,7 @@ WidgetCGI::WidgetCGI( QWidget *parent ) :
     _layout->addWidget( widget, 0, 0 );
 
     setLayout( _layout );
+#   endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -155,9 +195,10 @@ WidgetCGI::~WidgetCGI() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifndef SIM_NEW_OSG_QT
 QWidget* WidgetCGI::addViewWidget()
 {
-    createCamera();
+    createCameraCGI();
 
     setSceneData( new osg::Group() );
     addEventHandler( new osgViewer::StatsHandler );
@@ -169,16 +210,19 @@ QWidget* WidgetCGI::addViewWidget()
 
     return _gwin->getGLWidget();
 }
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void WidgetCGI::createCamera()
+void WidgetCGI::createCameraCGI()
 {
-    osg::ref_ptr<osg::Camera> camera = getCamera();
+    osg::ref_ptr<osg::Camera> camera = getOsgViewer()->getCamera();
 
+#   ifndef SIM_NEW_OSG_QT
     camera->setGraphicsContext( _gwin );
+#   endif
 
-    const osg::GraphicsContext::Traits *traits = _gwin->getTraits();
+    const osg::GraphicsContext::Traits *traits = camera->getGraphicsContext()->getTraits();
 
     double w2h = (double)(traits->width) / (double)(traits->height);
 

@@ -190,9 +190,6 @@ public:
     /** Destructor. */
     virtual ~Map();
 
-    /** */
-    void init();
-
     void resetTraces();
 
     /** */

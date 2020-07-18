@@ -146,6 +146,7 @@ public:
     {
         double curvature;       ///< curvature
         double deadzone;        ///< deadzone expressed as fraction of input
+        double scale;           ///< scale
     };
 
     /** Axes tuning data. */

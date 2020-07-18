@@ -150,13 +150,13 @@ public:
 
 private:
 
-    QGridLayout *_layout;
-
+#   ifndef SIM_NEW_OSG_QT
     /** */
     QWidget* addViewWidget();
+#   endif
 
     /** */
-    void createCamera();
+    void createCameraCGI();
 };
 
 ////////////////////////////////////////////////////////////////////////////////

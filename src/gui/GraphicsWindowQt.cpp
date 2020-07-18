@@ -125,7 +125,7 @@
  *
  ******************************************************************************/
 
-#include <gui/GraphicsWinQt.h>
+#include <gui/GraphicsWindowQt.h>
 
 #include <Common.h>
 
@@ -133,27 +133,28 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GraphicsWinQt::GraphicsWinQt( osg::GraphicsContext::Traits *traits ) :
+GraphicsWindowQt::GraphicsWindowQt( osg::GraphicsContext::Traits *traits ) :
     _widget ( NULLPTR ),
     _realized ( false )
 {
     _traits = traits;
 
-    WinData *winData = _traits.get() ? dynamic_cast< WinData* >( _traits->inheritedWindowData.get() ) : NULLPTR;
+    osg::ref_ptr<WinData> winData = _traits.get() ? dynamic_cast< WinData* >( _traits->inheritedWindowData.get() ) : NULLPTR;
 
     if ( !_widget )
     {
-        _widget = winData ? winData->_widget : NULLPTR;
+        _widget = winData.valid() ? winData->_widget : NULLPTR;
     }
 
     _ownsWidget = _widget == NULLPTR;
 
     if ( !_widget )
     {
-        QGLWidget        *shareWidget   = NULLPTR;
-        GraphicsWinQt *sharedContext = dynamic_cast< GraphicsWinQt* >( _traits->sharedContext.get() );
+        QGLWidget *shareWidget = NULLPTR;
+        osg::ref_ptr<GraphicsWindowQt> sharedContext =
+                dynamic_cast< GraphicsWindowQt* >( _traits->sharedContext.get() );
 
-        if ( sharedContext )
+        if ( sharedContext.valid() )
         {
             shareWidget = sharedContext->getGLWidget();
         }
@@ -223,15 +224,13 @@ GraphicsWinQt::GraphicsWinQt( osg::GraphicsContext::Traits *traits ) :
         getState()->setContextID( osg::GraphicsContext::createNewContextID() );
     }
 
-    //getEventQueue()->syncWindowRectangleWithGraphcisContext();
+    getEventQueue()->syncWindowRectangleWithGraphicsContext();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GraphicsWinQt::~GraphicsWinQt()
+GraphicsWindowQt::~GraphicsWindowQt()
 {
-    close();
-
     if ( _widget )
     {
         _widget->_gwin = NULLPTR;
@@ -241,7 +240,7 @@ GraphicsWinQt::~GraphicsWinQt()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GraphicsWinQt::setWindowRectangleImplementation( int x, int y, int w, int h )
+bool GraphicsWindowQt::setWindowRectangleImplementation( int x, int y, int w, int h )
 {
     if ( _widget == NULLPTR ) return false;
 
@@ -252,7 +251,7 @@ bool GraphicsWinQt::setWindowRectangleImplementation( int x, int y, int w, int h
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::getWindowRectangle( int &x, int &y, int &w, int &h )
+void GraphicsWindowQt::getWindowRectangle( int &x, int &y, int &w, int &h )
 {
     if ( _widget )
     {
@@ -267,28 +266,28 @@ void GraphicsWinQt::getWindowRectangle( int &x, int &y, int &w, int &h )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::grabFocus()
+void GraphicsWindowQt::grabFocus()
 {
     if ( _widget ) _widget->setFocus( Qt::ActiveWindowFocusReason );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::grabFocusIfPointerInWindow()
+void GraphicsWindowQt::grabFocusIfPointerInWindow()
 {
     if ( _widget->underMouse() ) _widget->setFocus( Qt::ActiveWindowFocusReason );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::raiseWindow()
+void GraphicsWindowQt::raiseWindow()
 {
     if ( _widget ) _widget->raise();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::useCursor( bool cursorOn )
+void GraphicsWindowQt::useCursor( bool cursorOn )
 {
     if ( _widget )
     {
@@ -303,7 +302,7 @@ void GraphicsWinQt::useCursor( bool cursorOn )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::setCursor( MouseCursor cursor )
+void GraphicsWindowQt::setCursor( MouseCursor cursor )
 {
     if ( cursor == InheritCursor && _widget )
     {
@@ -342,14 +341,14 @@ void GraphicsWinQt::setCursor( MouseCursor cursor )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GraphicsWinQt::valid() const
+bool GraphicsWindowQt::valid() const
 {
     return _widget && _widget->isValid();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GraphicsWinQt::realizeImplementation()
+bool GraphicsWindowQt::realizeImplementation()
 {
     const QGLContext *savedContext = QGLContext::currentContext();
 
@@ -376,7 +375,7 @@ bool GraphicsWinQt::realizeImplementation()
 
     _realized = true;
 
-    //getEventQueue()->syncWindowRectangleWithGraphcisContext();
+    getEventQueue()->syncWindowRectangleWithGraphicsContext();
 
     if ( !releaseContext() )
     {
@@ -393,14 +392,14 @@ bool GraphicsWinQt::realizeImplementation()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GraphicsWinQt::isRealizedImplementation() const
+bool GraphicsWindowQt::isRealizedImplementation() const
 {
     return _realized;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::closeImplementation()
+void GraphicsWindowQt::closeImplementation()
 {
     if ( _widget ) _widget->close();
 
@@ -409,7 +408,7 @@ void GraphicsWinQt::closeImplementation()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GraphicsWinQt::makeCurrentImplementation()
+bool GraphicsWindowQt::makeCurrentImplementation()
 {
     if ( _widget->getNumDeferredEvents() > 0 )
     {
@@ -423,7 +422,7 @@ bool GraphicsWinQt::makeCurrentImplementation()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GraphicsWinQt::releaseContextImplementation()
+bool GraphicsWindowQt::releaseContextImplementation()
 {
     _widget->doneCurrent();
     return true;
@@ -431,7 +430,7 @@ bool GraphicsWinQt::releaseContextImplementation()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::swapBuffersImplementation()
+void GraphicsWindowQt::swapBuffersImplementation()
 {
     _widget->swapBuffers();
 
@@ -448,7 +447,7 @@ void GraphicsWinQt::swapBuffersImplementation()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::runOperations()
+void GraphicsWindowQt::runOperations()
 {
     if ( _widget->getNumDeferredEvents() > 0 )
     {
@@ -465,7 +464,7 @@ void GraphicsWinQt::runOperations()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::requestWarpPointer( float x, float y )
+void GraphicsWindowQt::requestWarpPointer( float x, float y )
 {
     if ( _widget )
     {
@@ -475,18 +474,18 @@ void GraphicsWinQt::requestWarpPointer( float x, float y )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GraphicsWinQt::GLWidget::GLWidget( const QGLFormat &format,
-                                   QWidget *parent, const QGLWidget *shareWidget,
-                                   Qt::WindowFlags flags ) :
+GraphicsWindowQt::GLWidget::GLWidget( const QGLFormat &format,
+                                      QWidget *parent, const QGLWidget *shareWidget,
+                                      Qt::WindowFlags flags ) :
     QGLWidget ( format, parent, shareWidget, flags ),
     _gwin ( NULLPTR )
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GraphicsWinQt::GLWidget::~GLWidget()
+GraphicsWindowQt::GLWidget::~GLWidget()
 {
-    if( _gwin )
+    if ( _gwin )
     {
         _gwin->close();
         _gwin->_widget = NULLPTR;
@@ -496,7 +495,7 @@ GraphicsWinQt::GLWidget::~GLWidget()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::GLWidget::setKeyboardModifiers( QInputEvent *event )
+void GraphicsWindowQt::GLWidget::setKeyboardModifiers( QInputEvent *event )
 {
     int modkey = event->modifiers() & ( Qt::ShiftModifier | Qt::ControlModifier | Qt::AltModifier );
 
@@ -511,7 +510,7 @@ void GraphicsWinQt::GLWidget::setKeyboardModifiers( QInputEvent *event )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GraphicsWinQt::GLWidget::event( QEvent *event )
+bool GraphicsWindowQt::GLWidget::event( QEvent *event )
 {
     if      ( event->type() == QEvent::Hide )
     {
@@ -523,7 +522,8 @@ bool GraphicsWinQt::GLWidget::event( QEvent *event )
         enqueueDeferredEvent( QEvent::Show, QEvent::Hide );
         return true;
     }
-    else if ( event->type() == QEvent::ParentChange )
+    else
+    if ( event->type() == QEvent::ParentChange )
     {
         enqueueDeferredEvent( QEvent::ParentChange );
         return true;
@@ -534,7 +534,7 @@ bool GraphicsWinQt::GLWidget::event( QEvent *event )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::GLWidget::keyPressEvent( QKeyEvent *event )
+void GraphicsWindowQt::GLWidget::keyPressEvent( QKeyEvent *event )
 {
     setKeyboardModifiers( event );
     _gwin->getEventQueue()->keyPress( KeyMap::remapOSG( event->key() ) );
@@ -542,7 +542,7 @@ void GraphicsWinQt::GLWidget::keyPressEvent( QKeyEvent *event )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::GLWidget::keyReleaseEvent( QKeyEvent *event )
+void GraphicsWindowQt::GLWidget::keyReleaseEvent( QKeyEvent *event )
 {
     if( event->isAutoRepeat() )
     {
@@ -557,7 +557,7 @@ void GraphicsWinQt::GLWidget::keyReleaseEvent( QKeyEvent *event )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::GLWidget::mousePressEvent( QMouseEvent *event )
+void GraphicsWindowQt::GLWidget::mousePressEvent( QMouseEvent *event )
 {
     int button = 0;
 
@@ -577,7 +577,7 @@ void GraphicsWinQt::GLWidget::mousePressEvent( QMouseEvent *event )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::GLWidget::mouseReleaseEvent( QMouseEvent *event )
+void GraphicsWindowQt::GLWidget::mouseReleaseEvent( QMouseEvent *event )
 {
     int button = 0;
 
@@ -597,7 +597,7 @@ void GraphicsWinQt::GLWidget::mouseReleaseEvent( QMouseEvent *event )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::GLWidget::mouseDoubleClickEvent( QMouseEvent *event )
+void GraphicsWindowQt::GLWidget::mouseDoubleClickEvent( QMouseEvent *event )
 {
     int button = 0;
 
@@ -617,7 +617,7 @@ void GraphicsWinQt::GLWidget::mouseDoubleClickEvent( QMouseEvent *event )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::GLWidget::mouseMoveEvent( QMouseEvent *event )
+void GraphicsWindowQt::GLWidget::mouseMoveEvent( QMouseEvent *event )
 {
     setKeyboardModifiers( event );
     _gwin->getEventQueue()->mouseMotion( event->x(), event->y() );
@@ -625,7 +625,7 @@ void GraphicsWinQt::GLWidget::mouseMoveEvent( QMouseEvent *event )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::GLWidget::moveEvent( QMoveEvent *event )
+void GraphicsWindowQt::GLWidget::moveEvent( QMoveEvent *event )
 {
     const QPoint &pos = event->pos();
 
@@ -635,7 +635,7 @@ void GraphicsWinQt::GLWidget::moveEvent( QMoveEvent *event )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::GLWidget::resizeEvent( QResizeEvent *event )
+void GraphicsWindowQt::GLWidget::resizeEvent( QResizeEvent *event )
 {
     const QSize &size = event->size();
 
@@ -646,7 +646,7 @@ void GraphicsWinQt::GLWidget::resizeEvent( QResizeEvent *event )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::GLWidget::wheelEvent( QWheelEvent *event )
+void GraphicsWindowQt::GLWidget::wheelEvent( QWheelEvent *event )
 {
     setKeyboardModifiers( event );
 
@@ -662,14 +662,14 @@ void GraphicsWinQt::GLWidget::wheelEvent( QWheelEvent *event )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::GLWidget::glDraw()
+void GraphicsWindowQt::GLWidget::glDraw()
 {
     _gwin->requestRedraw();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int GraphicsWinQt::GLWidget::getNumDeferredEvents()
+int GraphicsWindowQt::GLWidget::getNumDeferredEvents()
 {
     QMutexLocker lock( &_deferredEventQueueMutex );
     return _deferredEventQueue.count();
@@ -677,7 +677,7 @@ int GraphicsWinQt::GLWidget::getNumDeferredEvents()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::GLWidget::enqueueDeferredEvent( QEvent::Type eventType,
+void GraphicsWindowQt::GLWidget::enqueueDeferredEvent( QEvent::Type eventType,
                                                     QEvent::Type removeEventType )
 {
     QMutexLocker lock( &_deferredEventQueueMutex );
@@ -699,7 +699,7 @@ void GraphicsWinQt::GLWidget::enqueueDeferredEvent( QEvent::Type eventType,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GraphicsWinQt::GLWidget::processDeferredEvents()
+void GraphicsWindowQt::GLWidget::processDeferredEvents()
 {
     QQueue< QEvent::Type > deferredEventQueueCopy;
 

@@ -167,8 +167,6 @@ protected:
 
 private:
 
-    QGridLayout *_layout;
-
     osg::ref_ptr<cgi::ManipulatorMap> _manipulator;
 
     QString _mouseGeoPositionStr;
@@ -188,10 +186,11 @@ private:
     bool _viewBorders;
     bool _viewTraces;
 
+#   ifndef SIM_NEW_OSG_QT
     /** */
     QWidget* addViewWidget();
+#   endif
 
-    /** */
     void createCameraMap();
 
     void updateMouseGeoPositionStr( double lat, double lon );

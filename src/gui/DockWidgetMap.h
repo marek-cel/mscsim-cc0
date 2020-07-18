@@ -157,9 +157,6 @@ public:
     /** Destructor. */
     virtual ~DockWidgetMap();
 
-    /** */
-    void init();
-
 signals:
 
     void closed();

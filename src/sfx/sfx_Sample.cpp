@@ -308,7 +308,6 @@ bool Sample::loadFile( const char *file )
 {
     bool error = false;
 
-
     // loading audio stream to buffer
     ALenum format = 0;
     ALsizei size = 0;

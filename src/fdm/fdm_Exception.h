@@ -255,7 +255,7 @@ public:
     }
 
     /** Sets extra information. */
-    inline void setInfo( std::string info )
+    inline void setInfo( const std::string &info )
     {
         _info = info;
     }
@@ -279,6 +279,18 @@ public:
         if ( hasCause() ) ss << _cause->toString();
         ss << _info << " " << getFileAndLine() << std::endl;
         return ss.str();
+    }
+
+    /** Assignment operator. */
+    inline const Exception& operator= ( const Exception &e )
+    {
+        _cause = e._cause;
+        _type  = e._type;
+        _line  = e._line;
+        _file  = e._file;
+        _info  = e._info;
+
+        return (*this);
     }
 
 private:

@@ -314,7 +314,7 @@ void Manager::updateNavaidsActive()
     {
         for ( DataBase::ListILS::const_iterator it = DataBase::instance()->getListILS().begin();
               it != DataBase::instance()->getListILS().end();
-              it++ )
+              ++it )
         {
             if ( (*it).type == DataBase::ILS::LOC
               && (*it).freq == _nav_freq
@@ -330,7 +330,7 @@ void Manager::updateNavaidsActive()
     {
         for ( DataBase::ListILS::const_iterator it = DataBase::instance()->getListILS().begin();
               it != DataBase::instance()->getListILS().end();
-              it++ )
+              ++it )
         {
             if ( (*it).type == DataBase::ILS::DME
               && (*it).freq == Frequency::getFreqDME( _nav_freq )
@@ -346,7 +346,7 @@ void Manager::updateNavaidsActive()
     {
         for ( DataBase::ListILS::const_iterator it = DataBase::instance()->getListILS().begin();
               it != DataBase::instance()->getListILS().end();
-              it++ )
+              ++it )
         {
             if ( (*it).type == DataBase::ILS::GS
               && (*it).freq == Frequency::getFreqGS( _nav_freq )
@@ -362,7 +362,7 @@ void Manager::updateNavaidsActive()
     {
         for ( DataBase::ListNAV::const_iterator it = DataBase::instance()->getListNAV().begin();
               it != DataBase::instance()->getListNAV().end();
-              it++ )
+              ++it )
         {
             if ( ( (*it).type == DataBase::NAV::VOR || (*it).type == DataBase::NAV::VOR_DME || (*it).type == DataBase::NAV::VORTAC )
               && (*it).freq == _nav_freq
@@ -378,7 +378,7 @@ void Manager::updateNavaidsActive()
     {
         for ( DataBase::ListNAV::const_iterator it = DataBase::instance()->getListNAV().begin();
               it != DataBase::instance()->getListNAV().end();
-              it++ )
+              ++it )
         {
             if ( ( (*it).type == DataBase::NAV::NDB || (*it).type == DataBase::NAV::NDB_DME )
               && (*it).freq == _adf_freq
