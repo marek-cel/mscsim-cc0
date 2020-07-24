@@ -204,6 +204,9 @@ public:
             double def;         ///< [kg] default mass
         };
 
+        double empty;           ///< [kg] empty mass
+        double mtow;            ///< [kg] maximum take-off weight
+
         Mass pilot_1;           ///<
         Mass pilot_2;           ///<
 

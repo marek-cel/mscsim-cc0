@@ -154,9 +154,16 @@ public:
 
     void toggleHighlight();
 
+    inline void setHighlightColor( const QColor &color ) { _color = color; }
+
+    inline void setToggleOnDblClick( bool toggle ) { _toggleOnDblClick = toggle; }
+
 protected:
 
+    QColor _color;
+
     bool _highlighted;
+    bool _toggleOnDblClick;
 
     bool eventFilter( QObject *, QEvent *event );
 };
