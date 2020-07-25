@@ -827,6 +827,8 @@ void Manager::updateStateInit()
 
             if ( _aircraft != 0 )
             {
+                _dataInp.controls.collective = 0.0;
+
                 if ( _dataInp.initial.altitude_agl < FDM_MIN_INIT_ALTITUDE )
                     initOnGround();
                 else

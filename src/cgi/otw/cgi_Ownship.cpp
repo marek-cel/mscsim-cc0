@@ -151,8 +151,10 @@ using namespace cgi;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Ownship::Ownship( const Module *parent ) :
+Ownship::Ownship( const Module *parent, Scenery *scenery ) :
     Module( parent ),
+
+    _scenery ( scenery ),
 
     _rotor  ( NULLPTR ),
     _vector ( NULLPTR )
@@ -500,9 +502,11 @@ void Ownship::reload()
         {
             int result = FDM_SUCCESS;
 
-            std::string modelFile;
+            std::string model;
+            std::string shadow;
 
-            if ( result == FDM_SUCCESS ) result = fdm::XmlUtils::read( rootNode, modelFile, "model" );
+            if ( result == FDM_SUCCESS ) result = fdm::XmlUtils::read( rootNode, model  , "model"   );
+            if ( result == FDM_SUCCESS ) result = fdm::XmlUtils::read( rootNode, shadow , "shadow" );
 
             fdm::XmlNode wingTipNodeL = rootNode.getFirstChildElement( "wing_tip_l" );
             fdm::XmlNode wingTipNodeR = rootNode.getFirstChildElement( "wing_tip_r" );
@@ -538,7 +542,9 @@ void Ownship::reload()
 
             if ( result == FDM_SUCCESS )
             {
-                loadModel( modelFile.c_str() );
+                loadModel( model.c_str() );
+
+                if ( _scenery ) _scenery->setShadow( shadow.c_str() );
             }
         }
     }
