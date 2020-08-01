@@ -124,78 +124,353 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef AW101_AFCS_H
-#define AW101_AFCS_H
+
+#include <fdm/utils/fdm_VectorN.h>
+
+#include <limits>
+
+#include <fdm/utils/fdm_Misc.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/sys/fdm_PID.h>
-#include <fdm/utils/fdm_Vector3.h>
-#include <fdm/xml/fdm_XmlNode.h>
+using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
+VectorN::VectorN() :
+    _size ( 0 ),
+    _items ( FDM_NULLPTR )
+{}
+
+////////////////////////////////////////////////////////////////////////////////
+
+VectorN::VectorN( unsigned int size ) :
+    _size ( size ),
+    _items ( FDM_NULLPTR )
 {
+    _items = new double[ _size ];
 
-/**
- * @brief AW101 Automatic Flight Control System (AFCS) class.
- */
-class AW101_AFCS
+    zeroize();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+VectorN::VectorN( const VectorN &vect ) :
+    _size ( vect._size ),
+    _items ( FDM_NULLPTR )
 {
-public:
+    _items = new double[ _size ];
 
-    /** Constructor. */
-    AW101_AFCS();
+    setArray( vect._items );
+}
 
-    /** Destructor. */
-    ~AW101_AFCS();
+////////////////////////////////////////////////////////////////////////////////
 
-    /**
-     * Reads data.
-     * @param dataNode XML node
-     */
-    void readData( XmlNode &dataNode );
+VectorN::~VectorN()
+{
+    FDM_DELTAB( _items );
+}
 
-    void update( double timeStep,
-                 double ctrlLat, double trimLat,
-                 double ctrlLon, double trimLon,
-                 double ctrlYaw, double trimYaw,
-                 double climbRate,
-                 const Angles &angles_ned,
-                 const Vector3 &omg_bas );
+////////////////////////////////////////////////////////////////////////////////
 
-    inline double getCyclicLat()  const { return _cyclic_lat; }
-    inline double getCyclicLon()  const { return _cyclic_lon; }
-    inline double getTailPitch()  const { return _tail_pitch; }
+bool VectorN::isValid() const
+{
+    return Misc::isValid( _items, _size );
+}
 
-    inline double getCollective() const { return _collective; }
+////////////////////////////////////////////////////////////////////////////////
 
-private:
+double VectorN::getLength() const
+{
+    double length2 = 0.0;
 
-    /** */
-    struct Channel
+    for ( unsigned int i = 0; i < _size; i++ )
     {
-        double _auth;                   ///<
-    };
+        length2 += ( _items[ i ] * _items[ i ] );
+    }
 
-    PID _pid_sas_roll;
-    PID _pid_sas_pitch;
-    PID _pid_sas_yaw;
-
-    PID _pid_collective;
-
-    double _cyclic_lat;                 ///<
-    double _cyclic_lon;                 ///<
-    double _tail_pitch;                 ///<
-
-    double _collective;                 ///<
-
-    virtual void readSAS( const XmlNode &dataNode, PID &pid );
-};
-
-} // end of fdm namespace
+    return sqrt( length2 );
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // AW101_AFCS_H
+void VectorN::normalize()
+{
+    double length = getLength();
+
+    if ( length > 0.0 )
+    {
+        double length_inv = 1.0 / length;
+
+        for ( unsigned int i = 0; i < _size; i++ )
+        {
+            _items[ i ] *= length_inv;
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void VectorN::getArray( double items[] ) const
+{
+    for ( unsigned int i = 0; i < _size; i++ )
+    {
+        items[i] = _items[i];
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+double VectorN::getItem( unsigned int index ) const
+{
+    if ( index < _size )
+    {
+        return _items[ index ];
+    }
+    else
+    {
+        Exception e;
+
+        e.setType( Exception::ArrayIndexOverLimit );
+        e.setInfo( "Index over limit." );
+
+        FDM_THROW( e );
+    }
+
+    return std::numeric_limits< double >::quiet_NaN();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void VectorN::setArray( const double items[] )
+{
+    for ( unsigned int i = 0; i < _size; i++ )
+    {
+        _items[i] = items[i];
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void VectorN::setItem( unsigned int index, double val )
+{
+    if ( index < _size )
+    {
+        _items[ index ] = val;
+    }
+    else
+    {
+        Exception e;
+
+        e.setType( Exception::ArrayIndexOverLimit );
+        e.setInfo( "Index over limit." );
+
+        FDM_THROW( e );
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void VectorN::setValue( double val )
+{
+    for ( unsigned int i = 0; i < _size; i++ )
+    {
+        _items[i] = val;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+std::string VectorN::toString() const
+{
+    std::stringstream ss;
+
+    for ( unsigned int i = 0; i < _size; i++ )
+    {
+        if ( i != 0 ) ss << ",";
+
+        ss << _items[ i ];
+    }
+
+    return ss.str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void VectorN::resize( unsigned int size )
+{
+    if ( _size != size )
+    {
+        FDM_DELTAB( _items );
+
+        _size = size;
+        _items = new double[ _size ];
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void VectorN::zeroize()
+{
+    for ( unsigned int i = 0; i < _size; i++ )
+    {
+        _items[ i ] = 0.0;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+const VectorN& VectorN::operator= ( const VectorN &vect )
+{
+    resize( vect._size );
+    setArray( vect._items );
+
+    return (*this);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+VectorN VectorN::operator+ ( const VectorN &vect ) const
+{
+    VectorN result( _size );
+
+    if ( _size == vect._size )
+    {
+        for ( unsigned int i = 0; i < _size; i++ )
+        {
+            result._items[ i ] = _items[ i ] + vect._items[ i ];
+        }
+    }
+    else
+    {
+        result.setValue( std::numeric_limits< double >::quiet_NaN() );
+    }
+
+    return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+VectorN VectorN::operator- () const
+{
+    VectorN result( _size );
+
+    for ( unsigned int i = 0; i < _size; i++ )
+    {
+        result._items[ i ] = - _items[ i ];
+    }
+
+    return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+VectorN VectorN::operator- ( const VectorN &vect ) const
+{
+    VectorN result( _size );
+
+    if ( _size == vect._size )
+    {
+        for ( unsigned int i = 0; i < _size; i++ )
+        {
+            result._items[ i ] = _items[ i ] - vect._items[ i ];
+        }
+    }
+    else
+    {
+        result.setValue( std::numeric_limits< double >::quiet_NaN() );
+    }
+
+    return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+VectorN VectorN::operator* ( double val ) const
+{
+    VectorN result( _size );
+
+    for ( unsigned int i = 0; i < _size; i++ )
+    {
+        result._items[ i ] = _items[ i ] * val;
+    }
+
+    return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+VectorN VectorN::operator/ ( double val ) const
+{
+    VectorN result( _size );
+
+    for ( unsigned int i = 0; i < _size; i++ )
+    {
+        result._items[ i ] = _items[ i ] / val;
+    }
+
+    return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+VectorN& VectorN::operator+= ( const VectorN &vect )
+{
+    if ( _size == vect._size )
+    {
+        for ( unsigned int i = 0; i < _size; i++ )
+        {
+            _items[ i ] += vect._items[ i ];
+        }
+    }
+    else
+    {
+        setValue( std::numeric_limits< double >::quiet_NaN() );
+    }
+
+    return (*this);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+VectorN& VectorN::operator-= ( const VectorN &vect )
+{
+    if ( _size == vect._size )
+    {
+        for ( unsigned int i = 0; i < _size; i++ )
+        {
+            _items[ i ] -= vect._items[ i ];
+        }
+    }
+    else
+    {
+        setValue( std::numeric_limits< double >::quiet_NaN() );
+    }
+
+    return (*this);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+VectorN& VectorN::operator*= ( double val )
+{
+    for ( unsigned int i = 0; i < _size; i++ )
+    {
+        _items[ i ] *= val;
+    }
+
+    return (*this);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+VectorN& VectorN::operator/= ( double val )
+{
+    for ( unsigned int i = 0; i < _size; i++ )
+    {
+        _items[ i ] /= val;
+    }
+
+    return (*this);
+}
+

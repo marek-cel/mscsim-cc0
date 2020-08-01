@@ -311,9 +311,7 @@ public:
         return ss.str();
     }
 
-    /**
-     * Sets all vector items to zero.
-     */
+    /** Sets all vector items to zero. */
     virtual void zeroize()
     {
         for ( unsigned int i = 0; i < _size; i++ )

@@ -130,7 +130,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <fdm/fdm_Defines.h>
-#include <fdm/utils/fdm_Vector.h>
+
+#if __cplusplus > 199711L
+#   include <stdint.h>
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -146,8 +149,6 @@ typedef unsigned char  UInt8;   ///< 8-bits unsigned integer type
 typedef unsigned short UInt16;  ///< 16-bits unsigned integer type
 typedef unsigned int   UInt32;  ///< 32-bits unsigned integer type
 #endif
-
-typedef Vector< FDM_STATE_DIMENSION > StateVector;  ///< aircraft generalized state vector
 
 } // end of fdm namespace
 
