@@ -129,7 +129,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <osg/Fog>
+#include <osg/PositionAttitudeTransform>
 
 #include <cgi/cgi_Module.h>
 
@@ -151,7 +151,7 @@ public:
     /** Destructor. */
     virtual ~Entities();
 
-    /** Updates fog scene. */
+    /** Updates entities. */
     void update();
 
 private:
@@ -159,7 +159,17 @@ private:
     static const char _frag[];      ///<
     static const char _vert[];      ///<
 
-    static void createReflection( osg::Node *model, osg::Group *parent );
+    osg::ref_ptr<osg::PositionAttitudeTransform> _patBB39;
+    osg::ref_ptr<osg::PositionAttitudeTransform> _patBB63;
+    osg::ref_ptr<osg::PositionAttitudeTransform> _patLCS1;
+    osg::ref_ptr<osg::PositionAttitudeTransform> _patCVN78;
+
+    void addEntity( osg::PositionAttitudeTransform *pat, const char *file );
+
+    void createReflection( osg::Node *model, osg::Group *parent );
+
+    void setLatLonHdg( osg::PositionAttitudeTransform *pat,
+                       double lat, double lon, double hdg );
 };
 
 } // end of cgi namespace
