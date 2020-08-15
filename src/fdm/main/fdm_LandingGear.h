@@ -148,7 +148,7 @@ class FDMEXPORT LandingGear : public Module
 public:
 
     /** Constructor. */
-    LandingGear( const Aircraft* aircraft );
+    LandingGear( const Aircraft* aircraft, DataNode *rootNode );
 
     /** Destructor. */
     virtual ~LandingGear();
@@ -207,7 +207,7 @@ protected:
 private:
 
     /** Using this constructor is forbidden. */
-    LandingGear( const LandingGear & ) : Module( FDM_NULLPTR ) {}
+    LandingGear( const LandingGear & ) : Module( FDM_NULLPTR, FDM_NULLPTR ) {}
 };
 
 } // end of fdm namespace

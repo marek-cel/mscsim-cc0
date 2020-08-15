@@ -181,6 +181,7 @@ void Manager::updateMap()
 void Manager::updateOTW()
 {
     _otw->update();
+
     _camera->update();
     updateGround();
 }

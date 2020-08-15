@@ -139,7 +139,7 @@
 WidgetCGI::WidgetCGI( QWidget *parent ) :
     WidgetOSG ( parent )
 {
-#   ifdef SIM_NEW_OSG_QT
+#   ifdef USE_OSGQOPENGL
     QObject::connect( this, &osgQOpenGLWidget::initialized, [ this ]
     {
         getOsgViewer()->setThreadingModel( osgViewer::ViewerBase::SingleThreaded );
@@ -195,7 +195,7 @@ WidgetCGI::~WidgetCGI() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SIM_NEW_OSG_QT
+#ifndef USE_OSGQOPENGL
 QWidget* WidgetCGI::addViewWidget()
 {
     createCameraCGI();
@@ -218,7 +218,7 @@ void WidgetCGI::createCameraCGI()
 {
     osg::ref_ptr<osg::Camera> camera = getOsgViewer()->getCamera();
 
-#   ifndef SIM_NEW_OSG_QT
+#   ifndef USE_OSGQOPENGL
     camera->setGraphicsContext( _gwin );
 #   endif
 

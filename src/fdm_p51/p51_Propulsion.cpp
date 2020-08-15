@@ -136,8 +136,8 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-P51_Propulsion::P51_Propulsion( const P51_Aircraft *aircraft ) :
-    Propulsion( aircraft ),
+P51_Propulsion::P51_Propulsion( const P51_Aircraft *aircraft, DataNode *rootNode ) :
+    Propulsion( aircraft, rootNode ),
     _aircraft ( aircraft ),
 
     _engine    ( 0 ),

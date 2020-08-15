@@ -173,7 +173,7 @@ public:
     typedef std::map< std::string, Channel > Channels;
 
     /** Constructor. */
-    Controls( const Aircraft* aircraft );
+    Controls( const Aircraft* aircraft, DataNode *rootNode );
 
     /** Destructor. */
     virtual ~Controls();
@@ -204,7 +204,7 @@ protected:
 private:
 
     /** Using this constructor is forbidden. */
-    Controls( const Controls & ) : Module( FDM_NULLPTR ) {}
+    Controls( const Controls & ) : Module( FDM_NULLPTR, FDM_NULLPTR ) {}
 };
 
 } // end of fdm namespace

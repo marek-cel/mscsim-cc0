@@ -139,6 +139,8 @@
 
 #include <fdm/fdm_Base.h>
 
+#include <fdm/main/fdm_DataManager.h>
+
 #include <fdm/main/fdm_Environment.h>
 #include <fdm/main/fdm_Intersections.h>
 
@@ -227,7 +229,7 @@ namespace fdm
  * @endcode
  *
  * @see Taylor J.: Classical Mechanics, 2005
- * @see Osiński Z.: Mechanika ogólna, 1997, [in Polish]
+ * @see Osinski Z.: Mechanika ogolna, 1997, [in Polish]
  * @see Allerton D.: Principles of Flight Simulation, 2009
  * @see Stevens B., Lewis F.: Aircraft Control and Simulation, 1992
  * @see Sibilski K.: Modelowanie i symulacja dynamiki ruchu obiektow latajacych, 2004 [in Polish]
@@ -236,7 +238,7 @@ namespace fdm
  * @see https://en.wikipedia.org/wiki/Rotating_reference_frame
  * @see https://en.wikipedia.org/wiki/Centrifugal_force#Derivation
  */
-class FDMEXPORT Aircraft : public Base
+class FDMEXPORT Aircraft : public DataManager
 {
 public:
 
@@ -248,6 +250,66 @@ public:
     {
         Stopped  = 0,   ///< stopped
         Running  = 1    ///< running
+    };
+
+    /** Data references. */
+    struct DataRefs
+    {
+        struct Input
+        {
+            struct Controls
+            {
+                DataRef roll;                       ///< roll controls data reference
+                DataRef pitch;                      ///< pitch control data reference
+                DataRef yaw;                        ///< yaw control data reference
+
+                DataRef trim_roll;                  ///< roll trim data reference
+                DataRef trim_pitch;                 ///< pitch trim data reference
+                DataRef trim_yaw;                   ///< yaw trim data reference
+
+                DataRef brake_l;                    ///< left brake data reference
+                DataRef brake_r;                    ///< right brake data reference
+
+                DataRef landing_gear;               ///< landing gear data reference
+                DataRef nose_wheel;                 ///< nose wheel steering data reference
+
+                DataRef flaps;                      ///< flaps data reference
+                DataRef airbrake;                   ///< airbrake data reference
+                DataRef spoilers;                   ///< spoilers data reference
+
+                DataRef collective;                 ///< collective data reference
+
+                DataRef lgh;                        ///< landing gear handle data reference
+                DataRef nws;                        ///< nose wheel steering data reference
+                DataRef abs;                        ///< anti-skid braking system data reference
+            };
+
+            struct Engine
+            {
+                DataRef  throttle;                  ///< throttle data reference
+                DataRef  mixture;                   ///< mixture lever data reference
+                DataRef  propeller;                 ///< propeller lever data reference
+
+                DataRef  fuel;                      ///< fuel state data reference
+                DataRef  ignition;                  ///< ignition state data reference
+                DataRef  starter;                   ///< starter state data reference
+            };
+
+            struct Masses
+            {
+                DataRef pilot[ FDM_MAX_PILOTS ];     ///< pilots data reference
+                DataRef tank[ FDM_MAX_TANKS ];       ///< fuel tanks data reference
+                DataRef cabin;                       ///< cabin data reference
+                DataRef trunk;                       ///< cargo trunk data reference
+                DataRef slung;                       ///< slung load data reference
+            };
+
+            Controls controls;
+            Engine   engine[ FDM_MAX_ENGINES ];
+            Masses   masses;
+        };
+
+        Input input;
     };
 
     /** Constructor. */
@@ -265,14 +327,9 @@ public:
     /**
      * Updates aircraft due to simulation time step.
      * @param timeStep simulation time step [s]
+     * @param integrate specifies integration is enabled
      */
-    virtual void update( double timeStep );
-
-    /**
-     * Updates aircraft due to simulation time step.
-     * @param timeStep simulation time step [s]
-     */
-    virtual void updateFrozen( double timeStep );
+    virtual void update( double timeStep, bool integrate = true );
 
     inline const DataInp* getDataInp() const { return _dataInp; }
     inline const DataOut* getDataOut() const { return _dataOut; }
@@ -367,6 +424,10 @@ public:
      */
     virtual void setStateVector( const StateVector &stateVector );
 
+    inline void setIntegratePos( bool integrate_pos ) { _integrate_pos = integrate_pos; }
+    inline void setIntegrateAtt( bool integrate_att ) { _integrate_att = integrate_att; }
+    inline void setIntegrateVel( bool integrate_vel ) { _integrate_vel = integrate_vel; }
+
 protected:
 
     /**
@@ -393,6 +454,10 @@ protected:
 
     const DataInp *_dataInp;    ///< input data
     DataOut *_dataOut;          ///< output data
+
+    DataRefs _dataRefs;         ///< data references
+
+    DataNode *_rootNode;        ///< data tree root node
 
     Environment   *_envir;      ///< environment interface
     Intersections *_isect;      ///< intersections interface
@@ -484,6 +549,10 @@ protected:
     double _turnRate;           ///< [rad/s] turn rate
     double _headingPrev;        ///< [rad] previous heading
 
+    bool _integrate_pos;        ///< specifies if position is being integrated
+    bool _integrate_att;        ///< specifies if attitude is being integrated
+    bool _integrate_vel;        ///< specifies if velocity is being integrated
+
     /**
      * Reads data.
      * @param dataFile XML data file path
@@ -528,6 +597,9 @@ private:
 
     /** Using this constructor is forbidden. */
     Aircraft( const Aircraft & ) {}
+
+    /** Initializes data tree. */
+    void initDataTree();
 };
 
 } // end of fdm namespace

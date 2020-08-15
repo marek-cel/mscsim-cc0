@@ -149,7 +149,7 @@ class XF_Aerodynamics : public Aerodynamics
 public:
 
     /** Constructor. */
-    XF_Aerodynamics( const XF_Aircraft *aircraft );
+    XF_Aerodynamics( const XF_Aircraft *aircraft, DataNode *rootNode );
 
     /** Destructor. */
     ~XF_Aerodynamics();

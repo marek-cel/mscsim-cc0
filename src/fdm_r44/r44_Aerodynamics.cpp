@@ -136,8 +136,8 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-R44_Aerodynamics::R44_Aerodynamics( const R44_Aircraft *aircraft ) :
-    Aerodynamics( aircraft ),
+R44_Aerodynamics::R44_Aerodynamics( const R44_Aircraft *aircraft, DataNode *rootNode ) :
+    Aerodynamics( aircraft, rootNode ),
     _aircraft ( aircraft ),
 
     _mainRotor ( FDM_NULLPTR ),

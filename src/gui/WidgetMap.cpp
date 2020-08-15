@@ -181,7 +181,7 @@ WidgetMap::WidgetMap( QWidget *parent ) :
     _manipulator->setAllowThrow( true );
     _manipulator->setScale( 1.0e-3 );
 
-#   ifdef SIM_NEW_OSG_QT
+#   ifdef USE_OSGQOPENGL
     QObject::connect( this, &osgQOpenGLWidget::initialized, [ this ]
     {
         getOsgViewer()->setThreadingModel( osgViewer::ViewerBase::SingleThreaded );
@@ -392,7 +392,7 @@ void WidgetMap::timerEvent( QTimerEvent *event )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SIM_NEW_OSG_QT
+#ifndef USE_OSGQOPENGL
 QWidget* WidgetMap::addViewWidget()
 {
     createCameraMap();
@@ -415,7 +415,7 @@ void WidgetMap::createCameraMap()
 {
     osg::ref_ptr<osg::Camera> cameraMap = getOsgViewer()->getCamera();
 
-#   ifndef SIM_NEW_OSG_QT
+#   ifndef USE_OSGQOPENGL
     cameraMap->setGraphicsContext( _gwin );
 #   endif
 

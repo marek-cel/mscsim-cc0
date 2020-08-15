@@ -125,8 +125,11 @@
  *
  ******************************************************************************/
 
-#include <fdm/main/fdm_Aerodynamics.h>
-#include <fdm/main/fdm_Aircraft.h>
+#include <fdm/main/fdm_DataNode.h>
+
+#include <limits>
+
+#include <fdm/utils/fdm_String.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -134,160 +137,417 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double Aerodynamics::getAngleOfAttack( const Vector3 &vel_bas, double vel_min )
+DataNode::DataNode() :
+    _parent( 0 ),
+    _type( Group )
 {
-    double uv = vel_bas.getLengthXY();
-
-    return getAngleOfAttack( uv, vel_bas( _iw ), vel_min );
+    _children.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double Aerodynamics::getAngleOfAttack( double uv, double w, double vel_min )
+DataNode::~DataNode()
 {
-    double angleOfAttack = 0.0;
-
-    if ( fabs( uv ) > vel_min || fabs( w ) > vel_min )
+    if ( _type == Group )
     {
-        angleOfAttack = atan2( w, uv );
+        DataNodes::iterator it;
+
+        it = _children.begin();
+
+        while ( it != _children.end() )
+        {
+            if ( it->second )
+            {
+                delete it->second;
+                it->second = 0;
+            }
+
+            ++it;
+        }
     }
 
-    return angleOfAttack;
+    _children.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double Aerodynamics::getSideslipAngle( const Vector3 &vel_bas, double vel_min )
+int DataNode::addNode( const char *path, Type type )
 {
-    double sideslipAngle = 0.0;
-
-    if ( fabs( vel_bas( _iu ) ) > vel_min || fabs( vel_bas( _iv ) ) > vel_min )
+    if ( _type == Group )
     {
-        double vw = vel_bas.getLength();
-        double v_vw = ( vw > vel_min ) ? ( vel_bas( _iv ) / vw ) : 0.0;
+        std::string path_temp = path;
 
-        if ( v_vw >  1.0 ) v_vw =  1.0;
-        if ( v_vw < -1.0 ) v_vw = -1.0;
+        path_temp = stripPathDots( path_temp.c_str() );
 
-        sideslipAngle = asin( v_vw );
+        if ( path_temp.length() > 0 )
+        {
+            path_temp = String::toLower( path_temp );
+
+            std::string pathLead;
+            std::string pathRest;
+
+            breakPath( path_temp.c_str(), pathLead, pathRest );
+
+            if ( pathRest.size() > 0 )
+            {
+                DataNode *node = 0;
+
+                if ( _children.count( pathLead ) == 0 )
+                {
+                    addNode( pathLead.c_str(), Group );
+                }
+
+                node = findNode( pathLead.c_str() );
+
+                if ( node )
+                {
+                    return node->addNode( pathRest.c_str(), type );
+                }
+            }
+            else
+            {
+                if ( pathLead.size() > 0 )
+                {
+                    if ( _children.count( pathLead ) == 0 )
+                    {
+                        DataNode *node = createNode( pathLead.c_str(), type, this );
+
+                        std::pair<DataNodes::iterator,bool> result;
+
+                        result = _children.insert( std::pair<std::string,DataNode*>( pathLead, node ) );
+
+                        if ( result.second == true )
+                        {
+                            return FDM_SUCCESS;
+                        }
+                        else
+                        {
+                            delete node;
+                        }
+                    }
+                }
+            }
+        }
     }
 
-    return sideslipAngle;
+    return FDM_FAILURE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double Aerodynamics::getPrandtlGlauertCoef( double machNumber, double max )
+bool DataNode::getDatab() const
 {
-    double prandtlGlauertCoef  = 1.0;
-
-    if ( machNumber < 1.0 )
+    if ( _type == Bool )
     {
-        prandtlGlauertCoef = 1.0 / sqrt( fabs( 1.0 - Misc::pow2( machNumber ) ) );
+        return _data.bData;
+    }
+
+    return std::numeric_limits< bool >::quiet_NaN();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int DataNode::getDatai() const
+{
+    if ( _type == Int )
+    {
+        return _data.iData;
+    }
+
+    return std::numeric_limits< int >::quiet_NaN();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+long DataNode::getDatal() const
+{
+    if ( _type == Long )
+    {
+        return _data.lData;
+    }
+
+    return std::numeric_limits< long >::quiet_NaN();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+float DataNode::getDataf() const
+{
+    if ( _type == Float )
+    {
+        return _data.fData;
+    }
+
+    return std::numeric_limits< float >::quiet_NaN();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+double DataNode::getDatad() const
+{
+    if ( _type == Double )
+    {
+        return _data.dData;
+    }
+
+    return std::numeric_limits< double >::quiet_NaN();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+DataNode* DataNode::getNode( const char *path )
+{
+    std::string path_temp = String::toLower( path );
+
+    return findNode( path_temp.c_str() );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+std::string DataNode::getPath() const
+{
+    std::string path;
+    path.clear();
+
+    if ( _parent )
+    {
+        path += _parent->getPath();
+    }
+
+    path += ".";
+    path += _name;
+
+    return path;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+DataNode* DataNode::getRoot()
+{
+    if ( _parent )
+    {
+        return _parent->getRoot();
     }
     else
     {
-        prandtlGlauertCoef = 1.0 / sqrt( fabs( 1.0 - Misc::pow2( machNumber ) ) );
+        return this;
     }
+}
 
-    if ( prandtlGlauertCoef > max || !Misc::isValid( prandtlGlauertCoef ) )
+////////////////////////////////////////////////////////////////////////////////
+
+double DataNode::getValue() const
+{
+    switch ( _type )
     {
-        prandtlGlauertCoef = max;
+        case Group:  return std::numeric_limits< double >::quiet_NaN(); break;
+        case Bool:   return (double)_data.bData; break;
+        case Int:    return (double)_data.iData; break;
+        case Long:   return (double)_data.lData; break;
+        case Float:  return (double)_data.fData; break;
+        case Double: return (double)_data.dData; break;
     }
 
-    return prandtlGlauertCoef;
+    return std::numeric_limits< double >::quiet_NaN();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Matrix3x3 Aerodynamics::getAero2BAS( double alpha, double beta )
+int DataNode::setDatab( bool value )
 {
-    return getAero2BAS( sin( alpha ), cos( alpha ),
-                        sin( beta ), cos( beta ) );
+    if ( _type == Bool )
+    {
+        _data.bData = value;
+        return FDM_SUCCESS;
+    }
+
+    return FDM_FAILURE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Matrix3x3 Aerodynamics::getAero2BAS( double sinAlpha , double cosAlpha,
-                                     double sinBeta  , double cosBeta )
+int DataNode::setDatai( int value )
 {
-    Matrix3x3 aero2bas;
+    if ( _type == Int )
+    {
+        _data.iData = value;
+        return FDM_SUCCESS;
+    }
 
-    aero2bas(0,0) = -cosAlpha * cosBeta;
-    aero2bas(0,1) = -cosAlpha * sinBeta;
-    aero2bas(0,2) =  sinAlpha;
-
-    aero2bas(1,0) = -sinBeta;
-    aero2bas(1,1) =  cosBeta;
-    aero2bas(1,2) =  0.0;
-
-    aero2bas(2,0) = -sinAlpha * cosBeta;
-    aero2bas(2,1) = -sinAlpha * sinBeta;
-    aero2bas(2,2) = -cosAlpha;
-
-    return aero2bas;
+    return FDM_FAILURE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Matrix3x3 Aerodynamics::getStab2BAS( double alpha )
+int DataNode::setDatal( long value )
 {
-    return getStab2BAS( sin( alpha ), cos( alpha ) );
+    if ( _type == Long )
+    {
+        _data.lData = value;
+        return FDM_SUCCESS;
+    }
+
+    return FDM_FAILURE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Matrix3x3 Aerodynamics::getStab2BAS( double sinAlpha, double cosAlpha )
+int DataNode::setDataf( float value )
 {
-    Matrix3x3 stab2bas;
+    if ( _type == Float )
+    {
+        _data.fData = value;
+        return FDM_SUCCESS;
+    }
 
-    stab2bas(0,0) = -cosAlpha;
-    stab2bas(0,1) =  0.0;
-    stab2bas(0,2) =  sinAlpha;
-
-    stab2bas(1,0) = 0.0;
-    stab2bas(1,1) = 1.0;
-    stab2bas(1,2) = 0.0;
-
-    stab2bas(2,0) = -sinAlpha;
-    stab2bas(2,1) =  0.0;
-    stab2bas(2,2) = -cosAlpha;
-
-    return stab2bas;
+    return FDM_FAILURE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Aerodynamics::Aerodynamics( const Aircraft* aircraft, DataNode *rootNode ) :
-    Module ( aircraft, rootNode )
-{}
-
-////////////////////////////////////////////////////////////////////////////////
-
-Aerodynamics::~Aerodynamics() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void Aerodynamics::initialize() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void Aerodynamics::update()
+int DataNode::setDatad( double value )
 {
-    updateMatrices();
+    if ( _type == Double )
+    {
+        _data.dData = value;
+        return FDM_SUCCESS;
+    }
+
+    return FDM_FAILURE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Aerodynamics::updateMatrices()
+int DataNode::setValue( double value )
 {
-    double sinAlpha = sin( _aircraft->getAngleOfAttack() );
-    double cosAlpha = cos( _aircraft->getAngleOfAttack() );
-    double sinBeta  = sin( _aircraft->getSideslipAngle() );
-    double cosBeta  = cos( _aircraft->getSideslipAngle() );
+    switch ( _type )
+    {
+        case Bool:   _data.bData = value != 0.0;  return FDM_SUCCESS; break;
+        case Int:    _data.iData = (int)   value; return FDM_SUCCESS; break;
+        case Long:   _data.lData = (long)  value; return FDM_SUCCESS; break;
+        case Float:  _data.fData = (float) value; return FDM_SUCCESS; break;
+        case Double: _data.dData =         value; return FDM_SUCCESS; break;
 
-    _aero2bas = getAero2BAS( sinAlpha, cosAlpha, sinBeta, cosBeta );
-    _stab2bas = getStab2BAS( sinAlpha, cosAlpha );
-    _bas2aero = _aero2bas.getTransposed();
-    _bas2stab = _stab2bas.getTransposed();
+        default: return FDM_FAILURE; break;
+    }
+
+    return FDM_FAILURE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void DataNode::breakPath( const char *path, std::string &pathLead, std::string &pathRest )
+{
+    std::string str( path );
+
+    size_t pos = str.find( '.' );
+
+    pathLead.clear();
+
+    if ( pos != std::string::npos )
+    {
+        pathLead = str.substr( 0 , pos );
+        pathRest = str.substr( pos + 1 );
+    }
+    else
+    {
+        pathLead = path;
+        pathRest.clear();
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+DataNode* DataNode::createNode( const char *name, Type type, DataNode *parent )
+{
+    std::string name_temp = String::toLower( name );
+
+    DataNode *node = new DataNode();
+
+    node->_parent = parent;
+
+    node->_name = name_temp;
+    node->_type = type;
+
+    switch ( node->_type )
+    {
+        case Group:  node->_children.clear();    break;
+        case Bool:   node->_data.bData = false;  break;
+        case Int:    node->_data.iData = 0;      break;
+        case Long:   node->_data.lData = 0L;     break;
+        case Float:  node->_data.fData = 0.0f;   break;
+        case Double: node->_data.dData = 0.0;    break;
+    }
+
+    return node;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+DataNode* DataNode::findNode( const char *path )
+{
+    std::string path_temp = path;
+
+    stripPathDots( path_temp.c_str() );
+
+    if ( path_temp.length() > 0 )
+    {
+        std::string pathLead;
+        std::string pathRest;
+
+        breakPath( path_temp.c_str(), pathLead, pathRest );
+
+        DataNodes::iterator it;
+
+        it = _children.find( pathLead );
+
+        if ( it != _children.end() )
+        {
+            if ( pathRest.size() > 0 )
+            {
+                return it->second->findNode( pathRest.c_str() );
+            }
+            else
+            {
+                return it->second;
+            }
+        }
+    }
+
+    return 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+std::string DataNode::stripPathDots( const char *path )
+{
+    std::string str( path );
+
+    size_t pos;
+
+    // removing leading dots
+    pos = str.find( '.' );
+
+    if ( pos != std::string::npos )
+    {
+        while ( pos == 0 )
+        {
+            str = str.substr( pos + 1 );
+            pos = str.find( '.' );
+        }
+    }
+
+    // removing trailing dots
+    pos = str.rfind( '.' );
+
+    if ( pos != std::string::npos )
+    {
+        while ( pos == str.length() - 1 )
+        {
+            str = str.substr( 0, pos );
+            pos = str.rfind( '.' );
+        }
+    }
+
+    return str;
 }

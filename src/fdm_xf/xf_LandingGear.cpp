@@ -137,8 +137,8 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-XF_LandingGear::XF_LandingGear( const XF_Aircraft *aircraft ) :
-    LandingGear( aircraft ),
+XF_LandingGear::XF_LandingGear( const XF_Aircraft *aircraft, DataNode *rootNode ) :
+    LandingGear( aircraft, rootNode ),
     _aircraft ( aircraft )
 {}
 

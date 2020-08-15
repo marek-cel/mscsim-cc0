@@ -276,7 +276,6 @@ private:
     void setStateIdle();
     void setStateInit();
     void setStateWork();
-    void setStateFreeze();
     void setStatePause();
     void setStateStop();
 
@@ -335,7 +334,6 @@ private slots:
     void on_actionStateInpIdle_triggered();
     void on_actionStateInpInit_triggered();
     void on_actionStateInpWork_triggered();
-    void on_actionStateInpFreeze_triggered();
     void on_actionStateInpPause_triggered();
     void on_actionStateInpStop_triggered();
 

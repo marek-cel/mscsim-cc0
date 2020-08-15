@@ -224,10 +224,10 @@ GraphicsWindowQt::GraphicsWindowQt( osg::GraphicsContext::Traits *traits ) :
         getState()->setContextID( osg::GraphicsContext::createNewContextID() );
     }
 
-#   if OPENSCENEGRAPH_SOVERSION > 131
-    getEventQueue()->syncWindowRectangleWithGraphicsContext();
-#   else
+#   if OPENSCENEGRAPH_SOVERSION < 140
     getEventQueue()->syncWindowRectangleWithGraphcisContext();
+#   else
+    getEventQueue()->syncWindowRectangleWithGraphicsContext();
 #   endif
 }
 
@@ -379,10 +379,10 @@ bool GraphicsWindowQt::realizeImplementation()
 
     _realized = true;
 
-#   if OPENSCENEGRAPH_SOVERSION > 131
-    getEventQueue()->syncWindowRectangleWithGraphicsContext();
-#   else
+#   if OPENSCENEGRAPH_SOVERSION < 140
     getEventQueue()->syncWindowRectangleWithGraphcisContext();
+#   else
+    getEventQueue()->syncWindowRectangleWithGraphicsContext();
 #   endif
 
     if ( !releaseContext() )
@@ -724,3 +724,4 @@ void GraphicsWindowQt::GLWidget::processDeferredEvents()
         QGLWidget::event( &event );
     }
 }
+

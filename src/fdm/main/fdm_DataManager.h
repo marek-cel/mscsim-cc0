@@ -124,75 +124,75 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef R44_LANDINGGEAR_H
-#define R44_LANDINGGEAR_H
+#ifndef FDM_DATAMANAGER_H
+#define FDM_DATAMANAGER_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/main/fdm_LandingGear.h>
+#include <fdm/fdm_Base.h>
 
-#include <fdm/models/fdm_Wheel.h>
+#include <fdm/main/fdm_DataRef.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace fdm
 {
 
-class R44_Aircraft;     ///< aircraft class forward declaration
-
 /**
- * @brief R44 landing gear class.
- *
- * XML configuration file format:
- * @code
- * <landing_gear>
- *   <wheel [steerable="{ 0|1 }"] [caster="{ 0|1 }"] [brake_group="{ 0|1|2 }]">
- *     <attachment_point> { [m] x-coordinate } { [m] y-coordinate } { [m] z-coordinate } </attachment_point>
- *     <unloaded_wheel> { [m] x-coordinate } { [m] y-coordinate } { [m] z-coordinate } </unloaded_wheel>
- *     <stiffness> { [N/m] strut stiffness (linear spring) coefficient } </stiffness>
- *     <damping> { [N/(m/s)] strut damping coefficient  } </damping>
- *     <friction_static> { [-] static friction coefficient } </friction_static>
- *     <friction_kinetic> { [-] kinetic friction coefficient } </friction_kinetic>
- *     <friction_rolling> { [-] rolling friction coefficient } </friction_rolling>
- *     [<max_angle> { [rad] max steering angle } </max_angle>]
- *   </wheel>
- *   ... { more wheels }
- * </landing_gear>
- * @endcode
+ * @brief Data manager class.
  */
-class R44_LandingGear : public LandingGear
+class FDMEXPORT DataManager : public Base
 {
 public:
 
-    typedef Wheel::Wheels Wheels;
+    /** Constructor. */
+    DataManager( DataNode *rootNode = 0 );
 
     /** Constructor. */
-    R44_LandingGear( const R44_Aircraft *aircraft, DataNode *rootNode );
+    DataManager( const DataManager *dataManager );
 
     /** Destructor. */
-    ~R44_LandingGear();
+    virtual ~DataManager();
 
     /**
-     * Reads data.
-     * @param dataNode XML node
+     * Adds data refernce.
+     * @return FDM_SUCCESS on success or FDM_FAILURE on failure
      */
-    void readData( XmlNode &dataNode );
+    int addDataRef( const char *path, DataNode::Type type );
 
-    /** Computes force and moment. */
-    void computeForceAndMoment();
+    /**
+     * Adds data refernce.
+     * @return FDM_SUCCESS on success or FDM_FAILURE on failure
+     */
+    int addDataRef( const std::string &path, DataNode::Type type );
 
-    /** Updates model. */
-    void update();
+    /**
+     * Returns data reference of the data node
+     * @param path data node path relative to the root node
+     * @return data reference of the data node
+     */
+    DataRef getDataRef( const char *path );
+
+    /**
+     * Returns data reference of the data node
+     * @param path data node path relative to the root node
+     * @return data reference of the data node
+     */
+    DataRef getDataRef( const std::string &path );
+
+    /**
+     * Returns pointer to data root node.
+     * @return pointer to data root node
+     */
+    DataNode* getDataRootNode() { return _rootNode; }
 
 private:
 
-    const R44_Aircraft *_aircraft;      ///< aircraft model main object
-
-    Wheels _wheels;                     ///< wheels container
+    DataNode *_rootNode;    ///< data tree root node
 };
 
 } // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // R44_LANDINGGEAR_H
+#endif // FDM_DATAMANAGER_H

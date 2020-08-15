@@ -154,7 +154,7 @@ WidgetOTW::WidgetOTW( QWidget *parent ) :
 {
     _keyHandler = new KeyHandler( this );
 
-#   ifdef SIM_NEW_OSG_QT
+#   ifdef USE_OSGQOPENGL
     QObject::connect( this, &WidgetOTW::initialized, [ this ]
     {
         getOsgViewer()->setThreadingModel( osgViewer::ViewerBase::SingleThreaded );
@@ -349,7 +349,7 @@ void WidgetOTW::timerEvent( QTimerEvent *event )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SIM_NEW_OSG_QT
+#ifndef USE_OSGQOPENGL
 QWidget* WidgetOTW::addViewWidget()
 {
     createCameraOTW();
@@ -373,7 +373,7 @@ void WidgetOTW::createCameraOTW()
 {
     osg::ref_ptr<osg::Camera> cameraOTW = getOsgViewer()->getCamera();
 
-#   ifndef SIM_NEW_OSG_QT
+#   ifndef USE_OSGQOPENGL
     cameraOTW->setGraphicsContext( _gwin );
 #   endif
 
@@ -395,7 +395,7 @@ void WidgetOTW::createCameraHUD()
 {
     osg::ref_ptr<osg::Camera> cameraHUD = new osg::Camera();
 
-#   ifndef SIM_NEW_OSG_QT
+#   ifndef USE_OSGQOPENGL
     cameraHUD->setGraphicsContext( _gwin );
 #   endif
 

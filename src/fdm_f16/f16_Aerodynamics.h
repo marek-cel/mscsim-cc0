@@ -152,7 +152,7 @@ class F16_Aerodynamics : public Aerodynamics
 public:
 
     /** Constructor. */
-    F16_Aerodynamics( const F16_Aircraft *aircraft );
+    F16_Aerodynamics( const F16_Aircraft *aircraft, DataNode *rootNode );
 
     /** Destructor. */
     ~F16_Aerodynamics();

@@ -132,7 +132,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 WidgetOSG::WidgetOSG( QWidget *parent ) :
-#   ifdef SIM_NEW_OSG_QT
+#   ifdef USE_OSGQOPENGL
     osgQOpenGLWidget ( parent ),
     _initialized ( false )
 #   else
@@ -147,7 +147,7 @@ WidgetOSG::WidgetOSG( QWidget *parent ) :
     osg::setNotifyLevel( osg::WARN );
 #   endif
 
-#   ifndef SIM_NEW_OSG_QT
+#   ifndef USE_OSGQOPENGL
     setThreadingModel( osgViewer::ViewerBase::SingleThreaded );
     //setThreadingModel( osgViewer::ViewerBase::ThreadPerContext );
 
@@ -163,7 +163,7 @@ WidgetOSG::~WidgetOSG() {}
 
 osgViewer::Viewer* WidgetOSG::getOsgViewer()
 {
-#   ifdef SIM_NEW_OSG_QT
+#   ifdef USE_OSGQOPENGL
     return osgQOpenGLWidget::getOsgViewer();
 #   else
     return this;
@@ -174,7 +174,7 @@ osgViewer::Viewer* WidgetOSG::getOsgViewer()
 
 void WidgetOSG::setSceneData( osg::Node *node )
 {
-#   ifdef SIM_NEW_OSG_QT
+#   ifdef USE_OSGQOPENGL
     if ( _initialized )
     {
         getOsgViewer()->setSceneData( node );
@@ -186,7 +186,7 @@ void WidgetOSG::setSceneData( osg::Node *node )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SIM_NEW_OSG_QT
+#ifndef USE_OSGQOPENGL
 void WidgetOSG::paintEvent( QPaintEvent *event )
 {
     /////////////////////////////

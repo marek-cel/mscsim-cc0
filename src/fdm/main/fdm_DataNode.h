@@ -124,75 +124,191 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef R44_LANDINGGEAR_H
-#define R44_LANDINGGEAR_H
+#ifndef FDM_DATANODE_H
+#define FDM_DATANODE_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/main/fdm_LandingGear.h>
+#include <map>
+#include <string>
 
-#include <fdm/models/fdm_Wheel.h>
+#include <fdm/fdm_Defines.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace fdm
 {
 
-class R44_Aircraft;     ///< aircraft class forward declaration
-
 /**
- * @brief R44 landing gear class.
- *
- * XML configuration file format:
- * @code
- * <landing_gear>
- *   <wheel [steerable="{ 0|1 }"] [caster="{ 0|1 }"] [brake_group="{ 0|1|2 }]">
- *     <attachment_point> { [m] x-coordinate } { [m] y-coordinate } { [m] z-coordinate } </attachment_point>
- *     <unloaded_wheel> { [m] x-coordinate } { [m] y-coordinate } { [m] z-coordinate } </unloaded_wheel>
- *     <stiffness> { [N/m] strut stiffness (linear spring) coefficient } </stiffness>
- *     <damping> { [N/(m/s)] strut damping coefficient  } </damping>
- *     <friction_static> { [-] static friction coefficient } </friction_static>
- *     <friction_kinetic> { [-] kinetic friction coefficient } </friction_kinetic>
- *     <friction_rolling> { [-] rolling friction coefficient } </friction_rolling>
- *     [<max_angle> { [rad] max steering angle } </max_angle>]
- *   </wheel>
- *   ... { more wheels }
- * </landing_gear>
- * @endcode
+ * @brief Data node class.
  */
-class R44_LandingGear : public LandingGear
+class DataNode
 {
 public:
 
-    typedef Wheel::Wheels Wheels;
+    typedef std::map< std::string, DataNode* > DataNodes;
+
+    /** Data type enum. */
+    enum Type
+    {
+        Group  = 0,     ///< group node
+        Bool   = 1,     ///< bool type
+        Int    = 2,     ///< int type
+        Long   = 3,     ///< long type
+        Float  = 4,     ///< float type
+        Double = 5      ///< double type
+    };
 
     /** Constructor. */
-    R44_LandingGear( const R44_Aircraft *aircraft, DataNode *rootNode );
+    DataNode();
 
     /** Destructor. */
-    ~R44_LandingGear();
+    virtual ~DataNode();
 
     /**
-     * Reads data.
-     * @param dataNode XML node
+     * @param path Path relative to the node.
+     * @param type New node type.
+     * @return FDM_SUCCESS on success or FDM_FAILURE on failure
      */
-    void readData( XmlNode &dataNode );
+    int addNode( const char *path, Type type );
 
-    /** Computes force and moment. */
-    void computeForceAndMoment();
+    /**
+     * @return returns data value on success or NaN on failure
+     */
+    bool getDatab() const;
 
-    /** Updates model. */
-    void update();
+    /**
+     * @return returns data value on success or NaN on failure
+     */
+    int getDatai() const;
+
+    /**
+     * @return returns data value on success or NaN on failure
+     */
+    long getDatal() const;
+
+    /**
+     * @return returns data value on success or NaN on failure
+     */
+    float getDataf() const;
+
+    /**
+     * @return returns data value on success or NaN on failure
+     */
+    double getDatad() const;
+
+    /** */
+    inline std::string getName() const
+    {
+        return _name;
+    }
+
+    /**
+     * Returns node of the given path on success and NULL on failure.
+     * @param path Path relative to the node.
+     * @return returns node of the given path on success and NULL on failure
+     */
+    DataNode* getNode( const char *path );
+
+    /** Returns node path string. */
+    std::string getPath() const;
+
+    /** Returns node's root node. */
+    DataNode* getRoot();
+
+    /** @return Data node type. */
+    inline Type getType() const
+    {
+        return _type;
+    }
+
+    /** */
+    double getValue() const;
+
+    /**
+     * @return FDM_SUCCESS on success or FDM_FAILURE on failure
+     */
+    int setDatab( bool value );
+
+    /**
+     * @return FDM_SUCCESS on success or FDM_FAILURE on failure
+     */
+    int setDatai( int value );
+
+    /**
+     * @return FDM_SUCCESS on success or FDM_FAILURE on failure
+     */
+    int setDatal( long value );
+
+    /**
+     * @return FDM_SUCCESS on success or FDM_FAILURE on failure
+     */
+    int setDataf( float value );
+
+    /**
+     * @return FDM_SUCCESS on success or FDM_FAILURE on failure
+     */
+    int setDatad( double value );
+
+    /**
+     * @return FDM_SUCCESS on success or FDM_FAILURE on failure
+     */
+    int setValue( double value );
 
 private:
 
-    const R44_Aircraft *_aircraft;      ///< aircraft model main object
+    /** Data variables union. */
+    union Data
+    {
+        bool    bData;       ///< bool data
+        int     iData;       ///< int data
+        long    lData;       ///< long data
+        float   fData;       ///< float data
+        double  dData;       ///< double data
+    };
 
-    Wheels _wheels;                     ///< wheels container
+    DataNode *_parent;      ///< parent node
+    DataNodes _children;    ///< node children
+
+    std::string _name;      ///< data node name
+
+    Type _type;             ///< type
+    Data _data;             ///< data
+
+    /** Using this constructor is forbidden. */
+    DataNode( const DataNode & ) {}
+
+    /**
+     * Breaks path string apart.
+     * @param path path string to be broken
+     * @param pathLead name of the first node in the path string
+     * @param pathRest path relative to the first node in the unbroken path string
+     */
+    void breakPath( const char *path, std::string &pathLead, std::string &pathRest );
+
+    /**
+     * Creates node of the given name, type and parent.
+     * @param name node name
+     * @param type node type
+     * @param parent node parent
+     * @return data node pointer
+     */
+    DataNode* createNode( const char *name, Type type, DataNode *parent );
+
+    /**
+     * Returns node of the given path on success and NULL on failure.
+     * This function is case sensitive.
+     * @param path Path relative to the node.
+     * @return returns node of the given path on success and NULL on failure
+     */
+    DataNode* findNode( const char *path );
+
+    /** Strips path string dots. */
+    std::string stripPathDots( const char *path );
 };
 
 } // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // R44_LANDINGGEAR_H
+#endif // FDM_DATANODE_H

@@ -134,8 +134,8 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-LandingGear::LandingGear( const Aircraft* aircraft ) :
-    Module ( aircraft ),
+LandingGear::LandingGear( const Aircraft* aircraft, DataNode *rootNode ) :
+    Module ( aircraft, rootNode ),
 
     _ctrlAngle ( 0.0 ),
 

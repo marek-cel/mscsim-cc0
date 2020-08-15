@@ -150,7 +150,7 @@ class C130_Aerodynamics : public Aerodynamics
 public:
 
     /** Constructor. */
-    C130_Aerodynamics( const C130_Aircraft *aircraft );
+    C130_Aerodynamics( const C130_Aircraft *aircraft, DataNode *rootNode );
 
     /** Destructor. */
     ~C130_Aerodynamics();
