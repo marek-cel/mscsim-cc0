@@ -132,7 +132,7 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/Switch>
 
-#include <fdm/utils/fdm_Table.h>
+#include <fdm/utils/fdm_Table1.h>
 #include <fdm/xml/fdm_XmlNode.h>
 
 #include <cgi/cgi_Module.h>
@@ -227,6 +227,16 @@ private:
     osg::ref_ptr<osg::PositionAttitudeTransform> _mainRotor;    ///<
     osg::ref_ptr<osg::PositionAttitudeTransform> _tailRotor;    ///<
 
+    osg::ref_ptr<osg::PositionAttitudeTransform> _exhaust1;     ///< afterburner exhaust
+    osg::ref_ptr<osg::PositionAttitudeTransform> _exhaust2;     ///< afterburner exhaust
+    osg::ref_ptr<osg::PositionAttitudeTransform> _exhaust3;     ///< afterburner exhaust
+    osg::ref_ptr<osg::PositionAttitudeTransform> _exhaust4;     ///< afterburner exhaust
+
+    osg::ref_ptr<osg::Switch> _afterburner1;                    ///<
+    osg::ref_ptr<osg::Switch> _afterburner2;                    ///<
+    osg::ref_ptr<osg::Switch> _afterburner3;                    ///<
+    osg::ref_ptr<osg::Switch> _afterburner4;                    ///<
+
     osg::ref_ptr<osg::Switch> _landingGear;                     ///<
 
     Elements _gearElements;                                     ///<
@@ -248,6 +258,8 @@ private:
     osg::ref_ptr<osg::Vec3Array> _trace_1;                      ///<
     osg::ref_ptr<osg::Vec3Array> _trace_2;                      ///<
 
+    double _ab_angle;                                           ///< [rad]
+
     double _hinge_offset;                                       ///< [m] flapping hinge offset from rotor shaft
     double _rotor_radius;                                       ///< [m] rotor radius
     double _inclination;                                        ///< [rad] rotor inclination angle
@@ -259,6 +271,8 @@ private:
 
     void loadModel( const char *modelFile );
 
+    osg::PositionAttitudeTransform* initAfterburnerAndGetExhaust( osg::Switch *afterburer );
+
     void readElementsData( const fdm::XmlNode &rootNode, ElementsData *elementsData );
     void readElementAxisData( const fdm::XmlNode &node, ElementData::AxisData *axisData );
 
@@ -268,6 +282,8 @@ private:
     void reset();
 
     void updateModel();
+    void updateAfterburner( double value, osg::Switch *afterburner,
+                            osg::PositionAttitudeTransform *exhaust );
 
     void updateTraces();
     void updateTrace( osg::Group *parent, osg::Vec3Array *positions,

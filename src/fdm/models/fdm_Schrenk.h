@@ -129,7 +129,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/utils/fdm_Table.h>
+#include <fdm/utils/fdm_Table1.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -160,7 +160,7 @@ public:
      * @param chord [m] wing chord vs [m] spanwise coordinate
      * @return [m] mean aerodynamic chord
      */
-    static double getMeanAerodynamicChord( const Table &chord );
+    static double getMeanAerodynamicChord( const Table1 &chord );
 
     /** Constructor. */
     Schrenk();
@@ -200,14 +200,14 @@ public:
      * Sets wing chord.
      * @param chord [m] wing chord vs [m] spanwise coordinate
      */
-    void setChord( const Table &chord );
+    void setChord( const Table1 &chord );
 
 protected:
 
     double _area;               ///< [m^2] wing area
     double _span;               ///< [m] wing span
 
-    Table _chord;               ///< [m] wing chord vs [m] spanwise coordinate
+    Table1 _chord;              ///< [m] wing chord vs [m] spanwise coordinate
 
     double _4S_bpi;             ///< [m] 4*S/(b*pi) where S is wing area and b is wing span
     double _2_b;                ///< [1/m] 2/b where b is wing span

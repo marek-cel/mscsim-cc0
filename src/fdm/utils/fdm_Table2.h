@@ -124,69 +124,109 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm_xh/xh_Fuselage.h>
-
-#include <fdm/xml/fdm_XmlUtils.h>
+#ifndef FDM_TABLE2_H
+#define FDM_TABLE2_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using namespace fdm;
+#include <string>
+#include <vector>
+
+#include <fdm/fdm_Defines.h>
+
+#include <fdm/utils/fdm_Table1.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-XH_Fuselage::XH_Fuselage()
+namespace fdm
 {
-    _cx_beta = Table1::createOneRecordTable( 0.0 );
-    _cz_beta = Table1::createOneRecordTable( 0.0 );
-    _cm_beta = Table1::createOneRecordTable( 0.0 );
-}
 
-////////////////////////////////////////////////////////////////////////////////
-
-XH_Fuselage::~XH_Fuselage() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void XH_Fuselage::readData( XmlNode &dataNode )
+/**
+ * @brief 2D table and bilinear interpolation class.
+ */
+class FDMEXPORT Table2
 {
-    ///////////////////////////////
-    Fuselage::readData( dataNode );
-    ///////////////////////////////
+public:
 
-    if ( dataNode.isValid() )
-    {
-        int result = FDM_SUCCESS;
+    /**
+     * @brief Creates table with only one record.
+     * @param val record value
+     */
+    static Table2 createOneRecordTable( double val = 0.0 );
 
-        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _cx_beta, "cx_beta" );
-        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _cz_beta, "cz_beta" );
-        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _cm_beta, "cm_beta" );
+    /** Constructor. */
+    Table2();
 
-        if ( result != FDM_SUCCESS ) XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-    }
-    else
-    {
-        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-    }
-}
+    /** Constructor. */
+    Table2( const std::vector< double > &rowValues,
+            const std::vector< double > &colValues,
+            const std::vector< double > &tableData );
+
+    /** Copy constructor. */
+    Table2( const Table2 &table );
+
+    /** Destructor. */
+    virtual ~Table2();
+
+    inline unsigned int getCols() const { return _cols; }
+    inline unsigned int getRows() const { return _rows; }
+
+    /**
+     * Returns 1-dimensional table for the given col value.
+     * @param colValue column key value
+     * @return 1-dimensional table
+     */
+    Table1 getTable( double colValue ) const;
+
+    /**
+     * Returns table value for the given keys values using bilinear
+     * interpolation algorithm.
+     * @param rowValue row key value
+     * @param colValue column key value
+     * @return interpolated value on success or NaN on failure
+     */
+    double getValue( double rowValue, double colValue ) const;
+
+    /**
+     * Returns table value for the given key index.
+     * @param rowIndex row index
+     * @param colIndex col index
+     * @return value on success or NaN on failure
+     */
+    double getValueByIndex( unsigned int rowIndex, unsigned int colIndex ) const;
+
+    /**
+     * Checks if table is valid.
+     * @return returns true if size is greater than 0 and all data is valid
+     */
+    bool isValid() const;
+
+    /**
+     * Returns string representation of the table.
+     */
+    std::string toString();
+
+    /** Assignment operator. */
+    const Table2& operator= ( const Table2 &table );
+
+private:
+
+    unsigned int _rows;     ///< number of rows
+    unsigned int _cols;     ///< number of columns
+    unsigned int _size;     ///< number of table elements
+
+    double *_rowValues;     ///< rows keys values
+    double *_colValues;     ///< columns keys values
+    double *_tableData;     ///< table data
+
+    double *_interpolData;  ///< interpolation data matrix
+
+    /** Updates interpolation data due to table data. */
+    void updateInterpolationData();
+};
+
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double XH_Fuselage::getCx( double angleOfAttack ) const
-{
-    return Fuselage::getCx( angleOfAttack ) + _cx_beta.getValue( _sideslipAngle );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-double XH_Fuselage::getCz( double angleOfAttack ) const
-{
-    return Fuselage::getCz( angleOfAttack ) + _cz_beta.getValue( _sideslipAngle );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-double XH_Fuselage::getCm( double angleOfAttack ) const
-{
-    return Fuselage::getCm( angleOfAttack ) + _cm_beta.getValue( _sideslipAngle );
-}
+#endif // FDM_TABLE2_H

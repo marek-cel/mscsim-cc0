@@ -183,12 +183,6 @@ public:
      */
     virtual void integrate( double step, VectorN *vect ) = 0;
 
-    /**
-     * Sets vectot size.
-     * @param size
-     */
-    virtual void setSize( unsigned int size ) = 0;
-
 protected:
 
     /** Calls function calculating derivative of the given vector. */

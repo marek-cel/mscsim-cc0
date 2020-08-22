@@ -124,69 +124,151 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm_xh/xh_Fuselage.h>
-
-#include <fdm/xml/fdm_XmlUtils.h>
+#ifndef FDM_TABLE1_H
+#define FDM_TABLE1_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using namespace fdm;
+#include <string>
+#include <vector>
+
+#include <fdm/fdm_Defines.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-XH_Fuselage::XH_Fuselage()
+namespace fdm
 {
-    _cx_beta = Table1::createOneRecordTable( 0.0 );
-    _cz_beta = Table1::createOneRecordTable( 0.0 );
-    _cm_beta = Table1::createOneRecordTable( 0.0 );
+
+/**
+ * @brief 1D table and linear interpolation class.
+ */
+class FDMEXPORT Table1
+{
+public:
+
+    /**
+     * @brief Creates table with only one record.
+     * @param val record value
+     */
+    static Table1 createOneRecordTable( double val = 0.0 );
+
+    /** Constructor. */
+    Table1();
+
+    /** Constructor. */
+    Table1( const std::vector< double > &keyValues,
+            const std::vector< double > &tableData );
+
+    /** Copy constructor. */
+    Table1( const Table1 &table );
+
+    /** Destructor. */
+    virtual ~Table1();
+
+    /**
+     * Returns key value for the given key index.
+     * @param keyIndex key index
+     * @return key value on success or NaN on failure
+     */
+    double getIndexValue( unsigned int keyIndex ) const;
+
+    /** */
+    inline unsigned int getSize() const { return _size; }
+
+    /**
+     * Returns key of minimum table value.
+     * @return key of minimum table value
+     */
+    double getKeyOfValueMin() const;
+
+    /**
+     * Returns key of maximum table value.
+     * @return key of maximum table value
+     */
+    double getKeyOfValueMax() const;
+
+    /**
+     * Returns table value for the given key value using linear
+     * interpolation algorithm.
+     * @param keysValue key value
+     * @return interpolated value on success or NaN on failure
+     */
+    double getValue( double keyValue ) const;
+
+    /**
+     * Returns table value for the given key index.
+     * @param keyIndex key index
+     * @return value on success or NaN on failure
+     */
+    double getValueByIndex( unsigned int keyIndex ) const;
+
+    /**
+     * Returns table first value.
+     * @return value on success or NaN on failure
+     */
+    double getFirstValue() const;
+
+    /**
+     * Returns table last value.
+     * @return value on success or NaN on failure
+     */
+    double getLastValue() const;
+
+    /**
+     * Returns minimum table value.
+     * @return minimum table value
+     */
+    double getValueMin() const;
+
+    /**
+     * Returns maximum table value.
+     * @return maximum table value
+     */
+    double getValueMax() const;
+
+    /**
+     * Checks if table is valid.
+     * @return returns true if size is greater than 0 and all data is valid
+     */
+    bool isValid() const;
+
+    /**
+     * Returns string representation of the table.
+     */
+    std::string toString();
+
+    /** Assignment operator. */
+    const Table1& operator= ( const Table1 &table );
+
+    /** Addition operator. */
+    Table1 operator+ ( const Table1 &table ) const;
+
+    /** Multiplication operator (by scalar). */
+    Table1 operator* ( double val ) const;
+
+private:
+
+    unsigned int _size;     ///< number of table elements
+
+    double *_keyValues;     ///< key values
+    double *_tableData;     ///< table data
+
+    double *_interpolData;  ///< interpolation data matrix
+
+    /** Updates interpolation data due to table data. */
+    void updateInterpolationData();
+};
+
+} // end of fdm namespace
+
+////////////////////////////////////////////////////////////////////////////////
+
+/** Multiplication operator (by scalar). */
+inline fdm::Table1 operator* ( double val, const fdm::Table1 &table )
+{
+    return ( table * val );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-XH_Fuselage::~XH_Fuselage() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void XH_Fuselage::readData( XmlNode &dataNode )
-{
-    ///////////////////////////////
-    Fuselage::readData( dataNode );
-    ///////////////////////////////
-
-    if ( dataNode.isValid() )
-    {
-        int result = FDM_SUCCESS;
-
-        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _cx_beta, "cx_beta" );
-        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _cz_beta, "cz_beta" );
-        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _cm_beta, "cm_beta" );
-
-        if ( result != FDM_SUCCESS ) XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-    }
-    else
-    {
-        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-double XH_Fuselage::getCx( double angleOfAttack ) const
-{
-    return Fuselage::getCx( angleOfAttack ) + _cx_beta.getValue( _sideslipAngle );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-double XH_Fuselage::getCz( double angleOfAttack ) const
-{
-    return Fuselage::getCz( angleOfAttack ) + _cz_beta.getValue( _sideslipAngle );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-double XH_Fuselage::getCm( double angleOfAttack ) const
-{
-    return Fuselage::getCm( angleOfAttack ) + _cm_beta.getValue( _sideslipAngle );
-}
+#endif // FDM_TABLE1_H

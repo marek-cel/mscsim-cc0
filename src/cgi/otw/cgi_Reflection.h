@@ -124,69 +124,33 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm_xh/xh_Fuselage.h>
-
-#include <fdm/xml/fdm_XmlUtils.h>
+#ifndef CGI_REFLECTION_H
+#define CGI_REFLECTION_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using namespace fdm;
+#include <osg/Group>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-XH_Fuselage::XH_Fuselage()
+namespace cgi
 {
-    _cx_beta = Table1::createOneRecordTable( 0.0 );
-    _cz_beta = Table1::createOneRecordTable( 0.0 );
-    _cm_beta = Table1::createOneRecordTable( 0.0 );
-}
 
-////////////////////////////////////////////////////////////////////////////////
-
-XH_Fuselage::~XH_Fuselage() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void XH_Fuselage::readData( XmlNode &dataNode )
+/**
+ * @brief Reflection.
+ */
+class Reflection
 {
-    ///////////////////////////////
-    Fuselage::readData( dataNode );
-    ///////////////////////////////
+public:
 
-    if ( dataNode.isValid() )
-    {
-        int result = FDM_SUCCESS;
+    static const char _frag[];      ///<
+    static const char _vert[];      ///<
 
-        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _cx_beta, "cx_beta" );
-        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _cz_beta, "cz_beta" );
-        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _cm_beta, "cm_beta" );
+    static void create( osg::Node *model, osg::Group *parent );
+};
 
-        if ( result != FDM_SUCCESS ) XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-    }
-    else
-    {
-        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-    }
-}
+} // end of cgi namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double XH_Fuselage::getCx( double angleOfAttack ) const
-{
-    return Fuselage::getCx( angleOfAttack ) + _cx_beta.getValue( _sideslipAngle );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-double XH_Fuselage::getCz( double angleOfAttack ) const
-{
-    return Fuselage::getCz( angleOfAttack ) + _cz_beta.getValue( _sideslipAngle );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-double XH_Fuselage::getCm( double angleOfAttack ) const
-{
-    return Fuselage::getCm( angleOfAttack ) + _cm_beta.getValue( _sideslipAngle );
-}
+#endif // CGI_REFLECTION_H

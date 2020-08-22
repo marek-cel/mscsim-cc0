@@ -175,7 +175,7 @@ protected:
 private:
 
     /** Using this constructor is forbidden. */
-    Module( const Module & ) {}
+    Module( const Module & ) : DataManager() {}
 };
 
 } // end of fdm namespace

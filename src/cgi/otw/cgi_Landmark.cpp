@@ -124,109 +124,52 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_TABLE2D_H
-#define FDM_TABLE2D_H
+
+#include <cgi/otw/cgi_Landmark.h>
+
+#include <cgi/cgi_Models.h>
+#include <cgi/cgi_WGS84.h>
+
+#include <cgi/otw/cgi_Reflection.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <string>
-#include <vector>
-
-#include <fdm/fdm_Defines.h>
-
-#include <fdm/utils/fdm_Table.h>
+using namespace cgi;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
+Landmark::Landmark( const char *file, double lat, double lon, double alt,
+                    double hdg, bool reflection,
+                    const Module *parent ) :
+    Module( parent )
 {
+    _pat = new osg::PositionAttitudeTransform();
+    _root->addChild( _pat.get() );
 
-/**
- * @brief Table and bilinear interpolation class.
- */
-class FDMEXPORT Table2D
-{
-public:
+    osg::ref_ptr<osg::Node> node = Models::get( file );
 
-    /**
-     * @brief Creates table with only one record.
-     * @param val record value
-     */
-    static Table2D createOneRecordTable( double val = 0.0 );
+    if ( node.valid() )
+    {
+        _pat->addChild( node.get() );
 
-    /** Constructor. */
-    Table2D();
+        WGS84::setLatLonAltHdg( _pat.get(), lat, lon, alt, hdg );
 
-    /** Constructor. */
-    Table2D( const std::vector< double > &rowValues,
-             const std::vector< double > &colValues,
-             const std::vector< double > &tableData );
-
-    /** Copy constructor. */
-    Table2D( const Table2D &table );
-
-    /** Destructor. */
-    virtual ~Table2D();
-
-    inline unsigned int getCols() const { return _cols; }
-    inline unsigned int getRows() const { return _rows; }
-
-    /**
-     * Returns 1-dimensional table for the given col value.
-     * @param colValue column key value
-     * @return 1-dimensional table
-     */
-    Table getTable( double colValue ) const;
-
-    /**
-     * Returns table value for the given keys values using bilinear
-     * interpolation algorithm.
-     * @param rowValue row key value
-     * @param colValue column key value
-     * @return interpolated value on success or NaN on failure
-     */
-    double getValue( double rowValue, double colValue ) const;
-
-    /**
-     * Returns table value for the given key index.
-     * @param rowIndex row index
-     * @param colIndex col index
-     * @return value on success or NaN on failure
-     */
-    double getValueByIndex( unsigned int rowIndex, unsigned int colIndex ) const;
-
-    /**
-     * Checks if table is valid.
-     * @return returns true if size is greater than 0 and all data is valid
-     */
-    bool isValid() const;
-
-    /**
-     * Returns string representation of the table.
-     */
-    std::string toString();
-
-    /** Assignment operator. */
-    const Table2D& operator= ( const Table2D &table );
-
-private:
-
-    unsigned int _rows;     ///< number of rows
-    unsigned int _cols;     ///< number of columns
-    unsigned int _size;     ///< number of table elements
-
-    double *_rowValues;     ///< rows keys values
-    double *_colValues;     ///< columns keys values
-    double *_tableData;     ///< table data
-
-    double *_interpolData;  ///< interpolation data matrix
-
-    /** Updates interpolation data due to table data. */
-    void updateInterpolationData();
-};
-
-} // end of fdm namespace
+        if ( reflection )
+        {
+            Reflection::create( node.get(), _pat.get() );
+        }
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // FDM_TABLE2D_H
+Landmark::~Landmark() {}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Landmark::update()
+{
+    /////////////////
+    Module::update();
+    /////////////////
+}

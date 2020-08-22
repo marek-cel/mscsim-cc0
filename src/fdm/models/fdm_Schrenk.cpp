@@ -143,7 +143,7 @@ double Schrenk::getMeanAerodynamicChord( double cr, double ct )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double Schrenk::getMeanAerodynamicChord( const Table &chord )
+double Schrenk::getMeanAerodynamicChord( const Table1 &chord )
 {
     double sum_mac = 0.0;
     double sum_area = 0.0;
@@ -210,7 +210,7 @@ void Schrenk::setSpan( double span )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Schrenk::setChord( const Table &chord )
+void Schrenk::setChord( const Table1 &chord )
 {
     _chord = chord;
 }

@@ -178,6 +178,7 @@ private:
     void createShadow();
 
     void readAirports( const fdm::XmlNode &node );
+    void readLandmarks( const fdm::XmlNode &node );
 
     void readTerrain( const fdm::XmlNode &node );
 };

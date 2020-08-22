@@ -776,7 +776,7 @@ void SkyDome::createStars()
             }
         }
 
-        //osg::notify(osg::ALWAYS) << m_starsCount << " stars brighter than " << magLimit << "mag" << std::endl;
+        //osg::notify(osg::ALWAYS) << starsCount << " stars brighter than " << magLimit << "mag" << std::endl;
 
         fclose( file );
     }

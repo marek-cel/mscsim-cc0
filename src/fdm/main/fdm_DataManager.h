@@ -146,7 +146,7 @@ class FDMEXPORT DataManager : public Base
 public:
 
     /** Constructor. */
-    DataManager( DataNode *rootNode = 0 );
+    DataManager( DataNode *rootNode = FDM_NULLPTR );
 
     /** Constructor. */
     DataManager( const DataManager *dataManager );
