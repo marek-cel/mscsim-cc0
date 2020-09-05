@@ -129,7 +129,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/models/fdm_Stabilizer.h>
+#include <fdm/models/fdm_StabilizerHor.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -139,7 +139,7 @@ namespace fdm
 /**
  * @brief C-130 horizontal stabilizer class.
  */
-class C130_StabilizerHor : public Stabilizer
+class C130_StabilizerHor : public StabilizerHor
 {
 public:
 

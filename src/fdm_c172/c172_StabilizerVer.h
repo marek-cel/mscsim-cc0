@@ -129,7 +129,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/models/fdm_Stabilizer.h>
+#include <fdm/models/fdm_StabilizerVer.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -139,7 +139,7 @@ namespace fdm
 /**
  * @brief Cessna 172 vertical stabilizer class.
  */
-class C172_StabilizerVer : public Stabilizer
+class C172_StabilizerVer : public StabilizerVer
 {
 public:
 

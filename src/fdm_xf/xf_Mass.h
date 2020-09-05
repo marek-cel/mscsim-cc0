@@ -151,9 +151,6 @@ public:
     /** Destructor. */
     ~XF_Mass();
 
-    /** Initializes mass. */
-    void initialize();
-
 private:
 
     const XF_Aircraft *_aircraft;  ///< aircraft model main object

@@ -134,8 +134,6 @@ using namespace fdm;
 ////////////////////////////////////////////////////////////////////////////////
 
 UH60_MainRotor::UH60_MainRotor() :
-    MainRotorAD(),
-
     _downwashLag ( FDM_NULLPTR )
 {
     _downwashLag = new Lag();
@@ -156,9 +154,9 @@ void UH60_MainRotor::update( double omega,
                              double cyclicLat,
                              double cyclicLon )
 {
-    ////////////////////////////////////////////////////////////////////////
-    MainRotorAD::update( omega, azimuth, collective, cyclicLat, cyclicLon );
-    ////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    MainRotor::update( omega, azimuth, collective, cyclicLat, cyclicLon );
+    //////////////////////////////////////////////////////////////////////
 
     double timeStep = 0.0; // TODO
 

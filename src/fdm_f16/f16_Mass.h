@@ -151,9 +151,6 @@ public:
     /** Destructor. */
     ~F16_Mass();
 
-    /** Initializes mass. */
-    void initialize();
-
 private:
 
     const F16_Aircraft *_aircraft;  ///< aircraft model main object

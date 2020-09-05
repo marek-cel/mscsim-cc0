@@ -129,7 +129,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/models/fdm_MainRotorAD.h>
+#include <fdm/models/fdm_MainRotor.h>
 
 #include <fdm/sys/fdm_Lag.h>
 
@@ -141,7 +141,7 @@ namespace fdm
 /**
  * @brief UH-60 main rotor base class.
  */
-class UH60_MainRotor : public MainRotorAD
+class UH60_MainRotor : public MainRotor
 {
 public:
 

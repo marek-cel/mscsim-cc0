@@ -133,6 +133,8 @@
 
 #include <fdm/models/fdm_Wheel.h>
 
+#include <fdm/utils/fdm_Map.h>
+
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace fdm
@@ -164,7 +166,14 @@ class AW101_LandingGear : public LandingGear
 {
 public:
 
-    typedef Wheel::Wheels Wheels;
+    /** Wheel and input data reference struct. */
+    struct WheelAndInput
+    {
+        DataRef input;      ///< input data reference
+        Wheel   wheel;      ///< wheel model object
+    };
+
+    typedef Map< std::string, WheelAndInput > Wheels;
 
     /** Constructor. */
     AW101_LandingGear( const AW101_Aircraft *aircraft, DataNode *rootNode );
@@ -192,6 +201,8 @@ private:
     const AW101_Aircraft *_aircraft;    ///< aircraft model main object
 
     Wheels _wheels;                     ///< wheels container
+
+    DataRef _inputCtrlABS;              ///<
 };
 
 } // end of fdm namespace

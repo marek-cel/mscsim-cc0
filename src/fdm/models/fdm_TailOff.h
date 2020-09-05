@@ -129,8 +129,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/fdm_Base.h>
-
 #include <fdm/utils/fdm_Table1.h>
 #include <fdm/utils/fdm_Vector3.h>
 
@@ -185,7 +183,7 @@ namespace fdm
  *
  * Optional elements: "cy", "cl", "cn"
  */
-class FDMEXPORT TailOff : public Base
+class FDMEXPORT TailOff
 {
 public:
 

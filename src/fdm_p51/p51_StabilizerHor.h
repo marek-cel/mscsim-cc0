@@ -129,7 +129,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/models/fdm_Stabilizer.h>
+#include <fdm/models/fdm_StabilizerHor.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -139,7 +139,7 @@ namespace fdm
 /**
  * @brief P-51 horizontal stabilizer class.
  */
-class P51_StabilizerHor : public Stabilizer
+class P51_StabilizerHor : public StabilizerHor
 {
 public:
 

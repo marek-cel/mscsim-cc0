@@ -125,7 +125,7 @@
  *
  ******************************************************************************/
 
-#include <fdm/main/fdm_DataNode.h>
+#include <fdm/utils/fdm_DataNode.h>
 
 #include <limits>
 

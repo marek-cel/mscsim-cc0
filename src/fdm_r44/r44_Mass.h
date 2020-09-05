@@ -151,9 +151,6 @@ public:
     /** Destructor. */
     ~R44_Mass();
 
-    /** Initializes mass. */
-    void initialize();
-
 private:
 
     const R44_Aircraft *_aircraft;      ///< aircraft model main object

@@ -1,4 +1,9 @@
-/****************************************************************************//*
+/***************************************************************************//**
+ *
+ * @author Marek M. Cel <marekcel@marekcel.pl>
+ *
+ * @section LICENSE
+ *
  * Copyright (C) 2020 Marek M. Cel
  *
  * Creative Commons Legal Code
@@ -124,129 +129,167 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm/models/fdm_Stabilizer.h>
-
-#include <fdm/main/fdm_Aerodynamics.h>
-#include <fdm/utils/fdm_String.h>
-#include <fdm/xml/fdm_XmlUtils.h>
+#ifndef FDM_FDM_H
+#define FDM_FDM_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using namespace fdm;
+#include <fdm/fdm_DataInp.h>
+#include <fdm/fdm_DataOut.h>
+
+#include <fdm/fdm_Recorder.h>
+
+#include <fdm/main/fdm_Aircraft.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Stabilizer::Stabilizer( Type type ) :
-    _type ( type ),
-    _area ( 0.0 ),
-    _incidence ( 0.0 )
+namespace fdm
 {
-    _cx = Table1::createOneRecordTable( 0.0 );
-    _cy = Table1::createOneRecordTable( 0.0 );
-    _cz = Table1::createOneRecordTable( 0.0 );
 
-    _downwash = Table1::createOneRecordTable( 0.0 );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-Stabilizer::~Stabilizer() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void Stabilizer::readData( XmlNode &dataNode )
+/** Flight dynamics modelflight dynamics model wrapper class. */
+class FDMEXPORT FDM : public Base
 {
-    if ( dataNode.isValid() )
+public:
+
+    /** Constructor. */
+    FDM( const DataInp *dataInpPtr, DataOut *dataOutPtr, bool verbose = false );
+
+    /** Destructor. */
+    virtual ~FDM();
+
+    /** */
+    virtual void initialize();
+
+    /** */
+    virtual void update( double timeStep );
+
+    /** */
+    virtual void printInitialConditions();
+
+    /** */
+    virtual void printState();
+
+    inline DataOut::Crash getCrash() const { return _aircraft->getCrash(); }
+
+    inline bool isReady() const { return _ready; }
+
+    inline bool isReplaying() const { return _recorder->isReplaying(); }
+
+protected:
+
+    /** Data references. */
+    struct DataRefs
     {
-        int result = FDM_SUCCESS;
+        /** */
+        struct Input
+        {
+            /** */
+            struct Controls
+            {
+                DataRef roll;                       ///< roll controls data reference
+                DataRef pitch;                      ///< pitch control data reference
+                DataRef yaw;                        ///< yaw control data reference
 
-        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _r_ac_bas, "aero_center" );
+                DataRef trim_roll;                  ///< roll trim data reference
+                DataRef trim_pitch;                 ///< pitch trim data reference
+                DataRef trim_yaw;                   ///< yaw trim data reference
 
-        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _area, "area" );
+                DataRef brake_l;                    ///< left brake data reference
+                DataRef brake_r;                    ///< right brake data reference
 
-        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _incidence, "incidence", true );
+                DataRef landing_gear;               ///< landing gear data reference
+                DataRef wheel_nose;                 ///< nose wheel steering data reference
 
-        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _downwash, "downwash", true );
+                DataRef flaps;                      ///< flaps data reference
+                DataRef airbrake;                   ///< airbrake data reference
+                DataRef spoilers;                   ///< spoilers data reference
 
-        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _cx, "cx" );
-        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _cy, "cy", _type == Horizontal );
-        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _cz, "cz", _type == Vertical   );
+                DataRef collective;                 ///< collective data reference
 
-        if ( result != FDM_SUCCESS ) XmlUtils::throwError( __FILE__, __LINE__, dataNode );
+                DataRef lgh;                        ///< landing gear handle data reference
+                DataRef nws;                        ///< nose wheel steering data reference
+                DataRef abs;                        ///< anti-skid braking system data reference
+            };
+
+            /** */
+            struct Engine
+            {
+                DataRef  throttle;                  ///< throttle data reference
+                DataRef  mixture;                   ///< mixture lever data reference
+                DataRef  propeller;                 ///< propeller lever data reference
+
+                DataRef  fuel;                      ///< fuel state data reference
+                DataRef  ignition;                  ///< ignition state data reference
+                DataRef  starter;                   ///< starter state data reference
+            };
+
+            /** */
+            struct Masses
+            {
+                DataRef pilot [ FDM_MAX_PILOTS ];   ///< pilots data reference
+                DataRef tank  [ FDM_MAX_TANKS ];    ///< fuel tanks data reference
+                DataRef cabin;                      ///< cabin data reference
+                DataRef trunk;                      ///< cargo trunk data reference
+                DataRef slung;                      ///< slung load data reference
+            };
+
+            Controls controls;                      ///< controls data
+            Engine   engine[ FDM_MAX_ENGINES ];     ///< engines data
+            Masses   masses;                        ///< masses data
+        };
+
+        Input  input;                               ///< input data
     }
-    else
-    {
-        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-    }
-}
+    _dataRefs;                                      ///< data references
+
+    const DataInp *_dataInpPtr;                     ///< input data pointer
+    DataOut       *_dataOutPtr;                     ///< output data pointer
+
+    DataInp _dataInp;                               ///< input data (internal)
+    DataOut _dataOut;                               ///< output data (internal)
+
+    DataNode *_rootNode;                            ///< data tree root node
+
+    Aircraft *_aircraft;                            ///< aircraft model
+    Recorder *_recorder;                            ///< recorder object
+
+    Vector3    _init_pos_wgs;                       ///< [m] initial position expressed in WGS
+    Quaternion _init_att_wgs;                       ///< initial attitude expressed as quaternion of rotation from WGS to BAS
+
+    UInt32 _initStep;                               ///< initialization step number
+
+    double _init_phi;                               ///< [rad] initial roll angle
+    double _init_tht;                               ///< [rad] initial pitch angle
+    double _init_alt;                               ///< [m] initial altitude above ground level
+
+    bool _initialized;                              ///< specifies if flight dynamics model is initialized
+    bool _ready;                                    ///< specifies if flight dynamics model is ready
+    bool _verbose;                                  ///< specifies if extra information should be printed
+
+    virtual void initializeOnGround();
+    virtual void initializeInFlight();
+
+    virtual void initializeRecorder();
+
+    virtual void updateDataInp();
+    virtual void updateDataOut();
+
+    virtual void updateAndSetDataInp();
+    virtual void updateAndSetDataOut();
+
+    virtual void updateInitialPositionAndAttitude();
+
+private:
+
+    /** Using this constructor is forbidden. */
+    FDM( const FDM & ) : Base() {}
+
+    /** Initializes basic data tree. */
+    void initDataTreeBasic();
+};
+
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Stabilizer::computeForceAndMoment( const Vector3 &vel_air_bas,
-                                        const Vector3 &omg_air_bas,
-                                        double airDensity,
-                                        double wingAngleOfAttack )
-{
-    // stabilizer velocity
-    Vector3 vel_stab_bas = vel_air_bas + ( omg_air_bas % _r_ac_bas );
-
-    // TODO: main rotor downwash according to:
-    // [NASA-TM-84281, p.26] and [NASA-MEMO-4-15-59L]
-
-    // stabilizer angle of attack and sideslip angle
-    double angleOfAttack = getAngleOfAttack( vel_stab_bas, wingAngleOfAttack );
-    double sideslipAngle = Aerodynamics::getSideslipAngle( vel_stab_bas );
-
-    double angle = ( _type == Horizontal ) ? angleOfAttack : sideslipAngle;
-
-    // dynamic pressure
-    double dynPress = 0.5 * airDensity * vel_stab_bas.getLength2();
-
-    Vector3 for_aero( dynPress * getCx( angle ) * _area,
-                      dynPress * getCy( angle ) * _area,
-                      dynPress * getCz( angle ) * _area );
-
-    _for_bas = Aerodynamics::getAero2BAS( angleOfAttack, sideslipAngle ) * for_aero;
-    _mom_bas = _r_ac_bas % _for_bas;
-
-    if ( !_for_bas.isValid() || !_mom_bas.isValid() )
-    {
-        Exception e;
-
-        e.setType( Exception::UnexpectedNaN );
-        e.setInfo( "NaN detected in the stabilizer model." );
-
-        FDM_THROW( e );
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-double Stabilizer::getAngleOfAttack( const Vector3 &vel_air_bas,
-                                     double wingAngleOfAttack )
-{
-    return Aerodynamics::getAngleOfAttack( vel_air_bas )
-         + _incidence - _downwash.getValue( wingAngleOfAttack );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-double Stabilizer::getCx( double angle ) const
-{
-    return _cx.getValue( angle );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-double Stabilizer::getCy( double angle ) const
-{
-    return _cy.getValue( angle );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-double Stabilizer::getCz( double angle ) const
-{
-    return _cz.getValue( angle );
-}
+#endif // FDM_FDM_H

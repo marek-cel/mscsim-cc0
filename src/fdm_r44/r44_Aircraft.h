@@ -150,7 +150,7 @@ class R44_Aircraft : public Aircraft
 public:
 
     /** Constructor. */
-    R44_Aircraft( const DataInp *dataInp, DataOut *dataOut );
+    R44_Aircraft( DataNode *rootNode, const DataInp *dataInp, DataOut *dataOut );
 
     /** Destructor. */
     ~R44_Aircraft();

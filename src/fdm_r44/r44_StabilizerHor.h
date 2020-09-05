@@ -129,7 +129,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/models/fdm_Stabilizer.h>
+#include <fdm/models/fdm_StabilizerHor.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -139,7 +139,7 @@ namespace fdm
 /**
  * @brief R44 horizontal stabilizer class.
  */
-class R44_StabilizerHor : public Stabilizer
+class R44_StabilizerHor : public StabilizerHor
 {
 public:
 

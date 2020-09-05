@@ -129,8 +129,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/fdm_Base.h>
-
 #include <fdm/utils/fdm_Table1.h>
 #include <fdm/utils/fdm_Vector3.h>
 
@@ -182,7 +180,7 @@ namespace fdm
  *
  * @see Talbot P., et al.: A Mathematical Model of a Single Main Rototr Helicopter for Piloted Simulation. NASA, TM-84281, 1982
  */
-class FDMEXPORT Fuselage : public Base
+class FDMEXPORT Fuselage
 {
 public:
 

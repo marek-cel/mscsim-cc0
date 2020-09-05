@@ -1052,6 +1052,7 @@ void MainWindow::updateDockProp()
             _dockProp->setEPR   ( i, Data::get()->propulsion.engine[ i ].epr );
             _dockProp->setMAP   ( i, Data::get()->propulsion.engine[ i ].map );
             _dockProp->setEGT   ( i, fdm::Units::c2k( Data::get()->propulsion.engine[ i ].egt ) );
+            _dockProp->setCHT   ( i, fdm::Units::c2k( Data::get()->propulsion.engine[ i ].cht ) );
             _dockProp->setTIT   ( i, fdm::Units::c2k( Data::get()->propulsion.engine[ i ].tit ) );
             _dockProp->setTOT   ( i, fdm::Units::c2k( Data::get()->propulsion.engine[ i ].egt ) );
             _dockProp->setITT   ( i, fdm::Units::c2k( Data::get()->propulsion.engine[ i ].itt ) );
@@ -1222,10 +1223,6 @@ void MainWindow::updateOutputData()
     Data::get()->environment.turbulence     = _dialogEnvr->getTurbulence();
     Data::get()->environment.windShear      = _dialogEnvr->getWindShear();
 
-    Data::get()->freezes.position = _dockMain->getFreezePosition();
-    Data::get()->freezes.attitude = _dockMain->getFreezeAttitude();
-    Data::get()->freezes.velocity = _dockMain->getFreezeVelocity();
-
     // initial conditions
     Data::get()->initial.latitude     = _dialogInit->getLat();
     Data::get()->initial.longitude    = _dialogInit->getLon();
@@ -1287,6 +1284,11 @@ void MainWindow::updateOutputData()
 
     // time coefficient
     Data::get()->timeCoef = _timeCoef;
+
+    // freezes
+    Data::get()->freezePosition = _dockMain->getFreezePosition();
+    Data::get()->freezeAttitude = _dockMain->getFreezeAttitude();
+    Data::get()->freezeVelocity = _dockMain->getFreezeVelocity();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

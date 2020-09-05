@@ -1,4 +1,9 @@
-/****************************************************************************//*
+/***************************************************************************//**
+ *
+ * @author Marek M. Cel <marekcel@marekcel.pl>
+ *
+ * @section LICENSE
+ *
  * Copyright (C) 2020 Marek M. Cel
  *
  * Creative Commons Legal Code
@@ -125,9 +130,7 @@
  *
  ******************************************************************************/
 
-#include <fdm/main/fdm_DataManager.h>
-
-#include <fdm/fdm_Exception.h>
+#include <fdm_aw101/aw101_FDM.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -135,74 +138,62 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-DataManager::DataManager( DataNode *rootNode ) :
-    _rootNode( rootNode )
+AW101_FDM::AW101_FDM( const DataInp *dataInpPtr, DataOut *dataOutPtr, bool verbose ) :
+    FDM( dataInpPtr, dataOutPtr, verbose )
 {
-    if ( _rootNode == 0 )
+    FDM::_aircraft = _aircraft = new AW101_Aircraft( _rootNode, &_dataInp, &_dataOut );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+AW101_FDM::~AW101_FDM()
+{
+    FDM_DELPTR( _aircraft );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void AW101_FDM::updateDataOut()
+{
+    /////////////////////
+    FDM::updateDataOut();
+    /////////////////////
+
+//    // propulsion
+//    _dataOut.engine[ 0 ].state = _aircraft->getProp()->getEngine()->getState() == Engine::Running;
+//    _dataOut.engine[ 0 ].rpm = _aircraft->getProp()->getEngine()->getRPM();
+//    _dataOut.engine[ 0 ].map = _aircraft->getProp()->getEngine()->getMAP();
+//    _dataOut.engine[ 0 ].ff  = _aircraft->getProp()->getEngine()->getFuelFlow();
+
+    // rotor
+    _dataOut.rotor.mainRotor_omega       = _aircraft->getProp()->getMainRotorOmega();
+    _dataOut.rotor.mainRotor_azimuth     = _aircraft->getProp()->getMainRotorPsi();
+    _dataOut.rotor.mainRotor_coningAngle = _aircraft->getAero()->getMainRotor()->getConingAngle();
+    _dataOut.rotor.mainRotor_diskRoll    = _aircraft->getAero()->getMainRotor()->getDiskRoll();
+    _dataOut.rotor.mainRotor_diskPitch   = _aircraft->getAero()->getMainRotor()->getDiskPitch();
+    _dataOut.rotor.mainRotor_collective  = _aircraft->getCtrl()->getCollective();
+    _dataOut.rotor.mainRotor_cyclicLon   = _aircraft->getCtrl()->getCyclicLon();
+    _dataOut.rotor.mainRotor_cyclicLat   = _aircraft->getCtrl()->getCyclicLat();
+    _dataOut.rotor.tailRotor_azimuth     = _aircraft->getProp()->getTailRotorPsi();
+
+    // blades
+    double delta_psi = 2.0 * M_PI / (double)( _aircraft->getAero()->getMainRotor()->getNumberOfBlades() );
+    for ( int i = 0; i < _aircraft->getAero()->getMainRotor()->getNumberOfBlades(); i++ )
     {
-        Exception e;
+        double psi = _aircraft->getProp()->getMainRotorPsi() + i * delta_psi;
 
-        e.setType( Exception::NullPointer );
-        e.setInfo( "Data root node pointer NULL." );
+        double sinPsi = sin( psi );
+        double cosPsi = cos( psi );
 
-        FDM_THROW( e );
+        double beta  = _aircraft->getAero()->getMainRotor()->getBeta0()
+                     + _aircraft->getAero()->getMainRotor()->getBeta1c() * cosPsi
+                     + _aircraft->getAero()->getMainRotor()->getBeta1s() * sinPsi;
+
+        double theta = _aircraft->getAero()->getMainRotor()->getTheta0()
+                     + _aircraft->getAero()->getMainRotor()->getTheta1c() * cosPsi
+                     + _aircraft->getAero()->getMainRotor()->getTheta1s() * sinPsi;
+
+        _dataOut.blade[ i ].flapping   = beta;
+        _dataOut.blade[ i ].feathering = theta;
     }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-DataManager::DataManager( const DataManager *dataManager ) :
-    _rootNode( dataManager->_rootNode )
-{
-    if ( _rootNode == 0 )
-    {
-        Exception e;
-
-        e.setType( Exception::NullPointer );
-        e.setInfo( "Data root node pointer NULL." );
-
-        FDM_THROW( e );
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-DataManager::~DataManager() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-int DataManager::addDataRef( const char *path, DataNode::Type type )
-{
-    return _rootNode->addNode( path, type );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-int DataManager::addDataRef( const std::string &path, DataNode::Type type )
-{
-    return _rootNode->addNode( path.c_str(), type );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-DataRef DataManager::getDataRef( const char *path )
-{
-    DataNode *dataNode = _rootNode->getNode( path );
-
-    if ( dataNode != 0 )
-    {
-        if ( dataNode->getType() == DataNode::Group )
-        {
-            dataNode = 0;
-        }
-    }
-
-    return DataRef( dataNode );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-DataRef DataManager::getDataRef( const std::string &path )
-{
-    return getDataRef( path.c_str() );
 }

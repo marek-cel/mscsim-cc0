@@ -151,9 +151,6 @@ public:
     /** Destructor. */
     ~F35A_Mass();
 
-    /** Initializes mass. */
-    void initialize();
-
 private:
 
     const F35A_Aircraft *_aircraft; ///< aircraft model main object

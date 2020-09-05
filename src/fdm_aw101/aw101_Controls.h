@@ -180,8 +180,13 @@ private:
     Channel *_channelCyclicLon;         ///<
     Channel *_channelCollective;        ///<
     Channel *_channelTailPitch;         ///<
-    Channel *_channelBrakeL;            ///<
-    Channel *_channelBrakeR;            ///<
+    Channel *_channelBrakeLeft;         ///< left brake channel
+    Channel *_channelBrakeRight;        ///< right brake channel
+
+    DataRef _inputCtrlRoll;             ///<
+    DataRef _inputCtrlPitch;            ///<
+    DataRef _inputCtrlYaw;              ///<
+    DataRef _inputCtrlCollective;       ///<
 
     AW101_AFCS *_afcs;                  ///< Automatic Flight Control System
 

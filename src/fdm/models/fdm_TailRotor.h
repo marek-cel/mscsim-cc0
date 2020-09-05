@@ -129,8 +129,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/fdm_Base.h>
-
 #include <fdm/utils/fdm_Matrix3x3.h>
 
 #include <fdm/xml/fdm_XmlNode.h>
@@ -173,7 +171,7 @@ namespace fdm
  * @see Padfield G.: Helicopter Flight Dynamics, 2007
  * @see Johnson W.: Helicopter Theory, 1980
  */
-class FDMEXPORT TailRotor : public Base
+class FDMEXPORT TailRotor
 {
 public:
 

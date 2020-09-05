@@ -129,8 +129,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/fdm_Base.h>
-
 #include <fdm/utils/fdm_Matrix3x3.h>
 
 #include <fdm/xml/fdm_XmlNode.h>
@@ -142,8 +140,10 @@ namespace fdm
 
 /**
  * @brief Helicopter main rotor simplified model class.
+ *
+ * @todo TODO
  */
-class FDMEXPORT SimpleRotor : public Base
+class FDMEXPORT SimpleRotor
 {
 public:
 

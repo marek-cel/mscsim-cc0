@@ -124,12 +124,15 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_MAINROTORAD_H
-#define FDM_MAINROTORAD_H
+#ifndef FDM_DATANODE_H
+#define FDM_DATANODE_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/models/fdm_MainRotor.h>
+#include <map>
+#include <string>
+
+#include <fdm/fdm_Defines.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -137,172 +140,175 @@ namespace fdm
 {
 
 /**
- * @brief Helicopter main rotor model class.
- *
- * This model is based on actuator disc theory.
- *
- * Flapping angle is positive upwards.
- *
- * Coordinate Systems Used for Rotor Calculations
- *
- * Rotor Axis System (RAS)
- * Origin of the Rotor Axis System is coincident with the rotor hub center,
- * the x-axis is positive forwards, the y-axis is positive right and z-axis
- * is positive downwards and coincident with the rotor shaft axis.
- *
- * Rotor-Wind Axis System (RWAS)
- * Rotor-Wind Axis System is very much like Rotor Axis System, the only
- * difference is that it is rotated about z-axis in such a manner that x-axis
- * points directly into relative wind, so there is no lateral airspeed
- * component.
- *
- * Control Axis System (CAS)
- * For most purposes, using the Rotor Axis System causes unnecessary
- * complications. It is convenient to use no cyclic feathering axis system.
- * Origin of the Control Axis System is coincident with the origin of the Rotor
- * Axis System, but it is rotated by angles of the swashplate roll and pitch so
- * there is no cyclic feathering in this coordinate system.
- *
- * Disc Axis System (DAS)
- * Origin of the Disc Axis System is coincident with the origin of the Rotor
- * Axis System, but it is rotated by angles of the rotor cone roll and pitch
- * in such a manner that z?axis is perpendicular to the tip path plane so there
- * is no cyclic flapping in this coordinate system.
- *
- * Control-Wind Axis System (CWAS)
- * Control-Wind Axis System is very much like Control Axis System, the only
- * difference is that it is rotated about z-axis in such a manner that x-axis
- * points directly into relative wind, so there is no lateral airspeed
- * component.
- *
- * XML configuration file format:
- * @code
- * <main_rotor>
- *   <hub_center> { [m] x-coordinate } { [m] y-coordinate } { [m] z-coordinate } </hub_center>
- *   <inclination> { [rad] rotor inclination angle (positive if forward) } </inclination>
- *   <number_of_blades> { number of blades } </number_of_blades>
- *   <blade_mass> { [kg] single blade mass } </blade_mass>
- *   <rotor_radius> { [m] rotor radius } </rotor_radius>
- *   <blade_chord> { [m] blades chord } </blade_chord>
- *   <hinge_offset> { [m] flapping hinge offset } </hinge_offset>
- *   <lift_slope> { [1/rad] blade section lift curve slope } </lift_slope>
- *   <tip_losses> { [-] tip losses coefficient } </tip_losses>
- *   <delta_0> { [-] drag coefficient constant component } </delta_0>
- *   <delta_2> { [-] drag coefficient quadratic component } </delta_2>
- *   <beta_max> { [rad] maximum flapping angle } </beta_max>
- *   <ct_max> { [-] maximum thrust coefficient } </ct_max>
- *   <cq_max> { [-] maximum thrust coefficient } </cq_max>
- *   [<thrust_factor> { [-] thrust scaling factor } </thrust_factor>]
- *   [<torque_factor> { [-] torque scaling factor } </torque_factor>]
- *   [<vel_i_factor> { [-] induced velocity scaling factor } </vel_i_factor>]
- * </main_rotor>
- * @endcode
- *
- * Optional elements: "thrust_factor", "torque_factor", "vel_i_factor"
- *
- * @see Mil M.: Helicopters: Calculation and Design. Volume 1: Aerodynamics, NASA, TM-X-74335, 1967
- * @see Gessow A., Myers G.: Aerodynamics of the Helicopter, 1985
- * @see Bramwell A.: Bramwells Helicopter Dynamics, 2001
- * @see Padfield G.: Helicopter Flight Dynamics, 2007
- * @see Stepniewski W.: Rotary-Wing Aerodynamics. Volume I: Basic Theories of Rotor Aerodynamics, 1984
- * @see Johnson W.: Helicopter Theory, 1980
+ * @brief Data node class.
  */
-class FDMEXPORT MainRotorAD : public MainRotor
+class FDMEXPORT DataNode
 {
 public:
 
+    typedef std::map< std::string, DataNode* > DataNodes;
+
+    /** Data type enum. */
+    enum Type
+    {
+        Group  = 0,     ///< group node
+        Bool   = 1,     ///< bool type
+        Int    = 2,     ///< int type
+        Long   = 3,     ///< long type
+        Float  = 4,     ///< float type
+        Double = 5      ///< double type
+    };
+
     /** Constructor. */
-    MainRotorAD();
+    DataNode();
 
     /** Destructor. */
-    virtual ~MainRotorAD();
+    virtual ~DataNode();
 
     /**
-     * Reads data.
-     * @param dataNode XML node
+     * @param path Path relative to the node.
+     * @param type New node type.
+     * @return FDM_SUCCESS on success or FDM_FAILURE on failure
      */
-    virtual void readData( XmlNode &dataNode );
+    int addNode( const char *path, Type type );
 
     /**
-     * Computes force and moment.
-     * @param vel_bas     [m/s]     aircraft linear velocity vector expressed in BAS
-     * @param omg_bas     [rad/s]   aircraft angular velocity expressed in BAS
-     * @param acc_bas     [m/s^2]   aircraft linear acceleration vector expressed in BAS
-     * @param eps_bas     [rad/s^2] aircraft angular acceleration vector expressed in BAS
-     * @param vel_air_bas [m/s]     aircraft linear velocity relative to the air expressed in BAS
-     * @param omg_air_bas [rad/s]   aircraft angular velocity relative to the air expressed in BAS
-     * @param grav_bas    [m/s^2]   gravity acceleration vector expressed in BAS
-     * @param airDensity  [kg/m^3]  air density
+     * @return returns data value on success or NaN on failure
      */
-    virtual void computeForceAndMoment( const Vector3 &vel_bas,
-                                        const Vector3 &omg_bas,
-                                        const Vector3 &acc_bas,
-                                        const Vector3 &eps_bas,
-                                        const Vector3 &vel_air_bas,
-                                        const Vector3 &omg_air_bas,
-                                        const Vector3 &grav_bas,
-                                        double airDensity );
+    bool getDatab() const;
 
     /**
-     * Returns rotor total inartia about shaft axis.
-     * @return [kg*m^2] rotor total inartia about shaft axis
+     * @return returns data value on success or NaN on failure
      */
-    inline double getInertia() const { return _nb * _ib; }
+    int getDatai() const;
 
-protected:
+    /**
+     * @return returns data value on success or NaN on failure
+     */
+    long getDatal() const;
 
-    Matrix3x3 _ras2cas;         ///< matrix of rotation from RAS to CAS
-    Matrix3x3 _cas2ras;         ///< matrix of rotation from CAS to RAS
+    /**
+     * @return returns data value on success or NaN on failure
+     */
+    float getDataf() const;
 
-    Matrix3x3 _bas2cas;         ///< matrix of rotation from BAS to CAS
+    /**
+     * @return returns data value on success or NaN on failure
+     */
+    double getDatad() const;
 
-    Matrix3x3 _bas2das;         ///< matrix of rotation from BAS to DAS
-    Matrix3x3 _das2bas;         ///< matrix of rotation from DAS to BAS
+    /** */
+    inline std::string getName() const
+    {
+        return _name;
+    }
 
-    Matrix3x3 _ras2rwas;        ///< matrix of rotation from RAS to RWAS
-    Matrix3x3 _rwas2ras;
+    /**
+     * Returns node of the given path on success and NULL on failure.
+     * @param path Path relative to the node.
+     * @return returns node of the given path on success and NULL on failure
+     */
+    DataNode* getNode( const char *path );
 
-    Matrix3x3 _cas2cwas;        ///< matrix of rotation from CAS to CWAS
-    Matrix3x3 _cwas2cas;        ///< matrix of rotation from CWAS to CAS
+    /** Returns node path string. */
+    std::string getPath() const;
 
-    Matrix3x3 _bas2cwas;        ///< matrix of rotation from BAS to CWAS
+    /** Returns node's root node. */
+    DataNode* getRoot();
 
-    int _nb;                    ///< number of rotor blades
+    /** @return Data node type. */
+    inline Type getType() const
+    {
+        return _type;
+    }
 
-    double _r;                  ///< [m] rotor radius
-    double _c;                  ///< [m] blades chord
-    double _e;                  ///< [m] flapping hinge offset
+    /** */
+    double getValue() const;
 
-    double _a;                  ///< [1/rad] blade section lift curve slope
-    double _b;                  ///< [-] tip losses coefficient
+    /**
+     * @return FDM_SUCCESS on success or FDM_FAILURE on failure
+     */
+    int setDatab( bool value );
 
-    double _delta_0;            ///< [-] drag coefficient constant component
-    double _delta_2;            ///< [-] drag coefficient quadratic component
+    /**
+     * @return FDM_SUCCESS on success or FDM_FAILURE on failure
+     */
+    int setDatai( int value );
 
-    double _beta_max;           ///< [rad] maximum flapping angle
+    /**
+     * @return FDM_SUCCESS on success or FDM_FAILURE on failure
+     */
+    int setDatal( long value );
 
-    double _ct_max;             ///< [-] maximum thrust coefficient
-    double _cq_max;             ///< [-] maximum torque coefficient
+    /**
+     * @return FDM_SUCCESS on success or FDM_FAILURE on failure
+     */
+    int setDataf( float value );
 
-    double _thrust_factor;      ///< [-] thrust scaling factor
-    double _torque_factor;      ///< [-] torque scaling factor
-    double _vel_i_factor;       ///< [-] induced velocity scaling factor
+    /**
+     * @return FDM_SUCCESS on success or FDM_FAILURE on failure
+     */
+    int setDatad( double value );
 
-    double _r2;                 ///< [m^2] rotor radius squared
-    double _r3;                 ///< [m^3] rotor radius cubed
-    double _r4;                 ///< [m^3] rotor radius to the power of 4
-    double _b2;                 ///< [-] tip losses coefficient squared
-    double _b3;                 ///< [-] tip losses coefficient cubed
-    double _b4;                 ///< [-] tip losses coefficient to the power of 4
-    double _ad;                 ///< [m^2] rotor disk area
-    double _s;                  ///< [-] rotor solidity
+    /**
+     * @return FDM_SUCCESS on success or FDM_FAILURE on failure
+     */
+    int setValue( double value );
 
-    double _sb;                 ///< [kg*m] single rotor blade first moment of mass about flapping hinge
-    double _ib;                 ///< [kg*m^2] single rotor blade inertia moment about flapping hinge
+private:
+
+    /** Data variables union. */
+    union Data
+    {
+        bool    bData;       ///< bool data
+        int     iData;       ///< int data
+        long    lData;       ///< long data
+        float   fData;       ///< float data
+        double  dData;       ///< double data
+    };
+
+    DataNode *_parent;      ///< parent node
+    DataNodes _children;    ///< node children
+
+    std::string _name;      ///< data node name
+
+    Type _type;             ///< type
+    Data _data;             ///< data
+
+    /** Using this constructor is forbidden. */
+    DataNode( const DataNode & ) {}
+
+    /**
+     * Breaks path string apart.
+     * @param path path string to be broken
+     * @param pathLead name of the first node in the path string
+     * @param pathRest path relative to the first node in the unbroken path string
+     */
+    void breakPath( const char *path, std::string &pathLead, std::string &pathRest );
+
+    /**
+     * Creates node of the given name, type and parent.
+     * @param name node name
+     * @param type node type
+     * @param parent node parent
+     * @return data node pointer
+     */
+    DataNode* createNode( const char *name, Type type, DataNode *parent );
+
+    /**
+     * Returns node of the given path on success and NULL on failure.
+     * This function is case sensitive.
+     * @param path Path relative to the node.
+     * @return returns node of the given path on success and NULL on failure
+     */
+    DataNode* findNode( const char *path );
+
+    /** Strips path string dots. */
+    std::string stripPathDots( const char *path );
 };
 
 } // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // FDM_MAINROTORAD_H
+#endif // FDM_DATANODE_H

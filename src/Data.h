@@ -347,14 +347,6 @@ public:
         WindShear  windShear;               ///< wind shear model type
     };
 
-    /** Simulation freezes data. */
-    struct Freezes
-    {
-        bool position;                      ///< freezes aircraft position
-        bool attitude;                      ///< freezes aircraft attitude
-        bool velocity;                      ///< freezes aircraft velocity
-    };
-
     /** Navigation data. */
     struct Navigation
     {
@@ -493,19 +485,20 @@ public:
         struct Engine
         {
             bool state;                     ///< specifies if engine is working
-            bool afterburner;               ///<
+            bool afterburner;               ///< specifies if afterburner is enabled
 
-            double rpm;                     ///< [rpm]
-            double prop;                    ///< [rpm]
-            double ng;                      ///< [%]
-            double n1;                      ///< [%]
-            double n2;                      ///< [%]
-            double trq;                     ///< [%]
-            double epr;                     ///< [-]
-            double map;                     ///< [Pa]
-            double egt;                     ///< [deg C]
-            double itt;                     ///< [deg C]
-            double tit;                     ///< [deg C]
+            double rpm;                     ///< [rpm] engine rpm
+            double prop;                    ///< [rpm] propeller rpm
+            double ng;                      ///< [%] gas generator rotational speed
+            double n1;                      ///< [%] low pressure engine spool rotational speed
+            double n2;                      ///< [%] high pressure engine spool rotational speed
+            double trq;                     ///< [%] torque
+            double epr;                     ///< [-] engine pressure ratio
+            double map;                     ///< [Pa] manifold absolute pressure
+            double egt;                     ///< [deg C] exhaust gas temperature
+            double cht;                     ///< [deg C] cylinder head temperature
+            double itt;                     ///< [deg C] interstage turbine temperature
+            double tit;                     ///< [deg C] turbine inlet temperature
 
             double fuelFlow;                ///< [kg/s]
 
@@ -544,7 +537,6 @@ public:
         Controls    controls;               ///< controls data
         DateTime    dateTime;               ///< date time data
         Environment environment;            ///< environment data
-        Freezes     freezes;                ///< freezes data
         Ground      ground;                 ///< ground data
         Initial     initial;                ///< initial conditions
         Masses      masses;                 ///< masses data
@@ -561,6 +553,10 @@ public:
 
         double timeCoef;                    ///< [-] time coefficient
         double timeStep;                    ///< [s] simulation time step
+
+        bool freezePosition;                ///< specifies if aircraft position is to be frozen
+        bool freezeAttitude;                ///< specifies if aircraft attitude is to be frozen
+        bool freezeVelocity;                ///< specifies if aircraft velocity is to be frozen
     };
 
 private:

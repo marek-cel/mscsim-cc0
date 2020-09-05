@@ -140,9 +140,9 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Matrix3x3 RotorBlade::getRAS2SRA( double psi, Direction direction )
+Matrix3x3 RotorBlade::getRAS2SRA( double psi, bool ccw )
 {
-    double ccw = ( direction == MainRotor::CCW ) ? 1.0 : -1.0;
+    double ccw_coef = ccw ? 1.0 : -1.0;
 
     Matrix3x3 a;
 
@@ -158,8 +158,8 @@ Matrix3x3 RotorBlade::getRAS2SRA( double psi, Direction direction )
     a(2,1) =  0.0;
     a(2,2) = -1.0;
 
-    double cosPsi = cos( ccw * psi );
-    double sinPsi = sin( ccw * psi );
+    double cosPsi = cos( ccw_coef * psi );
+    double sinPsi = sin( ccw_coef * psi );
 
     Matrix3x3 b;
 
@@ -180,12 +180,12 @@ Matrix3x3 RotorBlade::getRAS2SRA( double psi, Direction direction )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Matrix3x3 RotorBlade::getSRA2BSA( double beta, Direction direction )
+Matrix3x3 RotorBlade::getSRA2BSA( double beta, bool ccw )
 {
-    double ccw = ( direction == MainRotor::CCW ) ? 1.0 : -1.0;
+    double ccw_coef = ccw ? 1.0 : -1.0;
 
-    double cosBeta = cos( ccw * beta );
-    double sinBeta = sin( ccw * beta );
+    double cosBeta = cos( ccw_coef * beta );
+    double sinBeta = sin( ccw_coef * beta );
 
     Matrix3x3 result;
 
@@ -206,9 +206,9 @@ Matrix3x3 RotorBlade::getSRA2BSA( double beta, Direction direction )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-RotorBlade::RotorBlade( Direction direction ) :
-    _direction ( direction ),
-    _dirFactor ( _direction == MainRotor::CCW ? 1.0 : -1.0 ),
+RotorBlade::RotorBlade( bool ccw ) :
+    _ccw ( ccw ),
+    _dirFactor ( _ccw ? 1.0 : -1.0 ),
 
     _m ( 0.0 ),
     _b ( 0.0 ),
@@ -313,7 +313,7 @@ void RotorBlade::computeForceAndMoment( const Vector3 &vel_air_ras,
                                         double theta_1c,
                                         double theta_1s )
 {
-    _ras2sra = getRAS2SRA( azimuth, _direction );
+    _ras2sra = getRAS2SRA( azimuth, _ccw );
     _sra2ras = _ras2sra.getTransposed();
 
     //_sra2bsa = getSRA2BSA( _beta, _direction );
@@ -352,7 +352,7 @@ void RotorBlade::integrate( double timeStep,
                             double theta_1c,
                             double theta_1s )
 {
-    _ras2sra = getRAS2SRA( azimuth, _direction );
+    _ras2sra = getRAS2SRA( azimuth, _ccw );
     _sra2ras = _ras2sra.getTransposed();
 
     _theta = getTheta( azimuth, theta_0, theta_1c, theta_1s );
@@ -539,7 +539,7 @@ void RotorBlade::integrateSpanwise( const Vector3 &vel_air_ras,
                                     double beta,
                                     double beta_dot )
 {
-    Matrix3x3 sra2bsa = getSRA2BSA( beta, _direction );
+    Matrix3x3 sra2bsa = getSRA2BSA( beta, _ccw );
     Matrix3x3 bsa2sra = sra2bsa.getTransposed();
 
     // velocity relative to airflow

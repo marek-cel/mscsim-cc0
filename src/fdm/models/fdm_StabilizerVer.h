@@ -124,14 +124,15 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_DATAMANAGER_H
-#define FDM_DATAMANAGER_H
+#ifndef FDM_STABILIZERVER_H
+#define FDM_STABILIZERVER_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/fdm_Base.h>
+#include <fdm/utils/fdm_Vector3.h>
+#include <fdm/xml/fdm_XmlNode.h>
 
-#include <fdm/main/fdm_DataRef.h>
+#include <fdm/utils/fdm_Table1.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -139,60 +140,84 @@ namespace fdm
 {
 
 /**
- * @brief Data manager class.
+ * @brief Vertical stabilizer base class.
+ *
+ * XML configuration file format:
+ * @code
+ * <stab_ver>
+ *   <aerodynamic_center> { [m] x-coordinate } { [m] y-coordinate } { [m] z-coordinate } </aerodynamic_center>
+ *   <area> { [m^2] area } </area>
+ *   <cx>
+ *     { [rad] angle } { [-] drag coefficient }
+ *     ... { more entries }
+ *   </cx>
+ *   <cy>
+ *     { [rad] angle } { [-] sideforce coefficient }
+ *     ... { more entries }
+ *   </cy>
+ * </stab_ver>
+ * @endcode
  */
-class FDMEXPORT DataManager : public Base
+class FDMEXPORT StabilizerVer
 {
 public:
 
-    /** Constructor. */
-    DataManager( DataNode *rootNode = FDM_NULLPTR );
-
-    /** Constructor. */
-    DataManager( const DataManager *dataManager );
+    /**
+     * Constructor.
+     * @param type stabilizer type
+     */
+    StabilizerVer();
 
     /** Destructor. */
-    virtual ~DataManager();
+    virtual ~StabilizerVer();
 
     /**
-     * Adds data refernce.
-     * @return FDM_SUCCESS on success or FDM_FAILURE on failure
+     * Reads data.
+     * @param dataNode XML node
      */
-    int addDataRef( const char *path, DataNode::Type type );
+    virtual void readData( XmlNode &dataNode );
 
     /**
-     * Adds data refernce.
-     * @return FDM_SUCCESS on success or FDM_FAILURE on failure
+     * Computes force and moment.
+     * @param vel_air_bas [m/s] aircraft linear velocity relative to the air expressed in BAS
+     * @param omg_air_bas [rad/s] aircraft angular velocity relative to the air expressed in BAS
+     * @param airDensity [kg/m^3] air density
      */
-    int addDataRef( const std::string &path, DataNode::Type type );
+    virtual void computeForceAndMoment( const Vector3 &vel_air_bas,
+                                        const Vector3 &omg_air_bas,
+                                        double airDensity );
+
+    inline const Vector3& getFor_BAS() const { return _for_bas; }
+    inline const Vector3& getMom_BAS() const { return _mom_bas; }
+
+protected:
+
+    Vector3 _for_bas;           ///< [N] total force vector expressed in BAS
+    Vector3 _mom_bas;           ///< [N*m] total moment vector expressed in BAS
+
+    Vector3 _r_ac_bas;          ///< [m] stabilizer aerodynamic center expressed in BAS
+
+    Table1 _cx;                 ///< [-] drag coefficient vs sideslip angle
+    Table1 _cy;                 ///< [-] sideforce coefficient vs sideslip angle
+
+    double _area;               ///< [m^2] stabilizer reference area
+    /**
+     * Computes drag coefficient.
+     * @param angle [rad] "angle of attack"
+     * @return [-] drag coefficient
+     */
+    virtual double getCx( double angle ) const;
 
     /**
-     * Returns data reference of the data node
-     * @param path data node path relative to the root node
-     * @return data reference of the data node
+     * Computes sideforce coefficient.
+     * @param angle [rad] "angle of attack"
+     * @return [-] sideforce coefficient
      */
-    DataRef getDataRef( const char *path );
-
-    /**
-     * Returns data reference of the data node
-     * @param path data node path relative to the root node
-     * @return data reference of the data node
-     */
-    DataRef getDataRef( const std::string &path );
-
-    /**
-     * Returns pointer to data root node.
-     * @return pointer to data root node
-     */
-    DataNode* getDataRootNode() { return _rootNode; }
-
-private:
-
-    DataNode *_rootNode;    ///< data tree root node
+    virtual double getCy( double angle ) const;
 };
 
 } // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // FDM_DATAMANAGER_H
+#endif // FDM_STABILIZERVER_H

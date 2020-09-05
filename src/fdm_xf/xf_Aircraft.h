@@ -150,7 +150,7 @@ class XF_Aircraft : public Aircraft
 public:
 
     /** Constructor. */
-    XF_Aircraft( const DataInp *dataInp, DataOut *dataOut );
+    XF_Aircraft( DataNode *rootNode, const DataInp *dataInp, DataOut *dataOut );
 
     /** Destructor. */
     ~XF_Aircraft();

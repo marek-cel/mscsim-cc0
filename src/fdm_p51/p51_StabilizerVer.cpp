@@ -136,8 +136,6 @@ using namespace fdm;
 ////////////////////////////////////////////////////////////////////////////////
 
 P51_StabilizerVer::P51_StabilizerVer() :
-    Stabilizer( Vertical ),
-
     _dcx_drudder ( 0.0 ),
     _dcy_drudder ( 0.0 ),
     _rudder ( 0.0 )
@@ -151,9 +149,9 @@ P51_StabilizerVer::~P51_StabilizerVer() {}
 
 void P51_StabilizerVer::readData( XmlNode &dataNode )
 {
-    /////////////////////////////////
-    Stabilizer::readData( dataNode );
-    /////////////////////////////////
+    ////////////////////////////////////
+    StabilizerVer::readData( dataNode );
+    ////////////////////////////////////
 
     if ( dataNode.isValid() )
     {
@@ -179,15 +177,15 @@ void P51_StabilizerVer::computeForceAndMoment( const Vector3 &vel_air_bas,
 {
     _rudder = rudder;
 
-    Stabilizer::computeForceAndMoment( vel_air_bas, omg_air_bas,
-                                       airDensity );
+    StabilizerVer::computeForceAndMoment( vel_air_bas, omg_air_bas,
+                                          airDensity );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 double P51_StabilizerVer::getCx( double angle ) const
 {
-    return Stabilizer::getCx( angle )
+    return StabilizerVer::getCx( angle )
             + _dcx_drudder * _rudder;
 }
 
@@ -195,6 +193,6 @@ double P51_StabilizerVer::getCx( double angle ) const
 
 double P51_StabilizerVer::getCy( double angle ) const
 {
-    return Stabilizer::getCy( angle )
+    return StabilizerVer::getCy( angle )
             + _dcy_drudder * _rudder;
 }
