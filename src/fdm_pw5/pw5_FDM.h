@@ -1,4 +1,9 @@
-/****************************************************************************//*
+/***************************************************************************//**
+ *
+ * @author Marek M. Cel <marekcel@marekcel.pl>
+ *
+ * @section LICENSE
+ *
  * Copyright (C) 2020 Marek M. Cel
  *
  * Creative Commons Legal Code
@@ -124,127 +129,40 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm_p51/p51_Propulsion.h>
-#include <fdm_p51/p51_Aircraft.h>
-
-#include <fdm/xml/fdm_XmlUtils.h>
+#ifndef PW5_FDM_H
+#define PW5_FDM_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using namespace fdm;
+#include <fdm/fdm_FDM.h>
+
+#include <fdm_pw5/pw5_Aircraft.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-P51_Propulsion::P51_Propulsion( const P51_Aircraft *aircraft, DataNode *rootNode ) :
-    Propulsion( aircraft, rootNode ),
-    _aircraft ( aircraft ),
-
-    _engine    ( FDM_NULLPTR ),
-    _propeller ( FDM_NULLPTR )
+namespace fdm
 {
-    _engine    = new P51_Engine();
-    _propeller = new P51_Propeller();
-}
+
+/** PW-5 flight dynamics model wrapper class. */
+class PW5_FDM : public FDM
+{
+public:
+
+    /** Constructor. */
+    PW5_FDM( const DataInp *dataInpPtr, DataOut *dataOutPtr, bool verbose = false );
+
+    /** Destructor. */
+    virtual ~PW5_FDM();
+
+private:
+
+    PW5_Aircraft *_aircraft;        ///< aircraft model
+
+    virtual void updateDataOut();
+};
+
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-P51_Propulsion::~P51_Propulsion()
-{
-    FDM_DELPTR( _engine    );
-    FDM_DELPTR( _propeller );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void P51_Propulsion::readData( XmlNode &dataNode )
-{
-    if ( dataNode.isValid() )
-    {
-        XmlNode nodeEngine    = dataNode.getFirstChildElement( "engine"    );
-        XmlNode nodePropeller = dataNode.getFirstChildElement( "propeller" );
-
-        _engine->readData( nodeEngine );
-        _propeller->readData( nodePropeller );
-    }
-    else
-    {
-        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void P51_Propulsion::initialize()
-{
-    /////////////////////////
-    Propulsion::initialize();
-    /////////////////////////
-
-    bool engineOn = _aircraft->getInitPropState() == Aircraft::Running;
-
-    _propeller->setRPM( engineOn ? 700.0 : 0.0 );
-    _engine->setRPM( _propeller->getEngineRPM() );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void P51_Propulsion::computeForceAndMoment()
-{
-    _propeller->computeThrust( _aircraft->getAirspeed(),
-                               _aircraft->getEnvir()->getDensity() );
-
-    // thrust and moment due to thrust
-    Vector3 for_bas( _propeller->getThrust(), 0.0, 0.0 );
-    Vector3 mom_bas = _propeller->getPos_BAS() % for_bas;
-
-    // gyro effect
-    Vector3 omega_bas;
-
-    if ( _propeller->getDirection() == Propeller::CW )
-    {
-        omega_bas.x() =  _propeller->getOmega();
-    }
-    else
-    {
-        omega_bas.x() = -_propeller->getOmega();
-    }
-
-    mom_bas += ( _propeller->getInertia() + _engine->getInertia() ) * ( omega_bas % _aircraft->getOmg_BAS() );
-
-    _for_bas = for_bas;
-    _mom_bas = mom_bas;
-
-    if ( !_for_bas.isValid() || !_mom_bas.isValid() )
-    {
-        Exception e;
-
-        e.setType( Exception::UnexpectedNaN );
-        e.setInfo( "NaN detected in the propulsion model." );
-
-        FDM_THROW( e );
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void P51_Propulsion::update()
-{
-    _propeller->integrate( _aircraft->getTimeStep(), _engine->getInertia() );
-
-    _engine->update( _aircraft->getDataInp()->engine[ 0 ].throttle,
-                     _aircraft->getDataInp()->engine[ 0 ].mixture,
-                     _propeller->getEngineRPM(),
-                     _aircraft->getEnvir()->getPressure(),
-                     _aircraft->getEnvir()->getDensity(),
-                     _aircraft->getEnvir()->getDensityAltitude(),
-                     _aircraft->getDataInp()->engine[ 0 ].fuel,
-                     _aircraft->getDataInp()->engine[ 0 ].starter,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition );
-
-    _propeller->update( _aircraft->getDataInp()->engine[ 0 ].propeller,
-                        _engine->getTorque(),
-                        _aircraft->getAirspeed(),
-                        _aircraft->getEnvir()->getDensity() );
-}
+#endif // PW5_FDM_H

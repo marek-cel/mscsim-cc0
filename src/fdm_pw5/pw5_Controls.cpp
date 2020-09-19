@@ -125,10 +125,8 @@
  *
  ******************************************************************************/
 
-#include <fdm_p51/p51_Propulsion.h>
-#include <fdm_p51/p51_Aircraft.h>
-
-#include <fdm/xml/fdm_XmlUtils.h>
+#include <fdm_pw5/pw5_Controls.h>
+#include <fdm_pw5/pw5_Aircraft.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -136,115 +134,69 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-P51_Propulsion::P51_Propulsion( const P51_Aircraft *aircraft, DataNode *rootNode ) :
-    Propulsion( aircraft, rootNode ),
+PW5_Controls::PW5_Controls( const PW5_Aircraft *aircraft, DataNode *rootNode ) :
+    Controls( aircraft, rootNode ),
     _aircraft ( aircraft ),
 
-    _engine    ( FDM_NULLPTR ),
-    _propeller ( FDM_NULLPTR )
-{
-    _engine    = new P51_Engine();
-    _propeller = new P51_Propeller();
-}
+    _channelAilerons     ( FDM_NULLPTR ),
+    _channelElevator     ( FDM_NULLPTR ),
+    _channelRudder       ( FDM_NULLPTR ),
+    _channelElevatorTrim ( FDM_NULLPTR ),
+    _channelAirbrake     ( FDM_NULLPTR ),
+
+    _ailerons      ( 0.0 ),
+    _elevator      ( 0.0 ),
+    _rudder        ( 0.0 ),
+    _elevator_trim ( 0.0 ),
+    _airbrake      ( 0.0 )
+{}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-P51_Propulsion::~P51_Propulsion()
-{
-    FDM_DELPTR( _engine    );
-    FDM_DELPTR( _propeller );
-}
+PW5_Controls::~PW5_Controls() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Propulsion::readData( XmlNode &dataNode )
+void PW5_Controls::initialize()
 {
-    if ( dataNode.isValid() )
-    {
-        XmlNode nodeEngine    = dataNode.getFirstChildElement( "engine"    );
-        XmlNode nodePropeller = dataNode.getFirstChildElement( "propeller" );
+    _channelAilerons     = _channels.getItemByKey( "ailerons"      );
+    _channelElevator     = _channels.getItemByKey( "elevator"      );
+    _channelRudder       = _channels.getItemByKey( "rudder"        );
+    _channelElevatorTrim = _channels.getItemByKey( "elevator_trim" );
+    _channelAirbrake     = _channels.getItemByKey( "airbrake"      );
 
-        _engine->readData( nodeEngine );
-        _propeller->readData( nodePropeller );
-    }
-    else
-    {
-        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void P51_Propulsion::initialize()
-{
-    /////////////////////////
-    Propulsion::initialize();
-    /////////////////////////
-
-    bool engineOn = _aircraft->getInitPropState() == Aircraft::Running;
-
-    _propeller->setRPM( engineOn ? 700.0 : 0.0 );
-    _engine->setRPM( _propeller->getEngineRPM() );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void P51_Propulsion::computeForceAndMoment()
-{
-    _propeller->computeThrust( _aircraft->getAirspeed(),
-                               _aircraft->getEnvir()->getDensity() );
-
-    // thrust and moment due to thrust
-    Vector3 for_bas( _propeller->getThrust(), 0.0, 0.0 );
-    Vector3 mom_bas = _propeller->getPos_BAS() % for_bas;
-
-    // gyro effect
-    Vector3 omega_bas;
-
-    if ( _propeller->getDirection() == Propeller::CW )
-    {
-        omega_bas.x() =  _propeller->getOmega();
-    }
-    else
-    {
-        omega_bas.x() = -_propeller->getOmega();
-    }
-
-    mom_bas += ( _propeller->getInertia() + _engine->getInertia() ) * ( omega_bas % _aircraft->getOmg_BAS() );
-
-    _for_bas = for_bas;
-    _mom_bas = mom_bas;
-
-    if ( !_for_bas.isValid() || !_mom_bas.isValid() )
+    if ( FDM_NULLPTR == _channelAilerons
+      || FDM_NULLPTR == _channelElevator
+      || FDM_NULLPTR == _channelRudder
+      || FDM_NULLPTR == _channelElevatorTrim
+      || FDM_NULLPTR == _channelAirbrake )
     {
         Exception e;
 
-        e.setType( Exception::UnexpectedNaN );
-        e.setInfo( "NaN detected in the propulsion model." );
+        e.setType( Exception::UnknownException );
+        e.setInfo( "Obtaining control channels failed." );
 
         FDM_THROW( e );
     }
+
+    ///////////////////////
+    Controls::initialize();
+    ///////////////////////
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Propulsion::update()
+void PW5_Controls::update()
 {
-    _propeller->integrate( _aircraft->getTimeStep(), _engine->getInertia() );
+    ///////////////////
+    Controls::update();
+    ///////////////////
 
-    _engine->update( _aircraft->getDataInp()->engine[ 0 ].throttle,
-                     _aircraft->getDataInp()->engine[ 0 ].mixture,
-                     _propeller->getEngineRPM(),
-                     _aircraft->getEnvir()->getPressure(),
-                     _aircraft->getEnvir()->getDensity(),
-                     _aircraft->getEnvir()->getDensityAltitude(),
-                     _aircraft->getDataInp()->engine[ 0 ].fuel,
-                     _aircraft->getDataInp()->engine[ 0 ].starter,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition );
+    _ailerons = _channelAilerons->output;
+    _elevator = _channelElevator->output;
+    _rudder   = _channelRudder->output;
 
-    _propeller->update( _aircraft->getDataInp()->engine[ 0 ].propeller,
-                        _engine->getTorque(),
-                        _aircraft->getAirspeed(),
-                        _aircraft->getEnvir()->getDensity() );
+    _elevator_trim = _channelElevatorTrim->output;
+
+    _airbrake = _channelAirbrake->output;
 }

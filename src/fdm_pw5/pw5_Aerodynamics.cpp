@@ -125,8 +125,8 @@
  *
  ******************************************************************************/
 
-#include <fdm_p51/p51_Propulsion.h>
-#include <fdm_p51/p51_Aircraft.h>
+#include <fdm_pw5/pw5_Aerodynamics.h>
+#include <fdm_pw5/pw5_Aircraft.h>
 
 #include <fdm/xml/fdm_XmlUtils.h>
 
@@ -136,36 +136,48 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-P51_Propulsion::P51_Propulsion( const P51_Aircraft *aircraft, DataNode *rootNode ) :
-    Propulsion( aircraft, rootNode ),
+PW5_Aerodynamics::PW5_Aerodynamics( const PW5_Aircraft *aircraft, DataNode *rootNode ) :
+    Aerodynamics( aircraft, rootNode ),
     _aircraft ( aircraft ),
 
-    _engine    ( FDM_NULLPTR ),
-    _propeller ( FDM_NULLPTR )
+    _tailOff ( FDM_NULLPTR ),
+    _stabHor ( FDM_NULLPTR ),
+    _stabVer ( FDM_NULLPTR )
 {
-    _engine    = new P51_Engine();
-    _propeller = new P51_Propeller();
+    _tailOff = new PW5_TailOff();
+    _stabHor = new PW5_StabilizerHor();
+    _stabVer = new PW5_StabilizerVer();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-P51_Propulsion::~P51_Propulsion()
+PW5_Aerodynamics::~PW5_Aerodynamics()
 {
-    FDM_DELPTR( _engine    );
-    FDM_DELPTR( _propeller );
+    FDM_DELPTR( _tailOff );
+    FDM_DELPTR( _stabHor );
+    FDM_DELPTR( _stabVer );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Propulsion::readData( XmlNode &dataNode )
+void PW5_Aerodynamics::readData( XmlNode &dataNode )
 {
     if ( dataNode.isValid() )
     {
-        XmlNode nodeEngine    = dataNode.getFirstChildElement( "engine"    );
-        XmlNode nodePropeller = dataNode.getFirstChildElement( "propeller" );
+        int result = FDM_SUCCESS;
 
-        _engine->readData( nodeEngine );
-        _propeller->readData( nodePropeller );
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _drag_ground_effect, "drag_ground_effect" );
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _lift_ground_effect, "lift_ground_effect" );
+
+        if ( result != FDM_SUCCESS ) XmlUtils::throwError( __FILE__, __LINE__, dataNode );
+
+        XmlNode nodeTailOff = dataNode.getFirstChildElement( "tail_off" );
+        XmlNode nodeStabHor = dataNode.getFirstChildElement( "stab_hor" );
+        XmlNode nodeStabVer = dataNode.getFirstChildElement( "stab_ver" );
+
+        _tailOff->readData( nodeTailOff );
+        _stabHor->readData( nodeStabHor );
+        _stabVer->readData( nodeStabVer );
     }
     else
     {
@@ -175,52 +187,50 @@ void P51_Propulsion::readData( XmlNode &dataNode )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Propulsion::initialize()
+void PW5_Aerodynamics::computeForceAndMoment()
 {
-    /////////////////////////
-    Propulsion::initialize();
-    /////////////////////////
+    updateMatrices();
 
-    bool engineOn = _aircraft->getInitPropState() == Aircraft::Running;
+    _tailOff->computeForceAndMoment( _aircraft->getVel_air_BAS(),
+                                     _aircraft->getOmg_air_BAS(),
+                                     _aircraft->getEnvir()->getDensity(),
+                                     _aircraft->getCtrl()->getAilerons(),
+                                     _aircraft->getCtrl()->getAirbrake() );
 
-    _propeller->setRPM( engineOn ? 700.0 : 0.0 );
-    _engine->setRPM( _propeller->getEngineRPM() );
-}
+    _stabHor->computeForceAndMoment( _aircraft->getVel_air_BAS(),
+                                     _aircraft->getOmg_air_BAS(),
+                                     _aircraft->getEnvir()->getDensity(),
+                                     _aircraft->getAngleOfAttack(),
+                                     _aircraft->getCtrl()->getElevator(),
+                                     _aircraft->getCtrl()->getElevatorTrim() );
 
-////////////////////////////////////////////////////////////////////////////////
+    _stabVer->computeForceAndMoment( _aircraft->getVel_air_BAS(),
+                                     _aircraft->getOmg_air_BAS(),
+                                     _aircraft->getEnvir()->getDensity(),
+                                     _aircraft->getCtrl()->getRudder() );
 
-void P51_Propulsion::computeForceAndMoment()
-{
-    _propeller->computeThrust( _aircraft->getAirspeed(),
-                               _aircraft->getEnvir()->getDensity() );
+    _for_bas = _tailOff->getFor_BAS() + _stabHor->getFor_BAS() + _stabVer->getFor_BAS();
+    _mom_bas = _tailOff->getMom_BAS() + _stabHor->getMom_BAS() + _stabVer->getMom_BAS();
 
-    // thrust and moment due to thrust
-    Vector3 for_bas( _propeller->getThrust(), 0.0, 0.0 );
-    Vector3 mom_bas = _propeller->getPos_BAS() % for_bas;
+    // computing forces expressed in Aerodynamic Axes System
+    // computing moments expressed in Stability Axes System
+    _for_aero = _bas2aero * _for_bas;
+    _mom_stab = _bas2stab * _mom_bas;
 
-    // gyro effect
-    Vector3 omega_bas;
+    // ground effect
+    _for_aero.x() *= _drag_ground_effect.getValue( _aircraft->getAltitude_AGL() );
+    _for_aero.z() *= _lift_ground_effect.getValue( _aircraft->getAltitude_AGL() );
 
-    if ( _propeller->getDirection() == Propeller::CW )
-    {
-        omega_bas.x() =  _propeller->getOmega();
-    }
-    else
-    {
-        omega_bas.x() = -_propeller->getOmega();
-    }
-
-    mom_bas += ( _propeller->getInertia() + _engine->getInertia() ) * ( omega_bas % _aircraft->getOmg_BAS() );
-
-    _for_bas = for_bas;
-    _mom_bas = mom_bas;
+    // computing forces and moments expressed in BAS
+    _for_bas = _aero2bas * _for_aero;
+    _mom_bas = _stab2bas * _mom_stab;
 
     if ( !_for_bas.isValid() || !_mom_bas.isValid() )
     {
         Exception e;
 
         e.setType( Exception::UnexpectedNaN );
-        e.setInfo( "NaN detected in the propulsion model." );
+        e.setInfo( "NaN detected in the aerodynamics model." );
 
         FDM_THROW( e );
     }
@@ -228,23 +238,11 @@ void P51_Propulsion::computeForceAndMoment()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Propulsion::update()
+void PW5_Aerodynamics::update()
 {
-    _propeller->integrate( _aircraft->getTimeStep(), _engine->getInertia() );
+    ///////////////////////
+    Aerodynamics::update();
+    ///////////////////////
 
-    _engine->update( _aircraft->getDataInp()->engine[ 0 ].throttle,
-                     _aircraft->getDataInp()->engine[ 0 ].mixture,
-                     _propeller->getEngineRPM(),
-                     _aircraft->getEnvir()->getPressure(),
-                     _aircraft->getEnvir()->getDensity(),
-                     _aircraft->getEnvir()->getDensityAltitude(),
-                     _aircraft->getDataInp()->engine[ 0 ].fuel,
-                     _aircraft->getDataInp()->engine[ 0 ].starter,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition );
-
-    _propeller->update( _aircraft->getDataInp()->engine[ 0 ].propeller,
-                        _engine->getTorque(),
-                        _aircraft->getAirspeed(),
-                        _aircraft->getEnvir()->getDensity() );
+    _tailOff->update( _aircraft->getVel_air_BAS(),  _aircraft->getOmg_air_BAS() );
 }

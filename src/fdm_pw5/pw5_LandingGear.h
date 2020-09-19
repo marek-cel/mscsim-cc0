@@ -124,127 +124,84 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm_p51/p51_Propulsion.h>
-#include <fdm_p51/p51_Aircraft.h>
-
-#include <fdm/xml/fdm_XmlUtils.h>
+#ifndef PW5_LANDINGGEAR_H
+#define PW5_LANDINGGEAR_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using namespace fdm;
+#include <fdm/main/fdm_LandingGear.h>
+
+#include <fdm/models/fdm_Wheel.h>
+
+#include <fdm/utils/fdm_Map.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-P51_Propulsion::P51_Propulsion( const P51_Aircraft *aircraft, DataNode *rootNode ) :
-    Propulsion( aircraft, rootNode ),
-    _aircraft ( aircraft ),
-
-    _engine    ( FDM_NULLPTR ),
-    _propeller ( FDM_NULLPTR )
+namespace fdm
 {
-    _engine    = new P51_Engine();
-    _propeller = new P51_Propeller();
-}
 
-////////////////////////////////////////////////////////////////////////////////
+class PW5_Aircraft;    ///< aircraft class forward declaration
 
-P51_Propulsion::~P51_Propulsion()
+/**
+ * @brief PW-5 landing gear class.
+ *
+ * XML configuration file format:
+ * @code
+ * <landing_gear>
+ *   <wheel [steerable="{ 0|1 }"] [caster="{ 0|1 }"] [brake_group="{ 0|1|2 }]">
+ *     <attachment_point> { [m] x-coordinate } { [m] y-coordinate } { [m] z-coordinate } </attachment_point>
+ *     <unloaded_wheel> { [m] x-coordinate } { [m] y-coordinate } { [m] z-coordinate } </unloaded_wheel>
+ *     <stiffness> { [N/m] strut stiffness (linear spring) coefficient } </stiffness>
+ *     <damping> { [N/(m/s)] strut damping coefficient  } </damping>
+ *     <friction_static> { [-] static friction coefficient } </friction_static>
+ *     <friction_kinetic> { [-] kinetic friction coefficient } </friction_kinetic>
+ *     <friction_rolling> { [-] rolling friction coefficient } </friction_rolling>
+ *     [<max_angle> { [rad] max steering angle } </max_angle>]
+ *   </wheel>
+ *   ... { more wheels }
+ * </landing_gear>
+ * @endcode
+ */
+class PW5_LandingGear : public LandingGear
 {
-    FDM_DELPTR( _engine    );
-    FDM_DELPTR( _propeller );
-}
+public:
 
-////////////////////////////////////////////////////////////////////////////////
-
-void P51_Propulsion::readData( XmlNode &dataNode )
-{
-    if ( dataNode.isValid() )
+    /** Wheel and input data reference struct. */
+    struct WheelAndInput
     {
-        XmlNode nodeEngine    = dataNode.getFirstChildElement( "engine"    );
-        XmlNode nodePropeller = dataNode.getFirstChildElement( "propeller" );
+        DataRef input;      ///< input data reference
+        Wheel   wheel;      ///< wheel model object
+    };
 
-        _engine->readData( nodeEngine );
-        _propeller->readData( nodePropeller );
-    }
-    else
-    {
-        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-    }
-}
+    typedef Map< std::string, WheelAndInput > Wheels;
 
-////////////////////////////////////////////////////////////////////////////////
+    /** Constructor. */
+    PW5_LandingGear( const PW5_Aircraft *aircraft, DataNode *rootNode );
 
-void P51_Propulsion::initialize()
-{
-    /////////////////////////
-    Propulsion::initialize();
-    /////////////////////////
+    /** Destructor. */
+    ~PW5_LandingGear();
 
-    bool engineOn = _aircraft->getInitPropState() == Aircraft::Running;
+    /**
+     * Reads data.
+     * @param dataNode XML node
+     */
+    void readData( XmlNode &dataNode );
 
-    _propeller->setRPM( engineOn ? 700.0 : 0.0 );
-    _engine->setRPM( _propeller->getEngineRPM() );
-}
+    /** Computes force and moment. */
+    void computeForceAndMoment();
 
-////////////////////////////////////////////////////////////////////////////////
+    /** Updates model. */
+    void update();
 
-void P51_Propulsion::computeForceAndMoment()
-{
-    _propeller->computeThrust( _aircraft->getAirspeed(),
-                               _aircraft->getEnvir()->getDensity() );
+private:
 
-    // thrust and moment due to thrust
-    Vector3 for_bas( _propeller->getThrust(), 0.0, 0.0 );
-    Vector3 mom_bas = _propeller->getPos_BAS() % for_bas;
+    const PW5_Aircraft *_aircraft;      ///< aircraft model main object
 
-    // gyro effect
-    Vector3 omega_bas;
+    Wheels _wheels;                     ///< wheels container
+};
 
-    if ( _propeller->getDirection() == Propeller::CW )
-    {
-        omega_bas.x() =  _propeller->getOmega();
-    }
-    else
-    {
-        omega_bas.x() = -_propeller->getOmega();
-    }
-
-    mom_bas += ( _propeller->getInertia() + _engine->getInertia() ) * ( omega_bas % _aircraft->getOmg_BAS() );
-
-    _for_bas = for_bas;
-    _mom_bas = mom_bas;
-
-    if ( !_for_bas.isValid() || !_mom_bas.isValid() )
-    {
-        Exception e;
-
-        e.setType( Exception::UnexpectedNaN );
-        e.setInfo( "NaN detected in the propulsion model." );
-
-        FDM_THROW( e );
-    }
-}
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Propulsion::update()
-{
-    _propeller->integrate( _aircraft->getTimeStep(), _engine->getInertia() );
-
-    _engine->update( _aircraft->getDataInp()->engine[ 0 ].throttle,
-                     _aircraft->getDataInp()->engine[ 0 ].mixture,
-                     _propeller->getEngineRPM(),
-                     _aircraft->getEnvir()->getPressure(),
-                     _aircraft->getEnvir()->getDensity(),
-                     _aircraft->getEnvir()->getDensityAltitude(),
-                     _aircraft->getDataInp()->engine[ 0 ].fuel,
-                     _aircraft->getDataInp()->engine[ 0 ].starter,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition );
-
-    _propeller->update( _aircraft->getDataInp()->engine[ 0 ].propeller,
-                        _engine->getTorque(),
-                        _aircraft->getAirspeed(),
-                        _aircraft->getEnvir()->getDensity() );
-}
+#endif // PW5_LANDINGGEAR_H

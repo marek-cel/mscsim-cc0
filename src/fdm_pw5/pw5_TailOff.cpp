@@ -1,4 +1,4 @@
-/****************************************************************************//*
+﻿/****************************************************************************//*
  * Copyright (C) 2020 Marek M. Cel
  *
  * Creative Commons Legal Code
@@ -125,9 +125,9 @@
  *
  ******************************************************************************/
 
-#include <fdm_p51/p51_Propulsion.h>
-#include <fdm_p51/p51_Aircraft.h>
+#include <fdm_pw5/pw5_TailOff.h>
 
+#include <fdm/main/fdm_Aerodynamics.h>
 #include <fdm/xml/fdm_XmlUtils.h>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -136,36 +136,40 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-P51_Propulsion::P51_Propulsion( const P51_Aircraft *aircraft, DataNode *rootNode ) :
-    Propulsion( aircraft, rootNode ),
-    _aircraft ( aircraft ),
+PW5_TailOff::PW5_TailOff() :
+    _ailerons  ( 0.0 ),
+    _airbrakes ( 0.0 ),
 
-    _engine    ( FDM_NULLPTR ),
-    _propeller ( FDM_NULLPTR )
-{
-    _engine    = new P51_Engine();
-    _propeller = new P51_Propeller();
-}
+    _dcl_dailerons ( 0.0 ),
 
-////////////////////////////////////////////////////////////////////////////////
-
-P51_Propulsion::~P51_Propulsion()
-{
-    FDM_DELPTR( _engine    );
-    FDM_DELPTR( _propeller );
-}
+    _dcx_dairbrake ( 0.0 ),
+    _dcz_dairbrake ( 0.0 ),
+    _dcm_dairbrake ( 0.0 )
+{}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Propulsion::readData( XmlNode &dataNode )
+PW5_TailOff::~PW5_TailOff() {}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void PW5_TailOff::readData( XmlNode &dataNode )
 {
+    //////////////////////////////
+    TailOff::readData( dataNode );
+    //////////////////////////////
+
     if ( dataNode.isValid() )
     {
-        XmlNode nodeEngine    = dataNode.getFirstChildElement( "engine"    );
-        XmlNode nodePropeller = dataNode.getFirstChildElement( "propeller" );
+        int result = FDM_SUCCESS;
 
-        _engine->readData( nodeEngine );
-        _propeller->readData( nodePropeller );
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _dcl_dailerons, "dcl_dailerons" );
+
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _dcx_dairbrake, "dcx_dairbrake" );
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _dcz_dairbrake, "dcz_dairbrake" );
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _dcm_dairbrake, "dcm_dairbrake" );
+
+        if ( result != FDM_SUCCESS ) XmlUtils::throwError( __FILE__, __LINE__, dataNode );
     }
     else
     {
@@ -175,76 +179,75 @@ void P51_Propulsion::readData( XmlNode &dataNode )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Propulsion::initialize()
+void PW5_TailOff::computeForceAndMoment( const Vector3 &vel_air_bas,
+                                         const Vector3 &omg_air_bas,
+                                         double airDensity,
+                                         double ailerons,
+                                         double airbrakes )
 {
-    /////////////////////////
-    Propulsion::initialize();
-    /////////////////////////
+    _ailerons  = ailerons;
+    _airbrakes = airbrakes;
 
-    bool engineOn = _aircraft->getInitPropState() == Aircraft::Running;
-
-    _propeller->setRPM( engineOn ? 700.0 : 0.0 );
-    _engine->setRPM( _propeller->getEngineRPM() );
+    ///////////////////////////////////////////////////////////////////////
+    TailOff::computeForceAndMoment( vel_air_bas, omg_air_bas, airDensity );
+    ///////////////////////////////////////////////////////////////////////
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Propulsion::computeForceAndMoment()
+void PW5_TailOff::update( const Vector3 &vel_air_bas, const Vector3 &omg_air_bas )
 {
-    _propeller->computeThrust( _aircraft->getAirspeed(),
-                               _aircraft->getEnvir()->getDensity() );
+    ////////////////////////////////////////////
+    TailOff::update( vel_air_bas, omg_air_bas );
+    ////////////////////////////////////////////
 
-    // thrust and moment due to thrust
-    Vector3 for_bas( _propeller->getThrust(), 0.0, 0.0 );
-    Vector3 mom_bas = _propeller->getPos_BAS() % for_bas;
+    Table1 cz_total = _cz;
 
-    // gyro effect
-    Vector3 omega_bas;
-
-    if ( _propeller->getDirection() == Propeller::CW )
-    {
-        omega_bas.x() =  _propeller->getOmega();
-    }
-    else
-    {
-        omega_bas.x() = -_propeller->getOmega();
-    }
-
-    mom_bas += ( _propeller->getInertia() + _engine->getInertia() ) * ( omega_bas % _aircraft->getOmg_BAS() );
-
-    _for_bas = for_bas;
-    _mom_bas = mom_bas;
-
-    if ( !_for_bas.isValid() || !_mom_bas.isValid() )
-    {
-        Exception e;
-
-        e.setType( Exception::UnexpectedNaN );
-        e.setInfo( "NaN detected in the propulsion model." );
-
-        FDM_THROW( e );
-    }
+    _aoa_critical_neg = cz_total.getKeyOfValueMin();
+    _aoa_critical_pos = cz_total.getKeyOfValueMax();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Propulsion::update()
+double PW5_TailOff::getCx( double angleOfAttack ) const
 {
-    _propeller->integrate( _aircraft->getTimeStep(), _engine->getInertia() );
+    return TailOff::getCx( angleOfAttack )
+            + _airbrakes * _dcx_dairbrake;
+}
 
-    _engine->update( _aircraft->getDataInp()->engine[ 0 ].throttle,
-                     _aircraft->getDataInp()->engine[ 0 ].mixture,
-                     _propeller->getEngineRPM(),
-                     _aircraft->getEnvir()->getPressure(),
-                     _aircraft->getEnvir()->getDensity(),
-                     _aircraft->getEnvir()->getDensityAltitude(),
-                     _aircraft->getDataInp()->engine[ 0 ].fuel,
-                     _aircraft->getDataInp()->engine[ 0 ].starter,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition );
+////////////////////////////////////////////////////////////////////////////////
 
-    _propeller->update( _aircraft->getDataInp()->engine[ 0 ].propeller,
-                        _engine->getTorque(),
-                        _aircraft->getAirspeed(),
-                        _aircraft->getEnvir()->getDensity() );
+double PW5_TailOff::getCy( double sideslipAngle ) const
+{
+    return TailOff::getCy( sideslipAngle );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+double PW5_TailOff::getCz( double angleOfAttack ) const
+{
+    return TailOff::getCz( angleOfAttack )
+            + _airbrakes * _dcz_dairbrake;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+double PW5_TailOff::getCl( double sideslipAngle ) const
+{
+    return TailOff::getCl( sideslipAngle ) + _ailerons * _dcl_dailerons;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+double PW5_TailOff::getCm( double angleOfAttack ) const
+{
+    return TailOff::getCm( angleOfAttack )
+            + _airbrakes * _dcm_dairbrake;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+double PW5_TailOff::getCn( double sideslipAngle ) const
+{
+    return TailOff::getCn( sideslipAngle );
 }

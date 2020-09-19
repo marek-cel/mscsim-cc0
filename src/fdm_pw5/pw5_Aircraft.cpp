@@ -125,10 +125,7 @@
  *
  ******************************************************************************/
 
-#include <fdm_p51/p51_Propulsion.h>
-#include <fdm_p51/p51_Aircraft.h>
-
-#include <fdm/xml/fdm_XmlUtils.h>
+#include <fdm_pw5/pw5_Aircraft.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -136,115 +133,54 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-P51_Propulsion::P51_Propulsion( const P51_Aircraft *aircraft, DataNode *rootNode ) :
-    Propulsion( aircraft, rootNode ),
-    _aircraft ( aircraft ),
+PW5_Aircraft::PW5_Aircraft( DataNode *rootNode, const DataInp *dataInp, DataOut *dataOut ) :
+    Aircraft( rootNode, dataInp, dataOut ),
 
-    _engine    ( FDM_NULLPTR ),
-    _propeller ( FDM_NULLPTR )
+    _aero ( 0 ),
+    _ctrl ( 0 ),
+    _gear ( 0 ),
+    _mass ( 0 ),
+    _prop ( 0 )
 {
-    _engine    = new P51_Engine();
-    _propeller = new P51_Propeller();
+    Aircraft::_aero = _aero = new PW5_Aerodynamics ( this, _rootNode );
+    Aircraft::_ctrl = _ctrl = new PW5_Controls     ( this, _rootNode );
+    Aircraft::_gear = _gear = new PW5_LandingGear  ( this, _rootNode );
+    Aircraft::_mass = _mass = new PW5_Mass         ( this, _rootNode );
+    Aircraft::_prop = _prop = new PW5_Propulsion   ( this, _rootNode );
+
+    readFile( Path::get( "data/fdm/pw5/pw5_fdm.xml" ).c_str() );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-P51_Propulsion::~P51_Propulsion()
+PW5_Aircraft::~PW5_Aircraft()
 {
-    FDM_DELPTR( _engine    );
-    FDM_DELPTR( _propeller );
+    FDM_DELPTR( _aero );
+    FDM_DELPTR( _ctrl );
+    FDM_DELPTR( _gear );
+    FDM_DELPTR( _mass );
+    FDM_DELPTR( _prop );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Propulsion::readData( XmlNode &dataNode )
+void PW5_Aircraft::initialize( bool engineOn )
 {
-    if ( dataNode.isValid() )
-    {
-        XmlNode nodeEngine    = dataNode.getFirstChildElement( "engine"    );
-        XmlNode nodePropeller = dataNode.getFirstChildElement( "propeller" );
-
-        _engine->readData( nodeEngine );
-        _propeller->readData( nodePropeller );
-    }
-    else
-    {
-        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-    }
+    /////////////////////////////////
+    Aircraft::initialize( engineOn );
+    /////////////////////////////////
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Propulsion::initialize()
+void PW5_Aircraft::updateOutputData()
 {
-    /////////////////////////
-    Propulsion::initialize();
-    /////////////////////////
+    /////////////////////////////
+    Aircraft::updateOutputData();
+    /////////////////////////////
 
-    bool engineOn = _aircraft->getInitPropState() == Aircraft::Running;
-
-    _propeller->setRPM( engineOn ? 700.0 : 0.0 );
-    _engine->setRPM( _propeller->getEngineRPM() );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void P51_Propulsion::computeForceAndMoment()
-{
-    _propeller->computeThrust( _aircraft->getAirspeed(),
-                               _aircraft->getEnvir()->getDensity() );
-
-    // thrust and moment due to thrust
-    Vector3 for_bas( _propeller->getThrust(), 0.0, 0.0 );
-    Vector3 mom_bas = _propeller->getPos_BAS() % for_bas;
-
-    // gyro effect
-    Vector3 omega_bas;
-
-    if ( _propeller->getDirection() == Propeller::CW )
-    {
-        omega_bas.x() =  _propeller->getOmega();
-    }
-    else
-    {
-        omega_bas.x() = -_propeller->getOmega();
-    }
-
-    mom_bas += ( _propeller->getInertia() + _engine->getInertia() ) * ( omega_bas % _aircraft->getOmg_BAS() );
-
-    _for_bas = for_bas;
-    _mom_bas = mom_bas;
-
-    if ( !_for_bas.isValid() || !_mom_bas.isValid() )
-    {
-        Exception e;
-
-        e.setType( Exception::UnexpectedNaN );
-        e.setInfo( "NaN detected in the propulsion model." );
-
-        FDM_THROW( e );
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void P51_Propulsion::update()
-{
-    _propeller->integrate( _aircraft->getTimeStep(), _engine->getInertia() );
-
-    _engine->update( _aircraft->getDataInp()->engine[ 0 ].throttle,
-                     _aircraft->getDataInp()->engine[ 0 ].mixture,
-                     _propeller->getEngineRPM(),
-                     _aircraft->getEnvir()->getPressure(),
-                     _aircraft->getEnvir()->getDensity(),
-                     _aircraft->getEnvir()->getDensityAltitude(),
-                     _aircraft->getDataInp()->engine[ 0 ].fuel,
-                     _aircraft->getDataInp()->engine[ 0 ].starter,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition );
-
-    _propeller->update( _aircraft->getDataInp()->engine[ 0 ].propeller,
-                        _engine->getTorque(),
-                        _aircraft->getAirspeed(),
-                        _aircraft->getEnvir()->getDensity() );
+    // controls
+    _dataOut->controls.ailerons = _ctrl->getAilerons();
+    _dataOut->controls.elevator = _ctrl->getElevator();
+    _dataOut->controls.rudder   = _ctrl->getRudder();
 }

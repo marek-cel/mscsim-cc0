@@ -125,8 +125,7 @@
  *
  ******************************************************************************/
 
-#include <fdm_p51/p51_Propulsion.h>
-#include <fdm_p51/p51_Aircraft.h>
+#include <fdm_pw5/pw5_StabilizerVer.h>
 
 #include <fdm/xml/fdm_XmlUtils.h>
 
@@ -136,36 +135,32 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-P51_Propulsion::P51_Propulsion( const P51_Aircraft *aircraft, DataNode *rootNode ) :
-    Propulsion( aircraft, rootNode ),
-    _aircraft ( aircraft ),
-
-    _engine    ( FDM_NULLPTR ),
-    _propeller ( FDM_NULLPTR )
-{
-    _engine    = new P51_Engine();
-    _propeller = new P51_Propeller();
-}
+PW5_StabilizerVer::PW5_StabilizerVer() :
+    _dcx_drudder ( 0.0 ),
+    _dcy_drudder ( 0.0 ),
+    _rudder ( 0.0 )
+{}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-P51_Propulsion::~P51_Propulsion()
-{
-    FDM_DELPTR( _engine    );
-    FDM_DELPTR( _propeller );
-}
+PW5_StabilizerVer::~PW5_StabilizerVer() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Propulsion::readData( XmlNode &dataNode )
+void PW5_StabilizerVer::readData( XmlNode &dataNode )
 {
+    ////////////////////////////////////
+    StabilizerVer::readData( dataNode );
+    ////////////////////////////////////
+
     if ( dataNode.isValid() )
     {
-        XmlNode nodeEngine    = dataNode.getFirstChildElement( "engine"    );
-        XmlNode nodePropeller = dataNode.getFirstChildElement( "propeller" );
+        int result = FDM_SUCCESS;
 
-        _engine->readData( nodeEngine );
-        _propeller->readData( nodePropeller );
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _dcx_drudder, "dcx_drudder" );
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _dcy_drudder, "dcy_drudder" );
+
+        if ( result != FDM_SUCCESS ) XmlUtils::throwError( __FILE__, __LINE__, dataNode );
     }
     else
     {
@@ -175,76 +170,29 @@ void P51_Propulsion::readData( XmlNode &dataNode )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Propulsion::initialize()
+void PW5_StabilizerVer::computeForceAndMoment( const Vector3 &vel_air_bas,
+                                                const Vector3 &omg_air_bas,
+                                                double airDensity,
+                                                double rudder )
 {
-    /////////////////////////
-    Propulsion::initialize();
-    /////////////////////////
+    _rudder = rudder;
 
-    bool engineOn = _aircraft->getInitPropState() == Aircraft::Running;
-
-    _propeller->setRPM( engineOn ? 700.0 : 0.0 );
-    _engine->setRPM( _propeller->getEngineRPM() );
+    StabilizerVer::computeForceAndMoment( vel_air_bas, omg_air_bas,
+                                          airDensity );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Propulsion::computeForceAndMoment()
+double PW5_StabilizerVer::getCx( double angle ) const
 {
-    _propeller->computeThrust( _aircraft->getAirspeed(),
-                               _aircraft->getEnvir()->getDensity() );
-
-    // thrust and moment due to thrust
-    Vector3 for_bas( _propeller->getThrust(), 0.0, 0.0 );
-    Vector3 mom_bas = _propeller->getPos_BAS() % for_bas;
-
-    // gyro effect
-    Vector3 omega_bas;
-
-    if ( _propeller->getDirection() == Propeller::CW )
-    {
-        omega_bas.x() =  _propeller->getOmega();
-    }
-    else
-    {
-        omega_bas.x() = -_propeller->getOmega();
-    }
-
-    mom_bas += ( _propeller->getInertia() + _engine->getInertia() ) * ( omega_bas % _aircraft->getOmg_BAS() );
-
-    _for_bas = for_bas;
-    _mom_bas = mom_bas;
-
-    if ( !_for_bas.isValid() || !_mom_bas.isValid() )
-    {
-        Exception e;
-
-        e.setType( Exception::UnexpectedNaN );
-        e.setInfo( "NaN detected in the propulsion model." );
-
-        FDM_THROW( e );
-    }
+    return StabilizerVer::getCx( angle )
+            + _dcx_drudder * _rudder;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Propulsion::update()
+double PW5_StabilizerVer::getCy( double angle ) const
 {
-    _propeller->integrate( _aircraft->getTimeStep(), _engine->getInertia() );
-
-    _engine->update( _aircraft->getDataInp()->engine[ 0 ].throttle,
-                     _aircraft->getDataInp()->engine[ 0 ].mixture,
-                     _propeller->getEngineRPM(),
-                     _aircraft->getEnvir()->getPressure(),
-                     _aircraft->getEnvir()->getDensity(),
-                     _aircraft->getEnvir()->getDensityAltitude(),
-                     _aircraft->getDataInp()->engine[ 0 ].fuel,
-                     _aircraft->getDataInp()->engine[ 0 ].starter,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition );
-
-    _propeller->update( _aircraft->getDataInp()->engine[ 0 ].propeller,
-                        _engine->getTorque(),
-                        _aircraft->getAirspeed(),
-                        _aircraft->getEnvir()->getDensity() );
+    return StabilizerVer::getCy( angle )
+            + _dcy_drudder * _rudder;
 }

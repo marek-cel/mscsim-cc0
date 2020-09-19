@@ -125,9 +125,10 @@
  *
  ******************************************************************************/
 
-#include <fdm_p51/p51_Propulsion.h>
-#include <fdm_p51/p51_Aircraft.h>
+#include <fdm_pw5/pw5_LandingGear.h>
+#include <fdm_pw5/pw5_Aircraft.h>
 
+#include <fdm/utils/fdm_String.h>
 #include <fdm/xml/fdm_XmlUtils.h>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -136,36 +137,41 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-P51_Propulsion::P51_Propulsion( const P51_Aircraft *aircraft, DataNode *rootNode ) :
-    Propulsion( aircraft, rootNode ),
-    _aircraft ( aircraft ),
-
-    _engine    ( FDM_NULLPTR ),
-    _propeller ( FDM_NULLPTR )
-{
-    _engine    = new P51_Engine();
-    _propeller = new P51_Propeller();
-}
+PW5_LandingGear::PW5_LandingGear( const PW5_Aircraft *aircraft, DataNode *rootNode ) :
+    LandingGear( aircraft, rootNode ),
+    _aircraft ( aircraft )
+{}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-P51_Propulsion::~P51_Propulsion()
-{
-    FDM_DELPTR( _engine    );
-    FDM_DELPTR( _propeller );
-}
+PW5_LandingGear::~PW5_LandingGear() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Propulsion::readData( XmlNode &dataNode )
+void PW5_LandingGear::readData( XmlNode &dataNode )
 {
     if ( dataNode.isValid() )
     {
-        XmlNode nodeEngine    = dataNode.getFirstChildElement( "engine"    );
-        XmlNode nodePropeller = dataNode.getFirstChildElement( "propeller" );
+        int result = FDM_SUCCESS;
 
-        _engine->readData( nodeEngine );
-        _propeller->readData( nodePropeller );
+        XmlNode wheelNode = dataNode.getFirstChildElement( "wheel" );
+
+        while ( result == FDM_SUCCESS && wheelNode.isValid() )
+        {
+            WheelAndInput wheelAndInput;
+
+            std::string name  = wheelNode.getAttribute( "name"  );
+            std::string input = wheelNode.getAttribute( "input" );
+
+            wheelAndInput.input = getDataRef( input );
+            wheelAndInput.wheel.readData( wheelNode );
+
+            result = _wheels.addItem( name, wheelAndInput );
+
+            wheelNode = wheelNode.getNextSiblingElement( "wheel" );
+        }
+
+        if ( result != FDM_SUCCESS ) XmlUtils::throwError( __FILE__, __LINE__, dataNode );
     }
     else
     {
@@ -175,52 +181,39 @@ void P51_Propulsion::readData( XmlNode &dataNode )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Propulsion::initialize()
+void PW5_LandingGear::computeForceAndMoment()
 {
-    /////////////////////////
-    Propulsion::initialize();
-    /////////////////////////
+    _for_bas.zeroize();
+    _mom_bas.zeroize();
 
-    bool engineOn = _aircraft->getInitPropState() == Aircraft::Running;
-
-    _propeller->setRPM( engineOn ? 700.0 : 0.0 );
-    _engine->setRPM( _propeller->getEngineRPM() );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void P51_Propulsion::computeForceAndMoment()
-{
-    _propeller->computeThrust( _aircraft->getAirspeed(),
-                               _aircraft->getEnvir()->getDensity() );
-
-    // thrust and moment due to thrust
-    Vector3 for_bas( _propeller->getThrust(), 0.0, 0.0 );
-    Vector3 mom_bas = _propeller->getPos_BAS() % for_bas;
-
-    // gyro effect
-    Vector3 omega_bas;
-
-    if ( _propeller->getDirection() == Propeller::CW )
+    for ( Wheels::iterator it = _wheels.begin(); it != _wheels.end(); ++it )
     {
-        omega_bas.x() =  _propeller->getOmega();
-    }
-    else
-    {
-        omega_bas.x() = -_propeller->getOmega();
-    }
+        Wheel &wheel = (*it).second.wheel;
 
-    mom_bas += ( _propeller->getInertia() + _engine->getInertia() ) * ( omega_bas % _aircraft->getOmg_BAS() );
+        if ( wheel.getPosition() >= 1.0 )
+        {
+            Vector3 r_c_bas;
+            Vector3 n_c_bas;
 
-    _for_bas = for_bas;
-    _mom_bas = mom_bas;
+            getIsect( wheel.getRa_BAS(), wheel.getRu_BAS(), &r_c_bas, &n_c_bas );
+
+            wheel.computeForceAndMoment( _aircraft->getVel_BAS(),
+                                         _aircraft->getOmg_BAS(),
+                                         r_c_bas,
+                                         n_c_bas,
+                                         _steering, _antiskid );
+
+            _for_bas += wheel.getFor_BAS();
+            _mom_bas += wheel.getMom_BAS();
+        }
+    }
 
     if ( !_for_bas.isValid() || !_mom_bas.isValid() )
     {
         Exception e;
 
         e.setType( Exception::UnexpectedNaN );
-        e.setInfo( "NaN detected in the propulsion model." );
+        e.setInfo( "NaN detected in the landing gear model." );
 
         FDM_THROW( e );
     }
@@ -228,23 +221,41 @@ void P51_Propulsion::computeForceAndMoment()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void P51_Propulsion::update()
+void PW5_LandingGear::update()
 {
-    _propeller->integrate( _aircraft->getTimeStep(), _engine->getInertia() );
+    //////////////////////
+    LandingGear::update();
+    //////////////////////
 
-    _engine->update( _aircraft->getDataInp()->engine[ 0 ].throttle,
-                     _aircraft->getDataInp()->engine[ 0 ].mixture,
-                     _propeller->getEngineRPM(),
-                     _aircraft->getEnvir()->getPressure(),
-                     _aircraft->getEnvir()->getDensity(),
-                     _aircraft->getEnvir()->getDensityAltitude(),
-                     _aircraft->getDataInp()->engine[ 0 ].fuel,
-                     _aircraft->getDataInp()->engine[ 0 ].starter,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition );
+    _brake_l = 0.0;
+    _brake_r = 0.0;
 
-    _propeller->update( _aircraft->getDataInp()->engine[ 0 ].propeller,
-                        _engine->getTorque(),
-                        _aircraft->getAirspeed(),
-                        _aircraft->getEnvir()->getDensity() );
+    _ctrlAngle = 0.0;
+
+    _antiskid = false;
+    _steering = false;
+
+    for ( Wheels::iterator it = _wheels.begin(); it != _wheels.end(); ++it )
+    {
+        DataRef &input = (*it).second.input;
+        Wheel   &wheel = (*it).second.wheel;
+
+        Vector3 r_c_bas;
+        Vector3 n_c_bas;
+
+        getIsect( wheel.getRa_BAS(), wheel.getRu_BAS(), &r_c_bas, &n_c_bas );
+
+        wheel.integrate( _aircraft->getTimeStep(),
+                         _aircraft->getVel_BAS(),
+                         _aircraft->getOmg_BAS(),
+                         r_c_bas,
+                         n_c_bas,
+                         _steering );
+
+        double brake = 0.0;
+        if      ( wheel.getBrakeGroup() == Wheel::Left  ) brake = _brake_l;
+        else if ( wheel.getBrakeGroup() == Wheel::Right ) brake = _brake_r;
+
+        wheel.update( input.isValid() ? input.getValue() : 1.0, _ctrlAngle, brake );
+    }
 }

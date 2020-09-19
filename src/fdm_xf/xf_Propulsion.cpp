@@ -141,7 +141,7 @@ XF_Propulsion::XF_Propulsion( const XF_Aircraft *aircraft, DataNode *rootNode ) 
     Propulsion( aircraft, rootNode ),
     _aircraft ( aircraft ),
 
-    _engine ( 0 )
+    _engine ( FDM_NULLPTR )
 {
     _engine = new XF_Engine();
 }

@@ -124,127 +124,74 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm_p51/p51_Propulsion.h>
-#include <fdm_p51/p51_Aircraft.h>
-
-#include <fdm/xml/fdm_XmlUtils.h>
+#ifndef PW5_AIRCRAFT_H
+#define PW5_AIRCRAFT_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using namespace fdm;
+#include <fdm/main/fdm_Aircraft.h>
+
+#include <fdm_pw5/pw5_Aerodynamics.h>
+#include <fdm_pw5/pw5_Controls.h>
+#include <fdm_pw5/pw5_LandingGear.h>
+#include <fdm_pw5/pw5_Mass.h>
+#include <fdm_pw5/pw5_Propulsion.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-P51_Propulsion::P51_Propulsion( const P51_Aircraft *aircraft, DataNode *rootNode ) :
-    Propulsion( aircraft, rootNode ),
-    _aircraft ( aircraft ),
-
-    _engine    ( FDM_NULLPTR ),
-    _propeller ( FDM_NULLPTR )
+namespace fdm
 {
-    _engine    = new P51_Engine();
-    _propeller = new P51_Propeller();
-}
+
+/**
+ * @brief PW-5 aircraft class.
+ *
+ * @see B1-PW-5 Instrukcja Uzytkowania w Locie, B1-PW-5/IWL/I/2001, 2001
+ * @see B1-PW-5 Instrukcja Obslugi Technicznej i Napraw, B1-PW-5/IOT/I/2001, 2001
+ * @see PW-5 Sailplane Flight Manual, PW-5/IWL/I/97, 1997
+ * @see Skrzydla w miniaturze nr 17: PW-5 Smyk, BM-2, Tipsy Junior
+ */
+class PW5_Aircraft : public Aircraft
+{
+public:
+
+    /** Constructor. */
+    PW5_Aircraft( DataNode *rootNode, const DataInp *dataInp, DataOut *dataOut );
+
+    /** Destructor. */
+    ~PW5_Aircraft();
+
+    /**
+     * Initializes aircraft.
+     * @param engineOn specifies if engine is running on startup
+     */
+    void initialize( bool engineOn = false );
+
+    inline PW5_Aerodynamics* getAero() { return _aero; }
+    inline PW5_Controls*     getCtrl() { return _ctrl; }
+    inline PW5_LandingGear*  getGear() { return _gear; }
+    inline PW5_Mass*         getMass() { return _mass; }
+    inline PW5_Propulsion*   getProp() { return _prop; }
+
+    inline const PW5_Aerodynamics* getAero() const { return _aero; }
+    inline const PW5_Controls*     getCtrl() const { return _ctrl; }
+    inline const PW5_LandingGear*  getGear() const { return _gear; }
+    inline const PW5_Mass*         getMass() const { return _mass; }
+    inline const PW5_Propulsion*   getProp() const { return _prop; }
+
+private:
+
+    PW5_Aerodynamics *_aero;    ///< aerodynamics model
+    PW5_Controls     *_ctrl;    ///< controls model
+    PW5_LandingGear  *_gear;    ///< landing gear model
+    PW5_Mass         *_mass;    ///< mass and inertia model
+    PW5_Propulsion   *_prop;    ///< propulsion model
+
+    /** Updates output data. */
+    void updateOutputData();
+};
+
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-P51_Propulsion::~P51_Propulsion()
-{
-    FDM_DELPTR( _engine    );
-    FDM_DELPTR( _propeller );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void P51_Propulsion::readData( XmlNode &dataNode )
-{
-    if ( dataNode.isValid() )
-    {
-        XmlNode nodeEngine    = dataNode.getFirstChildElement( "engine"    );
-        XmlNode nodePropeller = dataNode.getFirstChildElement( "propeller" );
-
-        _engine->readData( nodeEngine );
-        _propeller->readData( nodePropeller );
-    }
-    else
-    {
-        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void P51_Propulsion::initialize()
-{
-    /////////////////////////
-    Propulsion::initialize();
-    /////////////////////////
-
-    bool engineOn = _aircraft->getInitPropState() == Aircraft::Running;
-
-    _propeller->setRPM( engineOn ? 700.0 : 0.0 );
-    _engine->setRPM( _propeller->getEngineRPM() );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void P51_Propulsion::computeForceAndMoment()
-{
-    _propeller->computeThrust( _aircraft->getAirspeed(),
-                               _aircraft->getEnvir()->getDensity() );
-
-    // thrust and moment due to thrust
-    Vector3 for_bas( _propeller->getThrust(), 0.0, 0.0 );
-    Vector3 mom_bas = _propeller->getPos_BAS() % for_bas;
-
-    // gyro effect
-    Vector3 omega_bas;
-
-    if ( _propeller->getDirection() == Propeller::CW )
-    {
-        omega_bas.x() =  _propeller->getOmega();
-    }
-    else
-    {
-        omega_bas.x() = -_propeller->getOmega();
-    }
-
-    mom_bas += ( _propeller->getInertia() + _engine->getInertia() ) * ( omega_bas % _aircraft->getOmg_BAS() );
-
-    _for_bas = for_bas;
-    _mom_bas = mom_bas;
-
-    if ( !_for_bas.isValid() || !_mom_bas.isValid() )
-    {
-        Exception e;
-
-        e.setType( Exception::UnexpectedNaN );
-        e.setInfo( "NaN detected in the propulsion model." );
-
-        FDM_THROW( e );
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void P51_Propulsion::update()
-{
-    _propeller->integrate( _aircraft->getTimeStep(), _engine->getInertia() );
-
-    _engine->update( _aircraft->getDataInp()->engine[ 0 ].throttle,
-                     _aircraft->getDataInp()->engine[ 0 ].mixture,
-                     _propeller->getEngineRPM(),
-                     _aircraft->getEnvir()->getPressure(),
-                     _aircraft->getEnvir()->getDensity(),
-                     _aircraft->getEnvir()->getDensityAltitude(),
-                     _aircraft->getDataInp()->engine[ 0 ].fuel,
-                     _aircraft->getDataInp()->engine[ 0 ].starter,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition,
-                     _aircraft->getDataInp()->engine[ 0 ].ignition );
-
-    _propeller->update( _aircraft->getDataInp()->engine[ 0 ].propeller,
-                        _engine->getTorque(),
-                        _aircraft->getAirspeed(),
-                        _aircraft->getEnvir()->getDensity() );
-}
+#endif // PW5_AIRCRAFT_H
