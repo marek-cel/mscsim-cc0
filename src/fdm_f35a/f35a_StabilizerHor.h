@@ -1,9 +1,4 @@
-/***************************************************************************//**
- *
- * @author Marek M. Cel <marekcel@marekcel.pl>
- *
- * @section LICENSE
- *
+/****************************************************************************//*
  * Copyright (C) 2020 Marek M. Cel
  *
  * Creative Commons Legal Code
@@ -129,42 +124,72 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm_pw5/pw5_FDM.h>
-
-////////////////////////////////////////////////////////////////////////////////
-
-using namespace fdm;
+#ifndef F35A_STABILIZERHOR_H
+#define F35A_STABILIZERHOR_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PW5_FDM::PW5_FDM( const DataInp *dataInpPtr, DataOut *dataOutPtr, bool verbose ) :
-    FDM( dataInpPtr, dataOutPtr, verbose )
+#include <fdm/models/fdm_StabilizerHor.h>
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace fdm
 {
-    FDM::_aircraft = _aircraft = new PW5_Aircraft( _rootNode, &_dataInp, &_dataOut );
 
-    _init_g_coef_p = 0.001;
-    _init_g_coef_q = 0.001;
-    _init_g_coef_n = 0.002;
-}
+/**
+ * @brief F-35A horizontal stabilizer class.
+ */
+class F35A_StabilizerHor : public StabilizerHor
+{
+public:
+
+    /** Constructor. */
+    F35A_StabilizerHor();
+
+    /** Destructor. */
+    ~F35A_StabilizerHor();
+
+    /**
+     * Reads data.
+     * @param dataNode XML node
+     */
+    void readData( XmlNode &dataNode );
+
+    /**
+     * Computes force and moment.
+     * @param vel_air_bas [m/s] aircraft linear velocity relative to the air expressed in BAS
+     * @param omg_air_bas [rad/s] aircraft angular velocity relative to the air expressed in BAS
+     * @param airDensity [kg/m^3] air density
+     * @param angleOfAttackWing [rad] wing angle of attack
+     * @param elevator [rad] elevator deflection
+     */
+    void computeForceAndMoment( const Vector3 &vel_air_bas,
+                                const Vector3 &omg_air_bas,
+                                double airDensity,
+                                double wingAngleOfAttack,
+                                double elevator );
+
+private:
+
+    double _elevator;               ///< [rad] elevator deflection
+
+    /**
+     * Computes drag coefficient.
+     * @param angle [rad] "angle of attack"
+     * @return [-] drag coefficient
+     */
+    virtual double getCx( double angle ) const;
+
+    /**
+     * Computes lift coefficient.
+     * @param angle [rad] "angle of attack"
+     * @return [-] lift coefficient
+     */
+    virtual double getCz( double angle ) const;
+};
+
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PW5_FDM::~PW5_FDM()
-{
-    FDM_DELPTR( _aircraft );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void PW5_FDM::updateDataOut()
-{
-    /////////////////////
-    FDM::updateDataOut();
-    /////////////////////
-
-    // controls
-    _dataOut.controls.ailerons = _aircraft->getCtrl()->getAilerons();
-    _dataOut.controls.elevator = _aircraft->getCtrl()->getElevator();
-    _dataOut.controls.rudder   = _aircraft->getCtrl()->getRudder();
-}
+#endif // F35A_STABILIZERHOR_H

@@ -1,9 +1,4 @@
-/***************************************************************************//**
- *
- * @author Marek M. Cel <marekcel@marekcel.pl>
- *
- * @section LICENSE
- *
+/****************************************************************************//*
  * Copyright (C) 2020 Marek M. Cel
  *
  * Creative Commons Legal Code
@@ -129,42 +124,123 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm_pw5/pw5_FDM.h>
-
-////////////////////////////////////////////////////////////////////////////////
-
-using namespace fdm;
+#ifndef F35A_TAILOFF_H
+#define F35A_TAILOFF_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PW5_FDM::PW5_FDM( const DataInp *dataInpPtr, DataOut *dataOutPtr, bool verbose ) :
-    FDM( dataInpPtr, dataOutPtr, verbose )
+#include <fdm/models/fdm_TailOff.h>
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace fdm
 {
-    FDM::_aircraft = _aircraft = new PW5_Aircraft( _rootNode, &_dataInp, &_dataOut );
 
-    _init_g_coef_p = 0.001;
-    _init_g_coef_q = 0.001;
-    _init_g_coef_n = 0.002;
-}
+/**
+ * @brief F-35A tail-off aerodynamics class.
+ */
+class F35A_TailOff : public TailOff
+{
+public:
+
+    /** Constructor. */
+    F35A_TailOff();
+
+    /** Destructor. */
+    ~F35A_TailOff();
+
+    /**
+     * Reads data.
+     * @param dataNode XML node
+     */
+    void readData( fdm::XmlNode &dataNode );
+
+    /**
+     * Computes force and moment.
+     * @param vel_air_bas [m/s] aircraft linear velocity relative to the air expressed in BAS
+     * @param omg_air_bas [rad/s] aircraft angular velocity relative to the air expressed in BAS
+     * @param airDensity [kg/m^3] air density
+     * @param ailerons [rad] ailerons deflection
+     * @param airbrake [-] airbrake normalized deflection
+     * @param flaps_le [rad] leading flaps deflection
+     * @param flaps_te [rad] trailing edge flaps deflection
+     */
+    void computeForceAndMoment( const fdm::Vector3 &vel_air_bas,
+                                const fdm::Vector3 &omg_air_bas,
+                                double airDensity ,
+                                double ailerons,
+                                double airbrake,
+                                double flaps_le,
+                                double flaps_te );
+
+    /**
+     * Updates model.
+     * @param vel_air_bas [m/s] aircraft linear velocity relative to the air expressed in BAS
+     * @param omg_air_bas [rad/s] aircraft angular velocity relative to the air expressed in BAS
+     */
+    void update( const fdm::Vector3 &vel_air_bas, const fdm::Vector3 &omg_air_bas );
+
+private:
+
+    double _ailerons;               ///< [rad] ailerons deflection
+    double _airbrake;               ///< [-] airbrake normalized deflection
+    double _flaps_le;               ///< [rad] leading flaps deflection
+    double _flaps_te;               ///< [rad] trailing edge flaps deflection
+
+    double _dcl_dailerons;          ///< [1/rad]
+
+    double _dcx_dairbrake;          ///< [1/-]
+    double _dcz_dairbrake;          ///< [1/-]
+
+    Table1 _dcx_dflaps_te;          ///< [1/rad]
+    Table1 _dcz_dflaps_te;          ///< [1/rad]
+    Table1 _dcm_dflaps_te;          ///< [1/rad]
+
+    /**
+     * Computes drag coefficient.
+     * @param angleOfAttack [rad] angle of attack
+     * @return [-] drag coefficient
+     */
+    double getCx( double angleOfAttack ) const;
+
+    /**
+     * Computes sideforce coefficient.
+     * @param sideslipAngle [rad] angle of sideslip
+     * @return [-] sideforce coefficient
+     */
+    double getCy( double sideslipAngle ) const;
+
+    /**
+     * Computes lift coefficient.
+     * @param angleOfAttack [rad] angle of attack
+     * @return [-] lift coefficient
+     */
+    double getCz( double angleOfAttack ) const;
+
+    /**
+     * Computes rolling moment coefficient.
+     * @param sideslipAngle [rad] angle of sideslip
+     * @return [-] rolling moment coefficient
+     */
+    double getCl( double sideslipAngle ) const;
+
+    /**
+     * Computes pitching moment coefficient.
+     * @param angleOfAttack [rad] angle of attack
+     * @return [-] pitching moment coefficient
+     */
+    double getCm( double angleOfAttack ) const;
+
+    /**
+     * Computes yawing moment coefficient.
+     * @param sideslipAngle [rad] angle of sideslip
+     * @return [-] yawing moment coefficient
+     */
+    double getCn( double sideslipAngle ) const;
+};
+
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PW5_FDM::~PW5_FDM()
-{
-    FDM_DELPTR( _aircraft );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void PW5_FDM::updateDataOut()
-{
-    /////////////////////
-    FDM::updateDataOut();
-    /////////////////////
-
-    // controls
-    _dataOut.controls.ailerons = _aircraft->getCtrl()->getAilerons();
-    _dataOut.controls.elevator = _aircraft->getCtrl()->getElevator();
-    _dataOut.controls.rudder   = _aircraft->getCtrl()->getRudder();
-}
+#endif // F35A_TAILOFF_H

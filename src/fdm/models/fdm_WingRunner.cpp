@@ -1,9 +1,4 @@
-/***************************************************************************//**
- *
- * @author Marek M. Cel <marekcel@marekcel.pl>
- *
- * @section LICENSE
- *
+/****************************************************************************//*
  * Copyright (C) 2020 Marek M. Cel
  *
  * Creative Commons Legal Code
@@ -130,7 +125,10 @@
  *
  ******************************************************************************/
 
-#include <fdm_pw5/pw5_FDM.h>
+#include <fdm/models/fdm_WingRunner.h>
+
+#include <fdm/utils/fdm_String.h>
+#include <fdm/xml/fdm_XmlUtils.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -138,33 +136,78 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PW5_FDM::PW5_FDM( const DataInp *dataInpPtr, DataOut *dataOutPtr, bool verbose ) :
-    FDM( dataInpPtr, dataOutPtr, verbose )
-{
-    FDM::_aircraft = _aircraft = new PW5_Aircraft( _rootNode, &_dataInp, &_dataOut );
+WingRunner::WingRunner() :
+    _k ( 0.0 ),
+    _c ( 0.0 ),
 
-    _init_g_coef_p = 0.001;
-    _init_g_coef_q = 0.001;
-    _init_g_coef_n = 0.002;
+    _active ( true )
+{}
+
+////////////////////////////////////////////////////////////////////////////////
+
+WingRunner::~WingRunner() {}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void WingRunner::readData( XmlNode &dataNode )
+{
+    if ( dataNode.isValid() )
+    {
+        int result = FDM_SUCCESS;
+
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _r_w_bas, "wing" );
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _r_f_bas, "feet" );
+
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _k, "stiffness" );
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _c, "damping"   );
+
+        if ( result != FDM_SUCCESS ) XmlUtils::throwError( __FILE__, __LINE__, dataNode );
+    }
+    else
+    {
+        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PW5_FDM::~PW5_FDM()
+void WingRunner::computeForceAndMoment( const Vector3 &vel_bas,
+                                        const Vector3 &omg_bas,
+                                        const Vector3 &r_c_bas,
+                                        const Vector3 &n_c_bas )
 {
-    FDM_DELPTR( _aircraft );
+    _for_bas.zeroize();
+    _mom_bas.zeroize();
+
+    if ( _active )
+    {
+        double deflection_norm = n_c_bas * ( r_c_bas - _r_f_bas );
+
+        if ( deflection_norm > 1.0e-6 )
+        {
+            // contact point velocities components
+            Vector3 v_c_bas = vel_bas + ( omg_bas % r_c_bas );
+            double v_norm = n_c_bas * v_c_bas;
+
+            // normal force
+            double for_norm = _k * deflection_norm - _c * v_norm;
+
+            // resulting forces
+            _for_bas = for_norm * n_c_bas;
+            _mom_bas = r_c_bas % _for_bas;
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void PW5_FDM::updateDataOut()
+void WingRunner::update( double timeStep, const Vector3 &vel_bas, bool onGround )
 {
-    /////////////////////
-    FDM::updateDataOut();
-    /////////////////////
-
-    // controls
-    _dataOut.controls.ailerons = _aircraft->getCtrl()->getAilerons();
-    _dataOut.controls.elevator = _aircraft->getCtrl()->getElevator();
-    _dataOut.controls.rudder   = _aircraft->getCtrl()->getRudder();
+    if ( _active )
+    {
+        if ( timeStep > 0.0 && ( vel_bas.getLength() > 1.0 || ( !onGround ) ) )
+        {
+            _active = false;
+        }
+    }
 }

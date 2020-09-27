@@ -1,9 +1,4 @@
-/***************************************************************************//**
- *
- * @author Marek M. Cel <marekcel@marekcel.pl>
- *
- * @section LICENSE
- *
+/****************************************************************************//*
  * Copyright (C) 2020 Marek M. Cel
  *
  * Creative Commons Legal Code
@@ -130,7 +125,9 @@
  *
  ******************************************************************************/
 
-#include <fdm_pw5/pw5_FDM.h>
+#include <fdm_f35a/f35a_StabilizerVer.h>
+
+#include <fdm/xml/fdm_XmlUtils.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -138,33 +135,64 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PW5_FDM::PW5_FDM( const DataInp *dataInpPtr, DataOut *dataOutPtr, bool verbose ) :
-    FDM( dataInpPtr, dataOutPtr, verbose )
-{
-    FDM::_aircraft = _aircraft = new PW5_Aircraft( _rootNode, &_dataInp, &_dataOut );
+F35A_StabilizerVer::F35A_StabilizerVer() :
+    _dcx_drudder ( 0.0 ),
+    _dcy_drudder ( 0.0 ),
+    _rudder ( 0.0 )
+{}
 
-    _init_g_coef_p = 0.001;
-    _init_g_coef_q = 0.001;
-    _init_g_coef_n = 0.002;
+////////////////////////////////////////////////////////////////////////////////
+
+F35A_StabilizerVer::~F35A_StabilizerVer() {}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void F35A_StabilizerVer::readData( XmlNode &dataNode )
+{
+    ////////////////////////////////////
+    StabilizerVer::readData( dataNode );
+    ////////////////////////////////////
+
+    if ( dataNode.isValid() )
+    {
+        int result = FDM_SUCCESS;
+
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _dcx_drudder, "dcx_drudder" );
+        if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, _dcy_drudder, "dcy_drudder" );
+
+        if ( result != FDM_SUCCESS ) XmlUtils::throwError( __FILE__, __LINE__, dataNode );
+    }
+    else
+    {
+        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PW5_FDM::~PW5_FDM()
+void F35A_StabilizerVer::computeForceAndMoment( const Vector3 &vel_air_bas,
+                                                const Vector3 &omg_air_bas,
+                                                double airDensity,
+                                                double rudder )
 {
-    FDM_DELPTR( _aircraft );
+    _rudder = rudder;
+
+    StabilizerVer::computeForceAndMoment( vel_air_bas, omg_air_bas,
+                                          airDensity );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void PW5_FDM::updateDataOut()
+double F35A_StabilizerVer::getCx( double angle ) const
 {
-    /////////////////////
-    FDM::updateDataOut();
-    /////////////////////
+    return StabilizerVer::getCx( angle )
+            + _dcx_drudder * _rudder;
+}
 
-    // controls
-    _dataOut.controls.ailerons = _aircraft->getCtrl()->getAilerons();
-    _dataOut.controls.elevator = _aircraft->getCtrl()->getElevator();
-    _dataOut.controls.rudder   = _aircraft->getCtrl()->getRudder();
+////////////////////////////////////////////////////////////////////////////////
+
+double F35A_StabilizerVer::getCy( double angle ) const
+{
+    return StabilizerVer::getCy( angle )
+            + _dcy_drudder * _rudder;
 }

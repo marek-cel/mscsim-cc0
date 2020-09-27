@@ -1,9 +1,4 @@
-/***************************************************************************//**
- *
- * @author Marek M. Cel <marekcel@marekcel.pl>
- *
- * @section LICENSE
- *
+/****************************************************************************//*
  * Copyright (C) 2020 Marek M. Cel
  *
  * Creative Commons Legal Code
@@ -129,42 +124,89 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm_pw5/pw5_FDM.h>
-
-////////////////////////////////////////////////////////////////////////////////
-
-using namespace fdm;
+#ifndef FDM_WINGRUNNER_H
+#define FDM_WINGRUNNER_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PW5_FDM::PW5_FDM( const DataInp *dataInpPtr, DataOut *dataOutPtr, bool verbose ) :
-    FDM( dataInpPtr, dataOutPtr, verbose )
+#include <fdm/utils/fdm_Vector3.h>
+
+#include <fdm/xml/fdm_XmlNode.h>
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace fdm
 {
-    FDM::_aircraft = _aircraft = new PW5_Aircraft( _rootNode, &_dataInp, &_dataOut );
 
-    _init_g_coef_p = 0.001;
-    _init_g_coef_q = 0.001;
-    _init_g_coef_n = 0.002;
-}
+/**
+ * @brief Wing runner class.
+ *
+ * XML configuration file format:
+ * @code
+ * <wing_runner>
+ *   <wing> { [m] x-coordinate } { [m] y-coordinate } { [m] z-coordinate } </wing>
+ *   <feet> { [m] x-coordinate } { [m] y-coordinate } { [m] z-coordinate } </feet>
+ *   <stiffness> { [N/m] stiffness (linear spring) coefficient } </stiffness>
+ *   <damping> { [N/(m/s)] damping coefficient  } </damping>
+ * </wing_runner>
+ * @endcode
+ */
+class FDMEXPORT WingRunner
+{
+public:
+
+    /** Constructor. */
+    WingRunner();
+
+    /** Destructor. */
+    virtual ~WingRunner();
+
+    /**
+     * Reads data.
+     * @param dataNode XML node
+     */
+    virtual void readData( XmlNode &dataNode );
+
+    /**
+     * Computes force and moment.
+     * @param vel_bas [m/s] aircraft linear velocity expressed in BAS
+     * @param omg_bas [rad/s] aircraft angular velocity expressed in BAS
+     * @param r_c_bas [m] contact point coordinates expressed in BAS
+     * @param n_c_bas [-] contact point normal vector expressed in BAS
+     */
+    virtual void computeForceAndMoment( const Vector3 &vel_bas,
+                                        const Vector3 &omg_bas,
+                                        const Vector3 &r_c_bas,
+                                        const Vector3 &n_c_bas );
+
+    /**
+     * Update wing runner model.
+     * @param timeStep [s] time step
+     */
+    virtual void update( double timeStep, const Vector3 &vel_bas, bool onGround );
+
+    inline const Vector3& getFor_BAS() const { return _for_bas; }
+    inline const Vector3& getMom_BAS() const { return _mom_bas; }
+
+    inline Vector3 getRw_BAS() const { return _r_w_bas; }
+    inline Vector3 getRf_BAS() const { return _r_f_bas; }
+
+protected:
+
+    Vector3 _for_bas;       ///< [N] total force vector expressed in BAS
+    Vector3 _mom_bas;       ///< [N*m] total moment vector expressed in BAS
+
+    Vector3 _r_w_bas;       ///< [m] wing coordinates expressed in BAS
+    Vector3 _r_f_bas;       ///< [m] feet coordinates expressed in BAS
+
+    double _k;              ///< [N/m] stiffness (linear spring) coefficient
+    double _c;              ///< [N/(m/s)] damping coefficient
+
+    bool _active;           ///< specify if wing runner is active
+};
+
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PW5_FDM::~PW5_FDM()
-{
-    FDM_DELPTR( _aircraft );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void PW5_FDM::updateDataOut()
-{
-    /////////////////////
-    FDM::updateDataOut();
-    /////////////////////
-
-    // controls
-    _dataOut.controls.ailerons = _aircraft->getCtrl()->getAilerons();
-    _dataOut.controls.elevator = _aircraft->getCtrl()->getElevator();
-    _dataOut.controls.rudder   = _aircraft->getCtrl()->getRudder();
-}
+#endif // FDM_WINGRUNNER_H

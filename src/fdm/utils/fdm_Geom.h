@@ -1,9 +1,4 @@
-/***************************************************************************//**
- *
- * @author Marek M. Cel <marekcel@marekcel.pl>
- *
- * @section LICENSE
- *
+/****************************************************************************//*
  * Copyright (C) 2020 Marek M. Cel
  *
  * Creative Commons Legal Code
@@ -129,42 +124,53 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm_pw5/pw5_FDM.h>
-
-////////////////////////////////////////////////////////////////////////////////
-
-using namespace fdm;
+#ifndef FDM_GEOM_H
+#define FDM_GEOM_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PW5_FDM::PW5_FDM( const DataInp *dataInpPtr, DataOut *dataOutPtr, bool verbose ) :
-    FDM( dataInpPtr, dataOutPtr, verbose )
+#include <fdm/utils/fdm_Vector3.h>
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace fdm
 {
-    FDM::_aircraft = _aircraft = new PW5_Aircraft( _rootNode, &_dataInp, &_dataOut );
 
-    _init_g_coef_p = 0.001;
-    _init_g_coef_q = 0.001;
-    _init_g_coef_n = 0.002;
-}
+/**
+ * @brief Geometric utilities.
+ */
+class FDMEXPORT Geom
+{
+public:
+
+    /**
+     * Checks if intersection occurs.
+     * @param b segment beginning
+     * @param e segment end
+     * @param r any point on the plane coordinates
+     * @param n plane normal vector
+     * @return true if there is an intersection, false otherwise
+     */
+    static bool isIsect( const Vector3 &b, const Vector3 &e,
+                         const Vector3 &r, const Vector3 &n );
+
+    /**
+     * Returns segment and plane intersection point.
+     * @see O'Rourke J.: Computational Geometry in C, 1998, p.226
+     * @see http://paulbourke.net/geometry/pointlineplane/
+     * @param b segment beginning
+     * @param e segment end
+     * @param r any point on the plane coordinates
+     * @param n plane normal vector
+     * @return intersection point
+     */
+    static Vector3 getIsect( const Vector3 &b, const Vector3 &e,
+                             const Vector3 &r, const Vector3 &n );
+
+};
+
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PW5_FDM::~PW5_FDM()
-{
-    FDM_DELPTR( _aircraft );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void PW5_FDM::updateDataOut()
-{
-    /////////////////////
-    FDM::updateDataOut();
-    /////////////////////
-
-    // controls
-    _dataOut.controls.ailerons = _aircraft->getCtrl()->getAilerons();
-    _dataOut.controls.elevator = _aircraft->getCtrl()->getElevator();
-    _dataOut.controls.rudder   = _aircraft->getCtrl()->getRudder();
-}
+#endif // FDM_GEOM_H

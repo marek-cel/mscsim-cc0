@@ -1,9 +1,4 @@
-/***************************************************************************//**
- *
- * @author Marek M. Cel <marekcel@marekcel.pl>
- *
- * @section LICENSE
- *
+/****************************************************************************//*
  * Copyright (C) 2020 Marek M. Cel
  *
  * Creative Commons Legal Code
@@ -130,7 +125,7 @@
  *
  ******************************************************************************/
 
-#include <fdm_pw5/pw5_FDM.h>
+#include <fdm/utils/fdm_Geom.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -138,33 +133,54 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PW5_FDM::PW5_FDM( const DataInp *dataInpPtr, DataOut *dataOutPtr, bool verbose ) :
-    FDM( dataInpPtr, dataOutPtr, verbose )
+bool Geom::isIsect( const Vector3 &b, const Vector3 &e,
+                    const Vector3 &r, const Vector3 &n )
 {
-    FDM::_aircraft = _aircraft = new PW5_Aircraft( _rootNode, &_dataInp, &_dataOut );
+    double num = n * ( r - b );
+    double den = n * ( e - b );
 
-    _init_g_coef_p = 0.001;
-    _init_g_coef_q = 0.001;
-    _init_g_coef_n = 0.002;
+    double u = 0.0;
+
+    if ( fabs( den ) > 10e-14 ) u = num / den;
+
+    if ( 0.0 < u && u < 1.0 )
+    {
+        return true;
+    }
+
+    return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PW5_FDM::~PW5_FDM()
+Vector3 Geom::getIsect( const Vector3 &b, const Vector3 &e,
+                        const Vector3 &r, const Vector3 &n )
 {
-    FDM_DELPTR( _aircraft );
-}
+    Vector3 r_i = e;
 
-////////////////////////////////////////////////////////////////////////////////
+    double num = n * ( r - b );
+    double den = n * ( e - b );
 
-void PW5_FDM::updateDataOut()
-{
-    /////////////////////
-    FDM::updateDataOut();
-    /////////////////////
+    double u = 0.0;
 
-    // controls
-    _dataOut.controls.ailerons = _aircraft->getCtrl()->getAilerons();
-    _dataOut.controls.elevator = _aircraft->getCtrl()->getElevator();
-    _dataOut.controls.rudder   = _aircraft->getCtrl()->getRudder();
+    if ( fabs( den ) < 10e-15 )
+    {
+        // segment is parallel to the plane
+        if ( fabs( num ) < 10e-15 )
+        {
+            // segment beginning is on the plane
+            r_i = b;
+        }
+    }
+    else
+    {
+        u = num / den;
+
+        if ( 0.0 <= u && u <= 1.0 )
+        {
+            r_i = b + u * ( e - b );
+        }
+    }
+
+    return r_i;
 }
