@@ -205,9 +205,12 @@ void WingRunner::update( double timeStep, const Vector3 &vel_bas, bool onGround 
 {
     if ( _active )
     {
-        if ( timeStep > 0.0 && ( vel_bas.getLength() > 1.0 || ( !onGround ) ) )
+        if ( timeStep > FDM_TIME_STEP_MIN )
         {
-            _active = false;
+            if ( vel_bas.getLength() > 1.0 || ( !onGround ) )
+            {
+                _active = false;
+            }
         }
     }
 }

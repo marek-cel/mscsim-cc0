@@ -155,7 +155,7 @@ class UH60_Aircraft : public Aircraft
 public:
 
     /** Constructor. */
-    UH60_Aircraft( DataNode *rootNode, const DataInp *dataInp, DataOut *dataOut );
+    UH60_Aircraft( DataNode *rootNode );
 
     /** Destructor. */
     ~UH60_Aircraft();
@@ -185,9 +185,6 @@ private:
     UH60_LandingGear  *_gear;   ///< landing gear model
     UH60_Mass         *_mass;   ///< mass and inertia model
     UH60_Propulsion   *_prop;   ///< propulsion model
-
-    /** Updates output data. */
-    void updateOutputData();
 };
 
 } // end of fdm namespace

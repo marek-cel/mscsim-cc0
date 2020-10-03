@@ -128,7 +128,6 @@
 #include <fdm_aw101/aw101_LandingGear.h>
 #include <fdm_aw101/aw101_Aircraft.h>
 
-#include <fdm/utils/fdm_String.h>
 #include <fdm/xml/fdm_XmlUtils.h>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -152,26 +151,10 @@ void AW101_LandingGear::readData( XmlNode &dataNode )
 {
     if ( dataNode.isValid() )
     {
-        int result = FDM_SUCCESS;
-
-        XmlNode wheelNode = dataNode.getFirstChildElement( "wheel" );
-
-        while ( result == FDM_SUCCESS && wheelNode.isValid() )
+        if ( FDM_SUCCESS != readWheelsData( dataNode, _wheels ) )
         {
-            WheelAndInput wheelAndInput;
-
-            std::string name  = wheelNode.getAttribute( "name"  );
-            std::string input = wheelNode.getAttribute( "input" );
-
-            wheelAndInput.input = getDataRef( input );
-            wheelAndInput.wheel.readData( wheelNode );
-
-            result = _wheels.addItem( name, wheelAndInput );
-
-            wheelNode = wheelNode.getNextSiblingElement( "wheel" );
+            XmlUtils::throwError( __FILE__, __LINE__, dataNode );
         }
-
-        if ( result != FDM_SUCCESS ) XmlUtils::throwError( __FILE__, __LINE__, dataNode );
     }
     else
     {
@@ -186,8 +169,6 @@ void AW101_LandingGear::initialize()
     //////////////////////////
     LandingGear::initialize();
     //////////////////////////
-
-    _inputCtrlABS = getDataRef( "input.controls.abs" );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -243,8 +224,8 @@ void AW101_LandingGear::update()
 
     _ctrlAngle = 0.0;
 
-    _antiskid = _aircraft->getDataInp()->controls.abs;
-    _steering = false;
+    int wheels_count = 0;
+    double position_sum = 0.0;
 
     for ( Wheels::iterator it = _wheels.begin(); it != _wheels.end(); ++it )
     {
@@ -264,9 +245,17 @@ void AW101_LandingGear::update()
                          _steering );
 
         double brake = 0.0;
-        if      ( wheel.getBrakeGroup() == Wheel::Left  ) brake = _brake_l;
+        if      ( wheel.getBrakeGroup() == Wheel::Both  ) brake = 0.5 * ( _brake_l + _brake_r );
+        else if ( wheel.getBrakeGroup() == Wheel::Left  ) brake = _brake_l;
         else if ( wheel.getBrakeGroup() == Wheel::Right ) brake = _brake_r;
 
-        wheel.update( input.isValid() ? input.getValue() : 1.0, _ctrlAngle, brake );
+        double position = input.isValid() ? input.getValue() : 1.0;
+
+        wheel.update( position, _ctrlAngle, brake );
+
+        position_sum += position;
+        wheels_count++;
     }
+
+    _position = position_sum / (double)wheels_count;
 }

@@ -163,7 +163,7 @@ public:
     inline double getSpeedOfSound()    const { return _speedOfSound;    }
     inline double getDensityAltitude() const { return _densityAltitude; }
 
-    inline Vector3 getWind_BAS() const { return _wind_bas; }
+    inline Vector3 getWind_NED() const { return _wind_ned; }
 
     /**
      * Sets sea level air temperature value.
@@ -183,6 +183,16 @@ public:
         _atmosphere->setPressureSL( pressure_0 );
     }
 
+    inline void setWindDirection( double wind_direction )
+    {
+        _wind_direction = wind_direction;
+    }
+
+    inline void setWindSpeed( double wind_speed )
+    {
+        _wind_speed = wind_speed;
+    }
+
 protected:
 
     Atmosphere *_atmosphere;    ///< atmosphere object
@@ -193,7 +203,10 @@ protected:
     double _speedOfSound;       ///< [m/s] speed of sound
     double _densityAltitude;    ///< [m] density altitude
 
-    Vector3 _wind_bas;          ///< [m/s] wind speed vector expressed in BAS
+    double _wind_direction;     ///< [rad] wind direction (from which it originates)
+    double _wind_speed;         ///< [m/s] wind speed
+
+    Vector3 _wind_ned;          ///< [m/s] wind speed vector expressed in BAS
 };
 
 } // end of fdm namespace

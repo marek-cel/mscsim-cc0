@@ -124,49 +124,106 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm_xf/xf_Aircraft.h>
-
-////////////////////////////////////////////////////////////////////////////////
-
-using namespace fdm;
+#ifndef FDM_WINCHLAUNCHER_H
+#define FDM_WINCHLAUNCHER_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-XF_Aircraft::XF_Aircraft( DataNode *rootNode ) :
-    Aircraft( rootNode ),
+#include <fdm/utils/fdm_Matrix3x3.h>
 
-    _aero ( 0 ),
-    _ctrl ( 0 ),
-    _gear ( 0 ),
-    _mass ( 0 ),
-    _prop ( 0 )
+#include <fdm/xml/fdm_XmlNode.h>
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace fdm
 {
-    Aircraft::_aero = _aero = new XF_Aerodynamics ( this, _rootNode );
-    Aircraft::_ctrl = _ctrl = new XF_Controls     ( this, _rootNode );
-    Aircraft::_gear = _gear = new XF_LandingGear  ( this, _rootNode );
-    Aircraft::_mass = _mass = new XF_Mass         ( this, _rootNode );
-    Aircraft::_prop = _prop = new XF_Propulsion   ( this, _rootNode );
 
-    readFile( Path::get( "data/fdm/xf/xf_fdm.xml" ).c_str() );
-}
+/**
+ * @brief Sailplane winch launcher class.
+ *
+ * XML configuration file format:
+ * @code
+ * <winch_launcher>
+ *   <attachment_point> { [m] x-coordinate } { [m] y-coordinate } { [m] z-coordinate } </attachment_point>
+ *   <for_max> { [N] maximum cable force } </for_max>
+ *   <len_max> { [m] maximum cable length } </len_max>
+ *   <ang_max> { [rad] maximum cable angle } </ang_max>
+ *   <vel_max> { [m/s] maximum cable velocity } </vel_max>
+ *   <tc_for> { [s] force time constant } </tc_for>
+ *   <tc_for> { [s] velocity time constant } </tc_for>
+ *   <stiffnes> { [N/m^2] cable stiffness } </stiffnes>
+ * </winch_launcher>
+ * @endcode
+ */
+class FDMEXPORT WinchLauncher
+{
+public:
+
+    /** Constructor. */
+    WinchLauncher();
+
+    /** Destructor. */
+    virtual ~WinchLauncher();
+
+    /**
+     * Reads data.
+     * @param dataNode XML node
+     */
+    virtual void readData( XmlNode &dataNode );
+
+    /**
+     * Computes force and moment.
+     * @param wgs2bas matrix of rotation from WGS to BAS
+     * @param pos_wgs [m] aircraft position expressed in WGS
+     */
+    virtual void computeForceAndMoment( const fdm::Matrix3x3 &wgs2bas,
+                                        const Vector3 &pos_wgs );
+
+    /**
+     * Update winch model.
+     * @param timeStep [s] time step
+     * @param bas2wgs matrix of rotation from BAS to WGS
+     * @param wgs2ned matrix of rotation from WGS to NED
+     * @param pos_wgs [m] aircraft position expressed in WGS
+     * @param altitude_agl [m] altitude above ground level
+     */
+    virtual void update( double timeStep,
+                         const fdm::Matrix3x3 &bas2wgs,
+                         const fdm::Matrix3x3 &wgs2ned,
+                         const Vector3 &pos_wgs,
+                         double altitude_agl );
+
+    inline const Vector3& getFor_BAS() const { return _for_bas; }
+    inline const Vector3& getMom_BAS() const { return _mom_bas; }
+
+protected:
+
+    Vector3 _for_bas;       ///< [N] total force vector expressed in BAS
+    Vector3 _mom_bas;       ///< [N*m] total moment vector expressed in BAS
+
+    Vector3 _r_a_bas;       ///< [m] winch cable attachment point expressed in BAS
+
+    Vector3 _pos_wgs;       ///< [m] winch position expressed in WGS
+
+    double _for_max;        ///< [N]   maximum cable force
+    double _len_max;        ///< [m]   maximum cable length
+    double _ang_max;        ///< [rad] maximum elevation
+    double _vel_max;        ///< [m/s] maximum cable velocity
+
+    double _tc_for;         ///< [s] force time constant
+    double _tc_vel;         ///< [s] velocity time constant
+
+    double _stiffness;      ///< [N/m^2] cable stiffness
+
+    double _for;            ///< [N]   current cable force
+    double _vel;            ///< [m/s] current cable velocity
+    double _len;            ///< [m]   current cable length
+
+    bool _active;           ///< specify if winch is active
+};
+
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-XF_Aircraft::~XF_Aircraft()
-{
-    FDM_DELPTR( _aero );
-    FDM_DELPTR( _ctrl );
-    FDM_DELPTR( _gear );
-    FDM_DELPTR( _mass );
-    FDM_DELPTR( _prop );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void XF_Aircraft::initialize( bool engineOn )
-{
-    /////////////////////////////////
-    Aircraft::initialize( engineOn );
-    /////////////////////////////////
-}
+#endif // FDM_WINCHLAUNCHER_H

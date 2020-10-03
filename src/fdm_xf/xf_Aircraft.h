@@ -150,7 +150,7 @@ class XF_Aircraft : public Aircraft
 public:
 
     /** Constructor. */
-    XF_Aircraft( DataNode *rootNode, const DataInp *dataInp, DataOut *dataOut );
+    XF_Aircraft( DataNode *rootNode );
 
     /** Destructor. */
     ~XF_Aircraft();
@@ -180,9 +180,6 @@ private:
     XF_LandingGear  *_gear;    ///< landing gear model
     XF_Mass         *_mass;    ///< mass and inertia model
     XF_Propulsion   *_prop;    ///< propulsion model
-
-    /** Updates output data. */
-    void updateOutputData();
 };
 
 } // end of fdm namespace

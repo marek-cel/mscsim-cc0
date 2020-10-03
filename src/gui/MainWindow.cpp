@@ -519,6 +519,10 @@ void MainWindow::setStateWork()
 {
     _stateInp = fdm::DataInp::Work;
     _dockMain->setStateInp( _stateInp );
+
+    QWidget *focusWidget = qApp->focusWidget();
+    if ( focusWidget ) focusWidget->clearFocus();
+    _ui->widgetOTW->setFocus();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

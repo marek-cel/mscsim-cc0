@@ -224,7 +224,7 @@ void AW101_Controls::initialize()
         Exception e;
 
         e.setType( Exception::UnknownException );
-        e.setInfo( "Obtaining input data refs failed." );
+        e.setInfo( "Obtaining input data refs in the controls module failed." );
 
         FDM_THROW( e );
     }

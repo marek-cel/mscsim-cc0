@@ -194,6 +194,7 @@ void FDM::initialize()
     {
         _initialized = true;
         initializeRecorder();
+        updateEnvironment();
         _aircraft->initialize( _dataInp.initial.engineOn );
     }
     else
@@ -219,6 +220,8 @@ void FDM::update( double timeStep )
     if ( _ready )
     {
         _recorder->step( timeStep );
+
+        updateEnvironment();
 
         _aircraft->setFreezePosition( _dataInp.freezePosition );
         _aircraft->setFreezeAttitude( _dataInp.freezeAttitude );
@@ -493,6 +496,7 @@ void FDM::initializeRecorder()
     _recorder->addVariable( new Recorder::Variable< double >( "trim_yaw"       , &( _dataInp.controls.trim_yaw     ), 3 ) );
     _recorder->addVariable( new Recorder::Variable< double >( "brake_l"        , &( _dataInp.controls.brake_l      ), 3 ) );
     _recorder->addVariable( new Recorder::Variable< double >( "brake_r"        , &( _dataInp.controls.brake_r      ), 3 ) );
+    _recorder->addVariable( new Recorder::Variable< double >( "wheel_brake"    , &( _dataInp.controls.wheel_brake  ), 3 ) );
     _recorder->addVariable( new Recorder::Variable< double >( "landing_gear"   , &( _dataInp.controls.landing_gear ), 3 ) );
     _recorder->addVariable( new Recorder::Variable< double >( "wheel_nose"     , &( _dataInp.controls.wheel_nose   ), 3 ) );
     _recorder->addVariable( new Recorder::Variable< double >( "flaps"          , &( _dataInp.controls.flaps        ), 3 ) );
@@ -547,6 +551,7 @@ void FDM::updateDataInp()
     _dataRefs.input.controls.trim_yaw     .setDatad( _dataInp.controls.trim_yaw     );
     _dataRefs.input.controls.brake_l      .setDatad( _dataInp.controls.brake_l      );
     _dataRefs.input.controls.brake_r      .setDatad( _dataInp.controls.brake_r      );
+    _dataRefs.input.controls.wheel_brake  .setDatad( _dataInp.controls.wheel_brake  );
     _dataRefs.input.controls.landing_gear .setDatad( _dataInp.controls.landing_gear );
     _dataRefs.input.controls.wheel_nose   .setDatad( _dataInp.controls.wheel_nose   );
     _dataRefs.input.controls.flaps        .setDatad( _dataInp.controls.flaps        );
@@ -695,6 +700,20 @@ void FDM::updateAndSetDataOut()
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void FDM::updateEnvironment()
+{
+    if ( _aircraft )
+    {
+        _aircraft->getEnvir()->setTemperatureSL( _dataInp.environment.temperature_0 );
+        _aircraft->getEnvir()->setPressureSL( _dataInp.environment.pressure_0 );
+
+        _aircraft->getEnvir()->setWindDirection( _dataInp.environment.wind_direction );
+        _aircraft->getEnvir()->setWindSpeed( _dataInp.environment.wind_speed );
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void FDM::updateInitialPositionAndAttitude()
 {
     double altitude_asl = _dataInp.initial.altitude_agl + _dataInp.ground.elevation;
@@ -737,6 +756,7 @@ void FDM::initDataTreeBasic()
     if ( result == FDM_SUCCESS ) result = addDataRef( "input.controls.trim_yaw"     , DataNode::Double );
     if ( result == FDM_SUCCESS ) result = addDataRef( "input.controls.brake_left"   , DataNode::Double );
     if ( result == FDM_SUCCESS ) result = addDataRef( "input.controls.brake_right"  , DataNode::Double );
+    if ( result == FDM_SUCCESS ) result = addDataRef( "input.controls.wheel_brake"  , DataNode::Double );
     if ( result == FDM_SUCCESS ) result = addDataRef( "input.controls.landing_gear" , DataNode::Double );
     if ( result == FDM_SUCCESS ) result = addDataRef( "input.controls.wheel_nose"   , DataNode::Double );
     if ( result == FDM_SUCCESS ) result = addDataRef( "input.controls.flaps"        , DataNode::Double );
@@ -758,6 +778,7 @@ void FDM::initDataTreeBasic()
         _dataRefs.input.controls.trim_yaw     = getDataRef( "input.controls.trim_yaw"     );
         _dataRefs.input.controls.brake_l      = getDataRef( "input.controls.brake_left"   );
         _dataRefs.input.controls.brake_r      = getDataRef( "input.controls.brake_right"  );
+        _dataRefs.input.controls.wheel_brake  = getDataRef( "input.controls.wheel_brake"  );
         _dataRefs.input.controls.landing_gear = getDataRef( "input.controls.landing_gear" );
         _dataRefs.input.controls.wheel_nose   = getDataRef( "input.controls.wheel_nose"   );
         _dataRefs.input.controls.flaps        = getDataRef( "input.controls.flaps"        );

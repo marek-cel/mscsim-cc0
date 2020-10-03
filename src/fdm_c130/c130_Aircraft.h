@@ -153,7 +153,7 @@ class C130_Aircraft : public Aircraft
 public:
 
     /** Constructor. */
-    C130_Aircraft( DataNode *rootNode, const DataInp *dataInp, DataOut *dataOut );
+    C130_Aircraft( DataNode *rootNode );
 
     /** Destructor. */
     ~C130_Aircraft();
@@ -163,9 +163,6 @@ public:
      * @param engineOn specifies if engine is running on startup
      */
     void initialize( bool engineOn = false );
-
-    /** Updates output data. */
-    void updateOutputData();
 
     inline C130_Aerodynamics* getAero() { return _aero; }
     inline C130_Controls*     getCtrl() { return _ctrl; }
