@@ -125,9 +125,10 @@
  *
  ******************************************************************************/
 
-#include <fdm/utils/fdm_Period.h>
+#include <fdm/utils/fdm_Oscillation.h>
 
 #include <algorithm>
+#include <cfloat>
 #include <cmath>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -136,123 +137,170 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Period::Period() :
-    _arg_0 ( 0.0 ),
+Oscillation::Oscillation() :
+    _x_last ( -DBL_MAX ),
 
-    _value_avg ( 0.0 ),
-    _value_min ( std::numeric_limits< double >::max() ),
-    _value_max ( std::numeric_limits< double >::min() ),
+    _y_max ( 0.0 ),
+    _y_min ( 0.0 ),
 
-    _value_avg_min ( std::numeric_limits< double >::max() ),
-    _value_avg_max ( std::numeric_limits< double >::min() ),
+    _p_max ( 0.0 ),
+    _p_min ( 0.0 ),
+    _p_avg ( 0.0 ),
 
-    _amplitude     ( 0.0 ),
-    _amplitude_avg ( 0.0 ),
-    _amplitude_min ( std::numeric_limits< double >::max() ),
-    _amplitude_max ( std::numeric_limits< double >::min() ),
-
-    _period     ( 0.0 ),
-    _period_avg ( 0.0 ),
-    _period_min ( std::numeric_limits< double >::max() ),
-    _period_max ( std::numeric_limits< double >::min() ),
-
-    _count ( 0 ),
-
-    _even ( false )
+    _a_max ( 0.0 ),
+    _a_min ( 0.0 ),
+    _a_avg ( 0.0 )
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Period::~Period() {}
+Oscillation::~Oscillation() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Period::update( double arg, double val, double min )
+void Oscillation::add( double x, double y )
 {
-    if ( _values.size() > 0 )
+    if ( x > _x_last || _points.size() == 0 )
     {
-        double val_last = *_values.end();
+        _x_last = x;
 
-        if ( ( val > _value_avg && val_last < _value_avg )
-          || ( val < _value_avg && val_last > _value_avg ) )
-        {
-            double val_min = *std::min_element( _values.begin(), _values.end() );
-            double val_max = *std::max_element( _values.begin(), _values.end() );
+        Point pt;
+        pt.x = x;
+        pt.y = y;
 
-            double amplitude = fabs( val_max - val_min );
+        _points.push_back( pt );
 
-            if ( amplitude > fabs( min ) )
-            {
-                if ( _even )
-                {
-                    _even = false;
-
-                    double coef = 1.0 / ( (double)_count + 1.0 );
-
-                    _value_avg_min = ( _value_avg_min * _count + val_min ) * coef;
-                    _value_avg_max = ( _value_avg_max * _count + val_max ) * coef;
-
-                    // amplitude
-                    _amplitude = amplitude;
-
-                    if ( _amplitude > _amplitude_max ) _amplitude_max = _amplitude;
-                    if ( _amplitude < _amplitude_min ) _amplitude_min = _amplitude;
-
-                    _amplitude_avg = ( _amplitude_avg * _count + _amplitude ) * coef;
-
-                    // period
-                    _period = arg - _arg_0;
-
-                    if ( _period > _period_max ) _period_max = _period;
-                    if ( _period < _period_min ) _period_min = _period;
-
-                    _period_avg = ( _period_avg * _count + _period ) * coef;
-
-                    // next
-                    _arg_0 = arg;
-                    _values.clear();
-                    _count++;
-                }
-                else
-                {
-                    _even = true;
-                }
-            }
-        }
+        update();
     }
-
-    if ( val > _value_max ) _value_max = val;
-    if ( val < _value_min ) _value_min = val;
-
-    _value_avg = 0.5 * ( _value_min + _value_max );
-
-    _values.push_back( val );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Period::reset()
+void Oscillation::add( double *x, double *y, unsigned int n )
 {
-    _values.clear();
+    size_t size_prev = _points.size();
 
-    _arg_0 = 0.0;
+    for ( unsigned int i = 0; i < n; i++ )
+    {
+        if ( x[ i ] > _x_last || _points.size() == 0 )
+        {
+            _x_last = x[ i ];
 
-    _value_avg = 0.0;
-    _value_min = std::numeric_limits< double >::max();
-    _value_max = std::numeric_limits< double >::min();
+            Point pt;
+            pt.x = x[ i ];
+            pt.y = y[ i ];
 
-    _value_avg_min = std::numeric_limits< double >::max();
-    _value_avg_max = std::numeric_limits< double >::min();
+            _points.push_back( pt );
+        }
+        else
+        {
+            break;
+        }
+    }
 
-    _amplitude     = 0.0;
-    _amplitude_avg = 0.0;
-    _amplitude_min = std::numeric_limits< double >::max();
-    _amplitude_max = std::numeric_limits< double >::min();
+    if ( size_prev != _points.size() ) update();
+}
 
-    _period     = 0.0;
-    _period_avg = 0.0;
-    _period_min = std::numeric_limits< double >::max();
-    _period_max = std::numeric_limits< double >::min();
+////////////////////////////////////////////////////////////////////////////////
 
-    _count = 0;
+void Oscillation::update()
+{
+    if ( _points.size() > 0 )
+    {
+        const double y_0 = _points[ 0 ].y;
+
+        double y = y_0;
+
+        bool inc = false;
+        bool dec = false;
+
+        _y_max = y_0;
+        _y_min = y_0;
+
+        _p_max = -DBL_MAX;
+        _p_min =  DBL_MAX;
+
+        _a_max = -DBL_MAX;
+        _a_min =  DBL_MAX;
+
+        int ne = 0; // number of extremum
+        int np = 0; // number of periods
+
+        double xe0;
+
+        double ye_prev;
+
+        double as = 0.0;
+        double ps = 0.0;
+
+        for ( Points::iterator it = _points.begin(); it != _points.end(); it++ )
+        {
+            Point &pt = *(it);
+
+            double y_prev = y;
+
+            y = pt.y;
+
+            bool inc_prev = inc;
+            bool dec_prev = dec;
+
+            if ( pt.y > _y_max ) _y_max = pt.y;
+            if ( pt.y < _y_min ) _y_min = pt.y;
+
+            inc = false;
+            dec = false;
+
+            if ( pt.y - y_prev > 0.0 ) inc = true;
+            if ( pt.y - y_prev < 0.0 ) dec = true;
+
+            if ( ( inc && dec_prev ) || ( dec && inc_prev ) )
+            {
+                if ( ne % 2 == 0 )
+                {
+                    if ( ne > 0 )
+                    {
+                        double p = pt.x - xe0;
+
+                        if ( p > _p_max ) _p_max = p;
+                        if ( p < _p_min ) _p_min = p;
+
+                        ps += p;
+                        np++;
+                    }
+
+                    xe0 = pt.x;
+                }
+
+                if ( ne > 0 )
+                {
+                    double a = fabs( pt.y - ye_prev );
+
+                    if ( a > _a_max ) _a_max = a;
+                    if ( a < _a_min ) _a_min = a;
+
+                    as += a;
+                }
+
+                ye_prev = pt.y;
+
+                ne++;
+            }
+        }
+
+        if ( np > 0 )
+        {
+            _p_avg = ps / ( (double)(np) );
+            _a_avg = as / ( (double)(ne - 1) );
+        }
+        else
+        {
+            _p_max = 0.0;
+            _p_min = 0.0;
+            _p_avg = 0.0;
+
+            _a_max = 0.0;
+            _a_min = 0.0;
+            _a_avg = 0.0;
+        }
+    }
 }

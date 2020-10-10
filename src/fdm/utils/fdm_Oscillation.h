@@ -124,8 +124,8 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_PERIOD_H
-#define FDM_PERIOD_H
+#ifndef FDM_OSCILLATION_H
+#define FDM_OSCILLATION_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -140,74 +140,75 @@ namespace fdm
 {
 
 /**
- * @brief Function period class.
- *
- * UNDER CONSTRUCTION!
- *
- * @todo There are some problems with calculations. More testing is required!
+ * @brief Oscillations analysis class.
  */
-class FDMEXPORT Period
+class FDMEXPORT Oscillation
 {
 public:
 
     /** Constructor. */
-    Period();
+    Oscillation();
 
     /** Destructor. */
-    virtual ~Period();
+    virtual ~Oscillation();
 
-    void update( double arg, double val, double min = 0.0 );
+    /**
+     * Adds single data point and updates parameters.
+     * @param x argument
+     * @param y value
+     */
+    void add( double x, double y );
 
-    void reset();
+    /**
+     * Adds multiple data points and updates parameters.
+     * @param x arguments array
+     * @param y values array
+     * @param n arrays size
+     */
+    void add( double *x, double *y, unsigned int n );
 
-    inline double getAmplitude()    const { return _amplitude; }
-    inline double getAmplitudeAvg() const { return _amplitude_avg; }
-    inline double getAmplitudeMin() const { return _amplitude_min; }
-    inline double getAmplitudeMax() const { return _amplitude_max; }
+    /** Updates parameters. */
+    void update();
 
-    inline double getValueAvg() const { return _value_avg; }
-    inline double getValueMin() const { return _value_min; }
-    inline double getValueMax() const { return _value_max; }
+    inline double getY_max() const { return _y_max; }
+    inline double getY_min() const { return _y_min; }
 
-    inline double getPeriod()    const { return _period; }
-    inline double getPeriodAvg() const { return _period_avg; }
-    inline double getPeriodMin() const { return _period_min; }
-    inline double getPeriodMax() const { return _period_max; }
+    inline double getP_max() const { return _p_max; }
+    inline double getP_min() const { return _p_min; }
+    inline double getP_avg() const { return _p_avg; }
 
-    inline UInt32 getCount() const { return _count; }
+    inline double getA_max() const { return _a_max; }
+    inline double getA_min() const { return _a_min; }
+    inline double getA_avg() const { return _a_avg; }
 
 private:
 
-    typedef std::vector< double > Values;
+    struct Point
+    {
+        double x;       ///< argument
+        double y;       ///< value
+    };
 
-    Values _values;         ///< last period values
+    typedef std::vector< Point > Points;
 
-    double _arg_0;          ///< period start argument
+    Points _points;     ///< data points
 
-    double _value_avg;      ///< average value
-    double _value_min;      ///< minimum value
-    double _value_max;      ///< maximum value
+    double _x_last;     ///< last added argument
 
-    double _value_avg_min;  ///< average minimum value
-    double _value_avg_max;  ///< averaga maximum value
+    double _y_max;      ///< maximum value
+    double _y_min;      ///< minimum value
 
-    double _amplitude;      ///< amplitude (last computed)
-    double _amplitude_avg;  ///< average amplitude
-    double _amplitude_min;  ///< minimum amplitude
-    double _amplitude_max;  ///< maximum amplitude
+    double _p_max;      ///< maximal period
+    double _p_min;      ///< minimal period
+    double _p_avg;      ///< average period
 
-    double _period;         ///< period (last computed)
-    double _period_avg;     ///< average period
-    double _period_min;     ///< minimum period
-    double _period_max;     ///< maximum period
-
-    UInt32 _count;          ///< periods count
-
-    bool _even;             ///< specifies is pass through average vale is even
+    double _a_max;      ///< maximal amplitude
+    double _a_min;      ///< minimal amplitude
+    double _a_avg;      ///< average amplitude
 };
 
 } // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // FDM_PERIOD_H
+#endif // FDM_OSCILLATION_H
