@@ -230,7 +230,7 @@ public:
      */
     inline static bool isInside( const double &min, const double &max, const double &val )
     {
-        return min < val && val < max;
+        return min <= val && val <= max;
     }
 
     /**
@@ -410,7 +410,7 @@ public:
     inline static double stDev( double sum, double sumSq, int n )
     {
         double coef = 1.0 / ( (double)n - 1.0 );
-        double s2 = sumSq * coef - Misc::pow2( sum ) * coef / (double)n;
+        double s2 = sumSq * coef - pow2( sum ) * coef / (double)n;
 
         return sqrt( s2 );
     }
