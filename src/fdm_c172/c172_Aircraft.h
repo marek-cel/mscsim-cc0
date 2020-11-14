@@ -153,7 +153,7 @@ class C172_Aircraft : public Aircraft
 public:
 
     /** Constructor. */
-    C172_Aircraft( DataNode *rootNode );
+    C172_Aircraft( Input *input );
 
     /** Destructor. */
     ~C172_Aircraft();

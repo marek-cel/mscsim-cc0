@@ -134,8 +134,8 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-C130_Controls::C130_Controls( const C130_Aircraft *aircraft, DataNode *rootNode ) :
-    Controls( aircraft, rootNode ),
+C130_Controls::C130_Controls( const C130_Aircraft *aircraft, Input *input ) :
+    Controls( aircraft, input ),
     _aircraft ( aircraft ),
 
     _channelAilerons     ( FDM_NULLPTR ),

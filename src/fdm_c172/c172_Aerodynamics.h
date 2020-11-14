@@ -150,7 +150,7 @@ class C172_Aerodynamics : public Aerodynamics
 public:
 
     /** Constructor. */
-    C172_Aerodynamics( const C172_Aircraft *aircraft, DataNode *rootNode );
+    C172_Aerodynamics( const C172_Aircraft *aircraft, Input *input );
 
     /** Destructor. */
     ~C172_Aerodynamics();

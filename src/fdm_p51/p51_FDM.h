@@ -134,7 +134,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/fdm_FDM.h>
+#include <fdm/main/fdm_FDM.h>
 
 #include <fdm_p51/p51_Aircraft.h>
 

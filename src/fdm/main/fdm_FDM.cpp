@@ -130,7 +130,7 @@
  *
  ******************************************************************************/
 
-#include <fdm/fdm_FDM.h>
+#include <fdm/main/fdm_FDM.h>
 
 #include <cstring>
 
@@ -147,12 +147,13 @@ using namespace fdm;
 ////////////////////////////////////////////////////////////////////////////////
 
 FDM::FDM( const DataInp *dataInpPtr, DataOut *dataOutPtr, bool verbose ) :
-    Base( new DataNode() ),
+    Base( new Input() ),
 
     _dataInpPtr ( dataInpPtr ),
     _dataOutPtr ( dataOutPtr ),
 
-    _rootNode ( getDataRootNode() ),
+    _input ( getInput() ),
+
     _aircraft ( FDM_NULLPTR ),
     _recorder ( new Recorder( 0.1 ) ),
 
@@ -180,7 +181,7 @@ FDM::FDM( const DataInp *dataInpPtr, DataOut *dataOutPtr, bool verbose ) :
 
 FDM::~FDM()
 {
-    FDM_DELPTR( _rootNode );
+    FDM_DELPTR( _input );
     FDM_DELPTR( _recorder );
 }
 

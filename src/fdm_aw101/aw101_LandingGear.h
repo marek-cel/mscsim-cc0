@@ -163,7 +163,7 @@ class AW101_LandingGear : public LandingGear
 public:
 
     /** Constructor. */
-    AW101_LandingGear( const AW101_Aircraft *aircraft, DataNode *rootNode );
+    AW101_LandingGear( const AW101_Aircraft *aircraft, Input *input );
 
     /** Destructor. */
     ~AW101_LandingGear();

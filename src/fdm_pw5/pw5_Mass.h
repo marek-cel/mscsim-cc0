@@ -146,7 +146,7 @@ class PW5_Mass : public Mass
 public:
 
     /** Constructor. */
-    PW5_Mass( const PW5_Aircraft *aircraft, DataNode *rootNode );
+    PW5_Mass( const PW5_Aircraft *aircraft, Input *input );
 
     /** Destructor. */
     ~PW5_Mass();

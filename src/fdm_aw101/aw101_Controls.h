@@ -148,7 +148,7 @@ class AW101_Controls : public Controls
 public:
 
     /** Constructor. */
-    AW101_Controls( const AW101_Aircraft *aircraft, DataNode *rootNode );
+    AW101_Controls( const AW101_Aircraft *aircraft, Input *input );
 
     /** Destructor. */
     ~AW101_Controls();

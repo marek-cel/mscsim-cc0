@@ -155,7 +155,7 @@ class PW5_Aircraft : public Aircraft
 public:
 
     /** Constructor. */
-    PW5_Aircraft( DataNode *rootNode );
+    PW5_Aircraft( Input *input );
 
     /** Destructor. */
     ~PW5_Aircraft();

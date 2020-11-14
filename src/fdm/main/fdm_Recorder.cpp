@@ -125,7 +125,7 @@
  *
  ******************************************************************************/
 
-#include <fdm/fdm_Recorder.h>
+#include <fdm/main/fdm_Recorder.h>
 
 #include <fdm/fdm_Exception.h>
 

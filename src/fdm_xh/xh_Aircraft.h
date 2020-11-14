@@ -150,7 +150,7 @@ class XH_Aircraft : public Aircraft
 public:
 
     /** Constructor. */
-    XH_Aircraft( DataNode *rootNode );
+    XH_Aircraft( Input *input );
 
     /** Destructor. */
     ~XH_Aircraft();

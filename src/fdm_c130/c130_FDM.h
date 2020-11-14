@@ -134,7 +134,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/fdm_FDM.h>
+#include <fdm/main/fdm_FDM.h>
 
 #include <fdm_c130/c130_Aircraft.h>
 

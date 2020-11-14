@@ -1,4 +1,9 @@
-/****************************************************************************//*
+/***************************************************************************//**
+ *
+ * @author Marek M. Cel <marekcel@marekcel.pl>
+ *
+ * @section LICENSE
+ *
  * Copyright (C) 2020 Marek M. Cel
  *
  * Creative Commons Legal Code
@@ -124,119 +129,173 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm_f35a/f35a_LandingGear.h>
-#include <fdm_f35a/f35a_Aircraft.h>
-
-#include <fdm/xml/fdm_XmlUtils.h>
+#ifndef FDM_FDM_H
+#define FDM_FDM_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using namespace fdm;
+#include <fdm/fdm_DataInp.h>
+#include <fdm/fdm_DataOut.h>
+
+#include <fdm/main/fdm_Aircraft.h>
+#include <fdm/main/fdm_Recorder.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-F35A_LandingGear::F35A_LandingGear( const F35A_Aircraft *aircraft, Input *input ) :
-    LandingGear( aircraft, input ),
-    _aircraft ( aircraft )
-{}
-
-////////////////////////////////////////////////////////////////////////////////
-
-F35A_LandingGear::~F35A_LandingGear() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void F35A_LandingGear::readData( XmlNode &dataNode )
+namespace fdm
 {
-    if ( dataNode.isValid() )
+
+/** Fight dynamics model wrapper class. */
+class FDMEXPORT FDM : public Base
+{
+public:
+
+    /** Constructor. */
+    FDM( const DataInp *dataInpPtr, DataOut *dataOutPtr, bool verbose = false );
+
+    /** Destructor. */
+    virtual ~FDM();
+
+    /** */
+    virtual void initialize();
+
+    /** */
+    virtual void update( double timeStep );
+
+    /** */
+    virtual void printInitialConditions();
+
+    /** */
+    virtual void printState();
+
+    inline DataOut::Crash getCrash() const { return _aircraft->getCrash(); }
+
+    inline bool isReady() const { return _ready; }
+
+    inline bool isReplaying() const { return _recorder->isReplaying(); }
+
+protected:
+
+    /** Data references. */
+    struct DataRefs
     {
-        if ( FDM_SUCCESS != readWheelsData( dataNode, _wheels ) )
+        /** */
+        struct Input
         {
-            XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-        }
+            /** */
+            struct Controls
+            {
+                DataRef roll;                       ///< roll controls data reference
+                DataRef pitch;                      ///< pitch control data reference
+                DataRef yaw;                        ///< yaw control data reference
+
+                DataRef trim_roll;                  ///< roll trim data reference
+                DataRef trim_pitch;                 ///< pitch trim data reference
+                DataRef trim_yaw;                   ///< yaw trim data reference
+
+                DataRef brake_l;                    ///< left brake data reference
+                DataRef brake_r;                    ///< right brake data reference
+                DataRef wheel_brake;                ///< wheel brake data reference
+
+                DataRef landing_gear;               ///< landing gear data reference
+                DataRef wheel_nose;                 ///< nose wheel steering data reference
+
+                DataRef flaps;                      ///< flaps data reference
+                DataRef airbrake;                   ///< airbrake data reference
+                DataRef spoilers;                   ///< spoilers data reference
+
+                DataRef collective;                 ///< collective data reference
+
+                DataRef lgh;                        ///< landing gear handle data reference
+                DataRef nws;                        ///< nose wheel steering data reference
+                DataRef abs;                        ///< anti-skid braking system data reference
+            };
+
+            /** */
+            struct Engine
+            {
+                DataRef  throttle;                  ///< throttle data reference
+                DataRef  mixture;                   ///< mixture lever data reference
+                DataRef  propeller;                 ///< propeller lever data reference
+
+                DataRef  fuel;                      ///< fuel state data reference
+                DataRef  ignition;                  ///< ignition state data reference
+                DataRef  starter;                   ///< starter state data reference
+            };
+
+            /** */
+            struct Masses
+            {
+                DataRef pilot [ FDM_MAX_PILOTS ];   ///< pilots data reference
+                DataRef tank  [ FDM_MAX_TANKS ];    ///< fuel tanks data reference
+                DataRef cabin;                      ///< cabin data reference
+                DataRef trunk;                      ///< cargo trunk data reference
+                DataRef slung;                      ///< slung load data reference
+            };
+
+            Controls controls;                      ///< controls data
+            Engine   engine[ FDM_MAX_ENGINES ];     ///< engines data
+            Masses   masses;                        ///< masses data
+        };
+
+        Input  input;                               ///< input data
     }
-    else
-    {
-        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-    }
-}
+    _dataRefs;                                      ///< data references
+
+    const DataInp *_dataInpPtr;                     ///< input data pointer
+    DataOut       *_dataOutPtr;                     ///< output data pointer
+
+    DataInp _dataInp;                               ///< input data (internal)
+    DataOut _dataOut;                               ///< output data (internal)
+
+    Input *_input;                                  ///< input data tree root node
+
+    Aircraft *_aircraft;                            ///< aircraft model
+    Recorder *_recorder;                            ///< recorder object
+
+    Vector3    _init_pos_wgs;                       ///< [m] initial position expressed in WGS
+    Quaternion _init_att_wgs;                       ///< initial attitude expressed as quaternion of rotation from WGS to BAS
+
+    UInt32 _initStep;                               ///< initialization step number
+
+    double _init_g_coef_p;                          ///< initialization iteration coefficient
+    double _init_g_coef_q;                          ///< initialization iteration coefficient
+    double _init_g_coef_n;                          ///< initialization iteration coefficient
+
+    double _init_phi;                               ///< [rad] initial roll angle
+    double _init_tht;                               ///< [rad] initial pitch angle
+    double _init_alt;                               ///< [m] initial altitude above ground level
+
+    bool _initialized;                              ///< specifies if flight dynamics model is initialized
+    bool _ready;                                    ///< specifies if flight dynamics model is ready
+    bool _verbose;                                  ///< specifies if extra information should be printed
+
+    virtual void initializeOnGround();
+    virtual void initializeInFlight();
+
+    virtual void initializeRecorder();
+
+    virtual void updateDataInp();
+    virtual void updateDataOut();
+
+    virtual void updateAndSetDataInp();
+    virtual void updateAndSetDataOut();
+
+    virtual void updateEnvironment();
+
+    virtual void updateInitialPositionAndAttitude();
+
+private:
+
+    /** Using this constructor is forbidden. */
+    FDM( const FDM & ) : Base() {}
+
+    /** Initializes basic data tree. */
+    void initDataTreeBasic();
+};
+
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void F35A_LandingGear::computeForceAndMoment()
-{
-    _for_bas.zeroize();
-    _mom_bas.zeroize();
-
-    for ( Wheels::iterator it = _wheels.begin(); it != _wheels.end(); ++it )
-    {
-        Wheel &wheel = (*it).second.wheel;
-
-        if ( wheel.getPosition() >= 1.0 )
-        {
-            Vector3 r_c_bas;
-            Vector3 n_c_bas;
-
-            getIsect( wheel.getRa_BAS(), wheel.getRu_BAS(), &r_c_bas, &n_c_bas );
-
-            wheel.computeForceAndMoment( _aircraft->getVel_BAS(),
-                                         _aircraft->getOmg_BAS(),
-                                         r_c_bas,
-                                         n_c_bas,
-                                         _steering, _antiskid );
-
-            _for_bas += wheel.getFor_BAS();
-            _mom_bas += wheel.getMom_BAS();
-        }
-    }
-
-    if ( !_for_bas.isValid() || !_mom_bas.isValid() )
-    {
-        Exception e;
-
-        e.setType( Exception::UnexpectedNaN );
-        e.setInfo( "NaN detected in the landing gear model." );
-
-        FDM_THROW( e );
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void F35A_LandingGear::update()
-{
-    //////////////////////
-    LandingGear::update();
-    //////////////////////
-
-    _brake_l = _aircraft->getCtrl()->getBrakeL();
-    _brake_r = _aircraft->getCtrl()->getBrakeR();
-
-    _ctrlAngle = _aircraft->getCtrl()->getNoseWheel();
-
-    for ( Wheels::iterator it = _wheels.begin(); it != _wheels.end(); ++it )
-    {
-        DataRef &input = (*it).second.input;
-        Wheel   &wheel = (*it).second.wheel;
-
-        Vector3 r_c_bas;
-        Vector3 n_c_bas;
-
-        getIsect( wheel.getRa_BAS(), wheel.getRu_BAS(), &r_c_bas, &n_c_bas );
-
-        wheel.integrate( _aircraft->getTimeStep(),
-                         _aircraft->getVel_BAS(),
-                         _aircraft->getOmg_BAS(),
-                         r_c_bas,
-                         n_c_bas,
-                         _steering );
-
-        double brake = 0.0;
-        if      ( wheel.getBrakeGroup() == Wheel::Both  ) brake = 0.5 * ( _brake_l + _brake_r );
-        else if ( wheel.getBrakeGroup() == Wheel::Left  ) brake = _brake_l;
-        else if ( wheel.getBrakeGroup() == Wheel::Right ) brake = _brake_r;
-
-        wheel.update( input.isValid() ? input.getValue() : 1.0, _ctrlAngle, brake );
-    }
-}
+#endif // FDM_FDM_H

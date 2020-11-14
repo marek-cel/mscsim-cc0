@@ -223,7 +223,7 @@ public:
     static Matrix3x3 getStab2BAS( double sinAlpha , double cosAlpha );
 
     /** Constructor. */
-    Aerodynamics( const Aircraft* aircraft, DataNode *rootNode );
+    Aerodynamics( const Aircraft *aircraft, Input *input );
 
     /** Destructor. */
     virtual ~Aerodynamics();

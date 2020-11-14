@@ -148,7 +148,7 @@ class XF_Controls : public Controls
 public:
 
     /** Constructor. */
-    XF_Controls( const XF_Aircraft *aircraft, DataNode *rootNode );
+    XF_Controls( const XF_Aircraft *aircraft, Input *input );
 
     /** Destructor. */
     ~XF_Controls();

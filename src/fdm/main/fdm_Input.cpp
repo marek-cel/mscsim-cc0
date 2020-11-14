@@ -125,10 +125,7 @@
  *
  ******************************************************************************/
 
-#include <fdm_f35a/f35a_LandingGear.h>
-#include <fdm_f35a/f35a_Aircraft.h>
-
-#include <fdm/xml/fdm_XmlUtils.h>
+#include <fdm/main/fdm_Input.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -136,107 +133,8 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-F35A_LandingGear::F35A_LandingGear( const F35A_Aircraft *aircraft, Input *input ) :
-    LandingGear( aircraft, input ),
-    _aircraft ( aircraft )
-{}
+Input::Input() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-F35A_LandingGear::~F35A_LandingGear() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void F35A_LandingGear::readData( XmlNode &dataNode )
-{
-    if ( dataNode.isValid() )
-    {
-        if ( FDM_SUCCESS != readWheelsData( dataNode, _wheels ) )
-        {
-            XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-        }
-    }
-    else
-    {
-        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void F35A_LandingGear::computeForceAndMoment()
-{
-    _for_bas.zeroize();
-    _mom_bas.zeroize();
-
-    for ( Wheels::iterator it = _wheels.begin(); it != _wheels.end(); ++it )
-    {
-        Wheel &wheel = (*it).second.wheel;
-
-        if ( wheel.getPosition() >= 1.0 )
-        {
-            Vector3 r_c_bas;
-            Vector3 n_c_bas;
-
-            getIsect( wheel.getRa_BAS(), wheel.getRu_BAS(), &r_c_bas, &n_c_bas );
-
-            wheel.computeForceAndMoment( _aircraft->getVel_BAS(),
-                                         _aircraft->getOmg_BAS(),
-                                         r_c_bas,
-                                         n_c_bas,
-                                         _steering, _antiskid );
-
-            _for_bas += wheel.getFor_BAS();
-            _mom_bas += wheel.getMom_BAS();
-        }
-    }
-
-    if ( !_for_bas.isValid() || !_mom_bas.isValid() )
-    {
-        Exception e;
-
-        e.setType( Exception::UnexpectedNaN );
-        e.setInfo( "NaN detected in the landing gear model." );
-
-        FDM_THROW( e );
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void F35A_LandingGear::update()
-{
-    //////////////////////
-    LandingGear::update();
-    //////////////////////
-
-    _brake_l = _aircraft->getCtrl()->getBrakeL();
-    _brake_r = _aircraft->getCtrl()->getBrakeR();
-
-    _ctrlAngle = _aircraft->getCtrl()->getNoseWheel();
-
-    for ( Wheels::iterator it = _wheels.begin(); it != _wheels.end(); ++it )
-    {
-        DataRef &input = (*it).second.input;
-        Wheel   &wheel = (*it).second.wheel;
-
-        Vector3 r_c_bas;
-        Vector3 n_c_bas;
-
-        getIsect( wheel.getRa_BAS(), wheel.getRu_BAS(), &r_c_bas, &n_c_bas );
-
-        wheel.integrate( _aircraft->getTimeStep(),
-                         _aircraft->getVel_BAS(),
-                         _aircraft->getOmg_BAS(),
-                         r_c_bas,
-                         n_c_bas,
-                         _steering );
-
-        double brake = 0.0;
-        if      ( wheel.getBrakeGroup() == Wheel::Both  ) brake = 0.5 * ( _brake_l + _brake_r );
-        else if ( wheel.getBrakeGroup() == Wheel::Left  ) brake = _brake_l;
-        else if ( wheel.getBrakeGroup() == Wheel::Right ) brake = _brake_r;
-
-        wheel.update( input.isValid() ? input.getValue() : 1.0, _ctrlAngle, brake );
-    }
-}
+Input::~Input() {}

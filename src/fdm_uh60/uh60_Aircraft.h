@@ -155,7 +155,7 @@ class UH60_Aircraft : public Aircraft
 public:
 
     /** Constructor. */
-    UH60_Aircraft( DataNode *rootNode );
+    UH60_Aircraft( Input *input );
 
     /** Destructor. */
     ~UH60_Aircraft();
