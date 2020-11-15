@@ -148,6 +148,10 @@ public:
 
     /** Destructor. */
     virtual ~Input();
+
+private:
+
+    void init();
 };
 
 } // end of fdm namespace

@@ -177,8 +177,11 @@ public:
         Both                    ///< 3: both brake groups
     };
 
-    /** Constructor. */
-    Wheel( bool coupled = false );
+    /**
+     * Constructor.
+     * @param staticFriction specifies if static friction model is enabled
+     */
+    Wheel( bool staticFriction = true );
 
     /** Destructor. */
     virtual ~Wheel();
@@ -274,7 +277,7 @@ protected:
     double _delta;          ///< [rad] wheel turn angle
     double _brake;          ///< <0.0;1.0> normalized brake force
 
-    bool _coupled;          ///< specifies if roll and slip movement are coupled due to static friction break
+    bool _staticFriction;   ///< specifies if static friction model is enabled
 
     /**
      * Calculates wheel variables.
