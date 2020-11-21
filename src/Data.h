@@ -155,9 +155,6 @@ public:
             bool lightsTELS;                    ///< Taxiway Edge Lights System
             bool lightsTWRL;                    ///< Tower Lights
             bool lightsVGSI;                    ///< Visual Glide Slope Indicator
-
-            bool gatesRwy18;                    ///<
-            bool gatesRwy36;                    ///<
         };
 
         /** Camera data. */

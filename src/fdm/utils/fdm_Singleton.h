@@ -124,16 +124,16 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef CGI_SINGLETON_H
-#define CGI_SINGLETON_H
+#ifndef FDM_SINGLETON_H
+#define FDM_SINGLETON_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <cgi/cgi_Defines.h>
+#include <fdm/fdm_Defines.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace cgi
+namespace fdm
 {
 
 /**
@@ -144,7 +144,10 @@ class Singleton
 {
 public:
 
-    /** */
+    /**
+     * Returns singleton object instance pointer, creates it if necessary.
+     * @return singleton object instance pointer
+     */
     static TYPE* instance()
     {
         if ( !_instance )
@@ -157,15 +160,15 @@ public:
 
 private:
 
-    static TYPE *_instance;     ///<
+    static TYPE *_instance;     ///< singleton object instance pointer
 };
 
-} // end of cgi namespace
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template < class TYPE > TYPE* cgi::Singleton< TYPE >::_instance = NULLPTR;
+template < class TYPE > TYPE* fdm::Singleton< TYPE >::_instance = FDM_NULLPTR;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // CGI_SINGLETON_H
+#endif // FDM_SINGLETON_H

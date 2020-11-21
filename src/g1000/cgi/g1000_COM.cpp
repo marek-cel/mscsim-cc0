@@ -177,7 +177,7 @@ void COM::create()
     _root->addChild( geode.get() );
 
     osg::ref_ptr<osgText::Text> textLabel1 = new osgText::Text();
-    textLabel1->setFont( Fonts::get( "data/fonts/g1000.ttf" ) );
+    textLabel1->setFont( Fonts::get( "fonts/g1000.ttf" ) );
     textLabel1->setColor( osg::Vec4( Colors::_white, 1.0 ) );
     textLabel1->setCharacterSize( 3.0 );
     textLabel1->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -188,7 +188,7 @@ void COM::create()
     geode->addDrawable( textLabel1 );
 
     osg::ref_ptr<osgText::Text> textLabel2 = new osgText::Text();
-    textLabel2->setFont( Fonts::get( "data/fonts/g1000.ttf" ) );
+    textLabel2->setFont( Fonts::get( "fonts/g1000.ttf" ) );
     textLabel2->setColor( osg::Vec4( Colors::_white, 1.0 ) );
     textLabel2->setCharacterSize( 3.0 );
     textLabel2->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -199,7 +199,7 @@ void COM::create()
     geode->addDrawable( textLabel2 );
 
     _textComActive1 = new osgText::Text();
-    _textComActive1->setFont( Fonts::get( "data/fonts/g1000.ttf" ) );
+    _textComActive1->setFont( Fonts::get( "fonts/g1000.ttf" ) );
     _textComActive1->setColor( osg::Vec4( Colors::_white, 1.0 ) );
     _textComActive1->setCharacterSize( 4.0 );
     _textComActive1->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -210,7 +210,7 @@ void COM::create()
     geode->addDrawable( _textComActive1 );
 
     _textComActive2 = new osgText::Text();
-    _textComActive2->setFont( Fonts::get( "data/fonts/g1000.ttf" ) );
+    _textComActive2->setFont( Fonts::get( "fonts/g1000.ttf" ) );
     _textComActive2->setColor( osg::Vec4( Colors::_white, 1.0 ) );
     _textComActive2->setCharacterSize( 4.0 );
     _textComActive2->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -221,7 +221,7 @@ void COM::create()
     geode->addDrawable( _textComActive2 );
 
     _textComStandby1 = new osgText::Text();
-    _textComStandby1->setFont( Fonts::get( "data/fonts/g1000.ttf" ) );
+    _textComStandby1->setFont( Fonts::get( "fonts/g1000.ttf" ) );
     _textComStandby1->setColor( osg::Vec4( Colors::_white, 1.0 ) );
     _textComStandby1->setCharacterSize( 4.0 );
     _textComStandby1->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -232,7 +232,7 @@ void COM::create()
     geode->addDrawable( _textComStandby1 );
 
     _textComStandby2 = new osgText::Text();
-    _textComStandby2->setFont( Fonts::get( "data/fonts/g1000.ttf" ) );
+    _textComStandby2->setFont( Fonts::get( "fonts/g1000.ttf" ) );
     _textComStandby2->setColor( osg::Vec4( Colors::_white, 1.0 ) );
     _textComStandby2->setCharacterSize( 4.0 );
     _textComStandby2->setAxisAlignment( osgText::TextBase::XY_PLANE );

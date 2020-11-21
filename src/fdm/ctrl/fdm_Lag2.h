@@ -124,90 +124,72 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm/sys/fdm_LeadLag.h>
-
-#include <algorithm>
-#include <cmath>
+#ifndef FDM_LAG2_H
+#define FDM_LAG2_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using namespace fdm;
+#include <fdm/ctrl/fdm_Lag.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-LeadLag::LeadLag() :
-    _c1 ( 0.0 ),
-    _c2 ( 0.0 ),
-    _c3 ( 0.0 ),
-    _c4 ( 0.0 ),
-    _u_prev ( 0.0 ),
-    _y_prev ( 0.0 ),
-    _y ( 0.0 )
-{}
-
-////////////////////////////////////////////////////////////////////////////////
-
-LeadLag::LeadLag( double c1, double c2, double c3, double c4, double y ) :
-    _c1 ( c1 ),
-    _c2 ( c2 ),
-    _c3 ( c3 ),
-    _c4 ( c4 ),
-    _u_prev ( 0.0 ),
-    _y_prev ( y ),
-    _y ( y )
-{}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void LeadLag::setValue( double y )
+namespace fdm
 {
-    _y = y;
-}
+
+/**
+ * @brief Second-order lag class.
+ *
+ * Transfer function:
+ * G(s)  =  1 / ( Tc1*s + 1 )( Tc2*s + 1 )
+ */
+class FDMEXPORT Lag2
+{
+public:
+
+    /** Constructor. */
+    Lag2();
+
+    Lag2( double tc1, double tc2, double y = 0.0 );
+
+    virtual ~Lag2();
+
+    inline double getValue() const { return _y; }
+
+    /**
+     * Sets output value
+     * @param youtput value
+     */
+    void setValue( double y );
+
+    /**
+     * Sets time constant tc1.
+     * @param tc1 time constant tc1
+     */
+    void setTimeConst1( double tc1 );
+
+    /**
+     * Sets time constant tc2.
+     * @param tc2 time constant tc2
+     */
+    void setTimeConst2( double tc2 );
+
+    /**
+     * Updates element due to time step and input value
+     * @param u input value
+     * @param dt [s] time step
+     */
+    void update( double u, double dt );
+
+protected:
+
+    Lag *_lag1;             ///< first-order lag element
+
+    double _tc2;            ///< time constant
+    double _y;              ///< current value
+};
+
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void LeadLag::setC1( double c1 )
-{
-    _c1 = c1;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void LeadLag::setC2( double c2 )
-{
-    _c2 = c2;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void LeadLag::setC3( double c3 )
-{
-    _c3 = c3;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void LeadLag::setC4( double c4 )
-{
-    _c4 = c4;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void LeadLag::update( double u, double dt )
-{
-    if ( dt > 0.0 )
-    {
-        double den = 2.0 * _c3 + dt * _c4;
-
-        double ca = ( 2.0 * _c1 + dt  * _c2 ) / den;
-        double cb = ( dt  * _c2 - 2.0 * _c1 ) / den;
-        double cc = ( 2.0 * _c3 - dt  * _c4 ) / den;
-
-        _y = u * ca + _u_prev * cb + _y_prev * cc;
-
-        _u_prev = u;
-        _y_prev = _y;
-    }
-}
+#endif // FDM_LAG2_H

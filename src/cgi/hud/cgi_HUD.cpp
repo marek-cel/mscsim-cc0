@@ -573,7 +573,7 @@ void HUD::createHeadingScale()
 
         osg::ref_ptr<osgText::Text> text = new osgText::Text();
         _texts.push_back( text );
-        text->setFont( Fonts::get( "data/fonts/hud.ttf" ) );
+        text->setFont( Fonts::get( "fonts/hud.ttf" ) );
         text->setColor( _color );
         text->setCharacterSize( _charSize );
         text->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -816,7 +816,7 @@ void HUD::createStall()
 
     osg::ref_ptr<osgText::Text> text = new osgText::Text();
     _texts.push_back( text );
-    text->setFont( Fonts::get( "data/fonts/hud.ttf" ) );
+    text->setFont( Fonts::get( "fonts/hud.ttf" ) );
     text->setColor( _color );
     text->setCharacterSize( 2 * _charSize );
     text->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -866,7 +866,7 @@ void HUD::createTextL()
 
         osg::ref_ptr<osgText::Text> text = new osgText::Text();
         _texts.push_back( text );
-        text->setFont( Fonts::get( "data/fonts/hud.ttf" ) );
+        text->setFont( Fonts::get( "fonts/hud.ttf" ) );
         text->setColor( _color );
         text->setCharacterSize( _charSize );
         text->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -884,7 +884,7 @@ void HUD::createTextL()
 
         osg::ref_ptr<osgText::Text> text = new osgText::Text();
         _texts.push_back( text );
-        text->setFont( Fonts::get( "data/fonts/hud.ttf" ) );
+        text->setFont( Fonts::get( "fonts/hud.ttf" ) );
         text->setColor( _color );
         text->setCharacterSize( _charSize );
         text->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -902,7 +902,7 @@ void HUD::createTextL()
 
         osg::ref_ptr<osgText::Text> text = new osgText::Text();
         _texts.push_back( text );
-        text->setFont( Fonts::get( "data/fonts/hud.ttf" ) );
+        text->setFont( Fonts::get( "fonts/hud.ttf" ) );
         text->setColor( _color );
         text->setCharacterSize( _charSize );
         text->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -953,7 +953,7 @@ void HUD::createTextR()
 
         osg::ref_ptr<osgText::Text> text = new osgText::Text();
         _texts.push_back( text );
-        text->setFont( Fonts::get( "data/fonts/hud.ttf" ) );
+        text->setFont( Fonts::get( "fonts/hud.ttf" ) );
         text->setColor( _color );
         text->setCharacterSize( _charSize );
         text->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -971,7 +971,7 @@ void HUD::createTextR()
 
         osg::ref_ptr<osgText::Text> text = new osgText::Text();
         _texts.push_back( text );
-        text->setFont( Fonts::get( "data/fonts/hud.ttf" ) );
+        text->setFont( Fonts::get( "fonts/hud.ttf" ) );
         text->setColor( _color );
         text->setCharacterSize( _charSize );
         text->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -989,7 +989,7 @@ void HUD::createTextR()
 
         osg::ref_ptr<osgText::Text> text = new osgText::Text();
         _texts.push_back( text );
-        text->setFont( Fonts::get( "data/fonts/hud.ttf" ) );
+        text->setFont( Fonts::get( "fonts/hud.ttf" ) );
         text->setColor( _color );
         text->setCharacterSize( _charSize );
         text->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -1088,7 +1088,7 @@ void HUD::createPitchLadderBar( osg::Geode *geode, int y, int deg )
     {
         osg::ref_ptr<osgText::Text> text = new osgText::Text();
         _texts.push_back( text );
-        text->setFont( Fonts::get( "data/fonts/hud.ttf" ) );
+        text->setFont( Fonts::get( "fonts/hud.ttf" ) );
         text->setColor( _color );
         text->setCharacterSize( _charSize );
         text->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -1103,7 +1103,7 @@ void HUD::createPitchLadderBar( osg::Geode *geode, int y, int deg )
     {
         osg::ref_ptr<osgText::Text> text = new osgText::Text();
         _texts.push_back( text );
-        text->setFont( Fonts::get( "data/fonts/hud.ttf" ) );
+        text->setFont( Fonts::get( "fonts/hud.ttf" ) );
         text->setColor( _color );
         text->setCharacterSize( _charSize );
         text->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -1129,7 +1129,7 @@ void HUD::createHeadingScaleBar( osg::Geode *geode, float y_del, int x, int deg1
 
     osg::ref_ptr<osgText::Text> text = new osgText::Text();
     _texts.push_back( text );
-    text->setFont( Fonts::get( "data/fonts/hud.ttf" ) );
+    text->setFont( Fonts::get( "fonts/hud.ttf" ) );
     text->setColor( _color );
     text->setCharacterSize( _charSize );
     text->setAxisAlignment( osgText::TextBase::XY_PLANE );

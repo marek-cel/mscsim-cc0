@@ -124,109 +124,39 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_ANGLES_H
-#define FDM_ANGLES_H
+
+#include <fdm/ctrl/fdm_LPF.h>
+
+#include <algorithm>
+#include <cmath>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <string>
-
-#include <fdm/fdm_Defines.h>
+using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
+LPF::LPF() :
+    Lag( 1.0, 0.0 )
+{}
+
+////////////////////////////////////////////////////////////////////////////////
+
+LPF::LPF( double omega, double y ) :
+    Lag( 1.0 / omega, y )
+{}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void LPF::setOmega( double omega )
 {
-
-/**
- * @brief Tait-Bryant angles class.
- *
- * This class represents three angles of rotation about three axes in Z-Y-X
- * (yaw-pitch-roll) convention.
- *
- * @see https://en.wikipedia.org/wiki/Euler_angles
- */
-class FDMEXPORT Angles
-{
-public:
-
-    /** Degree-Minute-Second subdivision data struct. */
-    struct DegMinSec
-    {
-        int    deg;     ///< degree part
-        int    min;     ///< minute part (always greater than or equal to 0)
-        double sec;     ///< second part (always greater than or equal to 0)
-    };
-
-    /**
-     * Normalizes angle within [min,min+2*pi] range.
-     * @param val angle to be normalized
-     * @param min minimum value
-     * @return normalized angle
-     */
-    static double normalize( double val, double min = 0.0 );
-
-    /**
-     * @brief Returns angle represented as Degree-Minute-Second.
-     * @param val [rad] given angle
-     * @return Degree-Minute-Second representation
-     */
-    static DegMinSec toDegMinSec( double val );
-
-    /** Constructor. */
-    Angles();
-
-    /** Copy constructor. */
-    Angles( const Angles &angl );
-
-    /**
-     * Constructor.
-     * @param [rad] angle of rotation about x-axis
-     * @param [rad] angle of rotation about y-axis
-     * @param [rad] angle of rotation about z-axis
-     */
-    Angles( double phi, double tht, double psi );
-
-    /** @return 1 if all items are valid */
-    bool isValid() const;
-
-    /**
-     * @brief Normalizes angles.
-     * Limits phi to [-pi,pi] theta to [-pi/2,pi/2] and psi to [0,2*pi].
-     */
-    void normalize();
-
-    inline double  phi() const { return _phi; }
-    inline double  tht() const { return _tht; }
-    inline double  psi() const { return _psi; }
-    inline double& phi()       { return _phi; }
-    inline double& tht()       { return _tht; }
-    inline double& psi()       { return _psi; }
-
-    /** Sets angles values. */
-    void set( double phi, double tht, double psi );
-
-    /** This function returns string represtation of the angles. */
-    std::string toString() const;
-
-    /** Assignment operator. */
-    const Angles& operator= ( const Angles &angl );
-
-    /** Equality operator. */
-    bool operator== ( const Angles &angl ) const;
-
-    /** Inequality operator. */
-    bool operator!= ( const Angles &angl ) const;
-
-private:
-
-    double _phi;    ///< [rad] angle of rotation about x-axis
-    double _tht;    ///< [rad] angle of rotation about y-axis
-    double _psi;    ///< [rad] angle of rotation about z-axis
-};
-
-} // end of fdm namespace
+    _tc = 1.0 / std::max( 0.0, omega );
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // FDM_ANGLES_H
+void LPF::setCutoffFreq( double freq )
+{
+    double omega = 2.0 * M_PI * std::max( 0.0, freq );
+    _tc = 1.0 / omega;
+}

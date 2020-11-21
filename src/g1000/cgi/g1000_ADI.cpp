@@ -639,7 +639,7 @@ void ADI::createPitchScaleBar( osg::Geode *geode, osg::Vec3Array *v,
         // text L
         {
             osg::ref_ptr<osgText::Text> text = new osgText::Text();
-            text->setFont( Fonts::get( "data/fonts/g1000.ttf" ) );
+            text->setFont( Fonts::get( "fonts/g1000.ttf" ) );
             text->setColor( osg::Vec4( Colors::_white, 1.0 ) );
             text->setCharacterSize( 4.0 );
             text->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -653,7 +653,7 @@ void ADI::createPitchScaleBar( osg::Geode *geode, osg::Vec3Array *v,
         // text R
         {
             osg::ref_ptr<osgText::Text> text = new osgText::Text();
-            text->setFont( Fonts::get( "data/fonts/g1000.ttf" ) );
+            text->setFont( Fonts::get( "fonts/g1000.ttf" ) );
             text->setColor( osg::Vec4( Colors::_white, 1.0 ) );
             text->setCharacterSize( 4.0 );
             text->setAxisAlignment( osgText::TextBase::XY_PLANE );

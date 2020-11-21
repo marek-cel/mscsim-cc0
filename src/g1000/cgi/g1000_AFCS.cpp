@@ -178,7 +178,7 @@ void AFCS::create()
     _root->addChild( geode.get() );
 
     _textStateAP = new osgText::Text();
-    _textStateAP->setFont( Fonts::get( "data/fonts/g1000.ttf" ) );
+    _textStateAP->setFont( Fonts::get( "fonts/g1000.ttf" ) );
     _textStateAP->setColor( osg::Vec4( Colors::_lime, 1.0 ) );
     _textStateAP->setCharacterSize( 5.0 );
     _textStateAP->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -189,7 +189,7 @@ void AFCS::create()
     geode->addDrawable( _textStateAP );
 
     _textModeLat = new osgText::Text();
-    _textModeLat->setFont( Fonts::get( "data/fonts/g1000.ttf" ) );
+    _textModeLat->setFont( Fonts::get( "fonts/g1000.ttf" ) );
     _textModeLat->setColor( osg::Vec4( Colors::_lime, 1.0 ) );
     _textModeLat->setCharacterSize( 5.0 );
     _textModeLat->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -200,7 +200,7 @@ void AFCS::create()
     geode->addDrawable( _textModeLat );
 
     _textModeLatArm = new osgText::Text();
-    _textModeLatArm->setFont( Fonts::get( "data/fonts/g1000.ttf" ) );
+    _textModeLatArm->setFont( Fonts::get( "fonts/g1000.ttf" ) );
     _textModeLatArm->setColor( osg::Vec4( Colors::_white, 1.0 ) );
     _textModeLatArm->setCharacterSize( 4.0 );
     _textModeLatArm->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -211,7 +211,7 @@ void AFCS::create()
     geode->addDrawable( _textModeLatArm );
 
     _textModeVer = new osgText::Text();
-    _textModeVer->setFont( Fonts::get( "data/fonts/g1000.ttf" ) );
+    _textModeVer->setFont( Fonts::get( "fonts/g1000.ttf" ) );
     _textModeVer->setColor( osg::Vec4( Colors::_lime, 1.0 ) );
     _textModeVer->setCharacterSize( 5.0 );
     _textModeVer->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -222,7 +222,7 @@ void AFCS::create()
     geode->addDrawable( _textModeVer );
 
     _textModeVerRef = new osgText::Text();
-    _textModeVerRef->setFont( Fonts::get( "data/fonts/g1000.ttf" ) );
+    _textModeVerRef->setFont( Fonts::get( "fonts/g1000.ttf" ) );
     _textModeVerRef->setColor( osg::Vec4( Colors::_lime, 1.0 ) );
     _textModeVerRef->setCharacterSize( 5.0 );
     _textModeVerRef->setAxisAlignment( osgText::TextBase::XY_PLANE );
@@ -233,7 +233,7 @@ void AFCS::create()
     geode->addDrawable( _textModeVerRef );
 
     _textModeVerArm = new osgText::Text();
-    _textModeVerArm->setFont( Fonts::get( "data/fonts/g1000.ttf" ) );
+    _textModeVerArm->setFont( Fonts::get( "fonts/g1000.ttf" ) );
     _textModeVerArm->setColor( osg::Vec4( Colors::_white, 1.0 ) );
     _textModeVerArm->setCharacterSize( 4.0 );
     _textModeVerArm->setAxisAlignment( osgText::TextBase::XY_PLANE );

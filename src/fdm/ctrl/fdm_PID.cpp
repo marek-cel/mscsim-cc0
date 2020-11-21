@@ -124,61 +124,184 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_LPF_H
-#define FDM_LPF_H
+
+#include <fdm/ctrl/fdm_PID.h>
+
+#include <algorithm>
+#include <limits>
+
+#include <fdm/utils/fdm_Misc.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/sys/fdm_Lag.h>
+using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
+PID::PID( double kp, double ki, double kd ) :
+    _antiWindup ( None ),
+
+    _kp ( kp ),
+    _ki ( ki ),
+    _kd ( kd ),
+
+    _kaw ( 0.0 ),
+
+    _min ( std::numeric_limits< double >::min() ),
+    _max ( std::numeric_limits< double >::max() ),
+
+    _error   ( 0.0 ),
+    _error_i ( 0.0 ),
+    _error_d ( 0.0 ),
+
+    _value ( 0.0 ),
+    _delta ( 0.0 ),
+
+    _saturation ( false )
+{}
+
+////////////////////////////////////////////////////////////////////////////////
+
+PID::PID( double kp, double ki, double kd, double min, double max ) :
+    _antiWindup ( None ),
+
+    _kp ( kp ),
+    _ki ( ki ),
+    _kd ( kd ),
+
+    _kaw ( 0.0 ),
+
+    _min ( min ),
+    _max ( max ),
+
+    _error   ( 0.0 ),
+    _error_i ( 0.0 ),
+    _error_d ( 0.0 ),
+
+    _value ( 0.0 ),
+    _delta ( 0.0 ),
+
+    _saturation ( true )
+{}
+
+////////////////////////////////////////////////////////////////////////////////
+
+PID::~PID() {}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void PID::update( double timeStep, double error )
 {
+    if ( timeStep > 0.0 )
+    {
+        double error_i = _error_i;
 
-/**
- * @brief First-order low-pass filter (LPF) class.
- *
- * Transfer function:
- * G(s)  =  1 / ( Tc*s + 1 )  =  omega / ( s + omega )  =  1 / ( s/omega + 1 )
- *
- * First-order low-pass filter is based on a first-order lag element.
- */
-class FDMEXPORT LPF : public Lag
-{
-public:
+        _error_i = _error_i + ( error - _kaw * _delta ) * timeStep;
+        _error_d = ( timeStep > 0.0 ) ? ( error - _error ) / timeStep : 0.0;
 
-    /** Constructor. */
-    LPF();
+        _error = error;
 
-    /**
-     * Constructor.
-     * @param omega [rad/s] cutoff angular frequency
-     * @param y initial output value
-     */
-    LPF( double omega, double y = 0.0 );
+        double value_pd = _kp * _error + _kd * _error_d;
+        double value = value_pd + _ki * _error_i;
 
-    /**
-     * Returns cutoff angular frequency.
-     * @return cutoff angular frequency
-     */
-    inline double getOmega() const { return 1.0 / _tc; }
+        if ( _saturation )
+        {
+            _value = Misc::satur( _min, _max, value );
 
-    /**
-     * Sets cutoff angular frequency.
-     * @param omega [rad/s] cutoff angular frequency
-     */
-    void setOmega( double omega );
-
-    /**
-     * Sets cutoff frequency.
-     * @param freq [Hz] cutoff frequency
-     */
-    void setCutoffFreq( double freq );
-};
-
-} // end of fdm namespace
+            // anti-windup
+            if ( _antiWindup == Calculation )
+            {
+                if ( fabs( _ki ) > 0.0 )
+                {
+                    value_pd = Misc::satur( _min, _max, value_pd );
+                    _error_i = ( _value - value_pd ) / _ki;
+                }
+            }
+            else if ( _antiWindup == Conditional )
+            {
+                if ( _value != value ) _error_i = error_i;
+            }
+            else if ( _antiWindup == Filtering )
+            {
+                _delta = value - _value;
+            }
+        }
+        else
+        {
+            _value = value;
+        }
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // FDM_LPF_H
+void PID::reset()
+{
+    _error_i = 0.0;
+    _error_d = 0.0;
+
+    _error = 0.0;
+
+    _value = 0.0;
+    _delta = 0.0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void PID::setParallel( double kp, double ki, double kd )
+{
+    _kp = kp;
+    _ki = ki;
+    _kd = kd;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void PID::setSerial( double k, double tau_i, double tau_d )
+{
+    _kp = k * ( 1.0 + tau_d / tau_i );
+    _ki = k / tau_i;
+    _kd = k * tau_d;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void PID::setStandard( double Kp, double Ti, double Td )
+{
+    _kp = Kp;
+    _ki = Kp / Ti;
+    _kd = Kp * Td;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void PID::setError( double error )
+{
+    _error = error;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void PID::setValue( double value )
+{
+    _error_i = fabs( _ki ) > 0.0 ? value / _ki : 0.0;
+    _error_d = 0.0;
+
+    _error = 0.0;
+
+    _value = value;
+    _delta = 0.0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void PID::setValue( double timeStep, double error, double value )
+{
+    _error_d = ( timeStep > 0.0 ) ? ( error - _error ) / timeStep : 0.0;
+    _error_i = fabs( _ki ) > 0.0 ? ( ( value  - _kp * error - _kd * _error_d ) / _ki ) : 0.0;
+
+    _error = error;
+
+    _value = value;
+    _delta = 0.0;
+}

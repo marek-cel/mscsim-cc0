@@ -129,7 +129,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/sys/fdm_PID.h>
+#include <fdm/ctrl/fdm_PID.h>
 #include <fdm/utils/fdm_Vector3.h>
 #include <fdm/xml/fdm_XmlNode.h>
 

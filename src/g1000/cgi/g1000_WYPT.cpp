@@ -173,7 +173,7 @@ void WYPT::create()
     _root->addChild( geode.get() );
 
     _textWYPT = new osgText::Text();
-    _textWYPT->setFont( Fonts::get( "data/fonts/g1000.ttf" ) );
+    _textWYPT->setFont( Fonts::get( "fonts/g1000.ttf" ) );
     _textWYPT->setColor( osg::Vec4( Colors::_magenta, 1.0 ) );
     _textWYPT->setCharacterSize( 5.0 );
     _textWYPT->setAxisAlignment( osgText::TextBase::XY_PLANE );

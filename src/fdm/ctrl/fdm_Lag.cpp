@@ -124,58 +124,59 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_LAG2_H
-#define FDM_LAG2_H
+
+#include <fdm/ctrl/fdm_Lag.h>
+
+#include <cmath>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/sys/fdm_Lag.h>
+using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
+double Lag::update( double u, double y, double dt, double tc )
 {
-
-/**
- * @brief Second-order lag class.
- *
- * Transfer function:
- * G(s)  =  1 / ( Tc1*s + 1 )( Tc2*s + 1 )
- */
-class FDMEXPORT Lag2
-{
-public:
-
-    /** Constructor. */
-    Lag2();
-
-    Lag2( double tc1, double tc2, double y = 0.0 );
-
-    virtual ~Lag2();
-
-    inline double getValue() const { return _y; }
-
-    void setValue( double y );
-    void setTimeConst1( double tc1 );
-    void setTimeConst2( double tc2 );
-
-    /**
-     * Updates element due to time step and input value
-     * @param u input value
-     * @param dt [s] time step
-     */
-    void update( double u, double dt );
-
-protected:
-
-    Lag *_lag1;             ///< first-order lag element
-
-    double _tc2;            ///< time constant
-    double _y;              ///< current value
-};
-
-} // end of fdm namespace
+    return y + ( 1.0 - exp( -dt / tc ) ) * ( u - y );
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // FDM_LAG2_H
+Lag::Lag() :
+    _tc( 1.0 ),
+    _y ( 0.0 )
+{}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Lag::Lag( double tc, double y ) :
+    _tc ( tc ),
+    _y ( y )
+{}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Lag::setValue( double y )
+{
+    _y = y;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Lag::setTimeConst( double tc )
+{
+    if ( tc > 0.0 )
+    {
+        _tc = tc;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Lag::update( double u, double dt )
+{
+    if ( dt > 0.0 )
+    {
+        _y = update( u, _y, dt, _tc );
+    }
+}

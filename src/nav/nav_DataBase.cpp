@@ -147,10 +147,6 @@ using namespace nav;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-DataBase* DataBase::_instance = NULLPTR;
-
-////////////////////////////////////////////////////////////////////////////////
-
 double DataBase::getTrueBearing( const char *str_bear, const char *str_magvar )
 {
     double bear = fdm::Units::deg2rad( fdm::String::toDouble( str_bear ) );
@@ -195,7 +191,7 @@ double DataBase::getTrueBearing( const char *str_bear, const char *str_magvar )
 
 DataBase::DataBase()
 {
-    QFile file( Path::get( "data/nav/nav_db.xml" ).c_str() );
+    QFile file( Path::get( "nav/nav_db.xml" ).c_str() );
 
     if ( file.open(QFile::ReadOnly | QFile::Text) )
     {

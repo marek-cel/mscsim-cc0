@@ -132,7 +132,7 @@
 #include <osg/LOD>
 #include <osg/NodeVisitor>
 
-#include <cgi/cgi_Singleton.h>
+#include <sim/Singleton.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -160,13 +160,7 @@ public:
     /** Reads object from file. */
     static osg::Node* readNodeFile( std::string objectFile );
 
-    /** Destructor. */
-    virtual ~Models();
-
 private:
-
-    List _objects;                          ///< objects list
-    std::vector< std::string > _fileNames;  ///< file names
 
     /**
      * You should use static function instance() due to get refernce
@@ -176,6 +170,16 @@ private:
 
     /** Using this constructor is forbidden. */
     Models( const Models & ) : Singleton< Models >() {}
+
+public:
+
+    /** Destructor. */
+    virtual ~Models();
+
+private:
+
+    List _objects;                          ///< objects list
+    std::vector< std::string > _fileNames;  ///< file names
 };
 
 } // end of cgi namespace

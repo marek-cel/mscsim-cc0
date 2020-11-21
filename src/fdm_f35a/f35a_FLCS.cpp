@@ -129,7 +129,7 @@
 
 #include <algorithm>
 
-#include <fdm/sys/fdm_Lag.h>
+#include <fdm/ctrl/fdm_Lag.h>
 #include <fdm/utils/fdm_Misc.h>
 #include <fdm/utils/fdm_Units.h>
 

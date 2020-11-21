@@ -131,7 +131,7 @@
 
 #include <fdm/models/fdm_MainRotor.h>
 
-#include <fdm/sys/fdm_Lag.h>
+#include <fdm/ctrl/fdm_Lag.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 

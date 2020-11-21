@@ -125,7 +125,7 @@
  *
  ******************************************************************************/
 
-#include <fdm/sys/fdm_Filter2.h>
+#include <fdm/ctrl/fdm_Filter2.h>
 
 #include <algorithm>
 #include <cmath>

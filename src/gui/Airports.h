@@ -132,13 +132,17 @@
 #include <QDomElement>
 #include <QVector>
 
+#include <sim/Singleton.h>
+
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
  * @brief Airports class.
  */
-class Airports
+class Airports : public Singleton< Airports >
 {
+    friend class Singleton< Airports >;
+
 public:
 
     /** */
@@ -164,17 +168,6 @@ public:
         QVector< Location > locations;  ///< locations
     };
 
-    /** */
-    static inline Airports* instance()
-    {
-        if ( !_instance )
-        {
-            _instance = new Airports();
-        }
-
-        return _instance;
-    }
-
     /** Destructor. */
     virtual ~Airports();
 
@@ -188,8 +181,6 @@ public:
     inline Location getDefault() const { return _default; }
 
 private:
-
-    static Airports *_instance;         ///< instance of Airports singleton class
 
     QVector< Airport > _airports;       ///< airports
 

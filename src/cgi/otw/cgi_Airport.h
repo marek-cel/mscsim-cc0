@@ -175,9 +175,6 @@ private:
     osg::ref_ptr<osg::Switch> _switchLightsHELI;
     osg::ref_ptr<osg::Switch> _switchLightsTELS;
     osg::ref_ptr<osg::Switch> _switchLightsTWRL;
-
-    osg::ref_ptr<osg::Switch> _switchGatesRwyL;
-    osg::ref_ptr<osg::Switch> _switchGatesRwyH;
 };
 
 } // end of cgi namespace

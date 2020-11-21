@@ -125,8 +125,9 @@
  *
  ******************************************************************************/
 
-#include <fdm/sys/fdm_Lag2.h>
+#include <fdm/ctrl/fdm_HPF.h>
 
+#include <algorithm>
 #include <cmath>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -135,56 +136,53 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Lag2::Lag2() :
-    _lag1 ( new Lag( 0.0, 0.0 ) ),
-    _tc2 ( 0.0 ),
+HPF::HPF() :
+    _omega ( 1.0 ),
+    _tc ( 1.0 ),
+    _u_prev ( 0.0 ),
     _y ( 0.0 )
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Lag2::Lag2( double tc1, double tc2, double y ) :
-    _lag1 ( new Lag( tc1, y ) ),
-    _tc2 ( tc2 ),
+HPF::HPF( double omega, double y ) :
+    _omega ( omega ),
+    _tc ( 1.0 / _omega ),
+    _u_prev ( 0.0 ),
     _y ( y )
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Lag2::~Lag2()
+void HPF::setValue( double y )
 {
-    FDM_DELPTR( _lag1 );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void Lag2::setValue( double y )
-{
-    _lag1->setValue( y );
     _y = y;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Lag2::setTimeConst1( double tc1 )
+void HPF::setOmega( double omega )
 {
-    _lag1->setTimeConst( tc1 );
+    _omega = std::max( 0.0, omega );
+    _tc = 1.0 / _omega;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Lag2::setTimeConst2( double tc2 )
+void HPF::setCutoffFreq( double freq )
 {
-    _tc2 = tc2;
+    _omega = 2.0 * M_PI * std::max( 0.0, freq );
+    _tc = 1.0 / _omega;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Lag2::update( double u, double dt )
+void HPF::update( double u, double dt )
 {
     if ( dt > 0.0 )
     {
-        _lag1->update( u, dt );
-        _y = Lag::update( _lag1->getValue(), _y, dt, _tc2 );
+        double u_dif = ( dt > 0.0 ) ? ( u - _u_prev ) / dt : 0.0;
+        _y = _y + ( 1.0 - exp( -dt / _tc ) ) * ( _tc * u_dif - _y );
+        _u_prev = u;
     }
 }

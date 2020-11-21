@@ -135,7 +135,7 @@
 
 #include <osgUtil/IntersectionVisitor>
 
-#include <cgi/cgi_Singleton.h>
+#include <sim/Singleton.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -159,6 +159,19 @@ public:
         virtual osg::ref_ptr<osg::Node> readNodeFile( const std::string& filename );
 #       endif
     };
+
+private:
+
+    /**
+     * You should use static function instance() due to get refernce
+     * to Random class instance.
+     */
+    Intersections();
+
+    /** Using this constructor is forbidden. */
+    Intersections( const Intersections & ) {}
+
+public:
 
     /** Destructor. */
     virtual ~Intersections();
@@ -190,15 +203,6 @@ private:
 
 //    osg::ref_ptr<osgUtil::IntersectionVisitor> _iv;
 //    osg::ref_ptr<osgUtil::IntersectorGroup>    _ig;
-
-    /**
-     * You should use static function instance() due to get refernce
-     * to Random class instance.
-     */
-    Intersections();
-
-    /** Using this constructor is forbidden. */
-    Intersections( const Intersections & ) {}
 };
 
 } // end of cgi namespace

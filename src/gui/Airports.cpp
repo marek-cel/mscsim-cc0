@@ -137,10 +137,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Airports* Airports::_instance = NULLPTR;
-
-////////////////////////////////////////////////////////////////////////////////
-
 Airports::Airports()
 {
     _default.name   = "";
@@ -152,7 +148,7 @@ Airports::Airports()
     _default.slope  = 0.0;
     _default.runway = false;
 
-    QFile file( Path::get( "data/gui/airports.xml" ).c_str() );
+    QFile file( Path::get( "gui/airports.xml" ).c_str() );
 
     if ( file.open(QFile::ReadOnly | QFile::Text) )
     {
