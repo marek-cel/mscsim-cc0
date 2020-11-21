@@ -133,7 +133,7 @@ using namespace cgi;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-osg::Node* FindNode::findFirst( osg::Node* node, const char *name )
+osg::Node* FindNode::findFirst( osg::Node *node, const char *name )
 {
     if ( node )
     {
@@ -147,7 +147,7 @@ osg::Node* FindNode::findFirst( osg::Node* node, const char *name )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-FindNode::Nodes FindNode::findNodes( osg::Node* node, const char *name )
+FindNode::Nodes FindNode::findNodes( osg::Node *node, const char *name )
 {
     if ( node )
     {
