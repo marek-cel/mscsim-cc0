@@ -140,7 +140,7 @@
 namespace cgi
 {
 
-/** */
+/** Traces class. */
 class Traces : public Module
 {
 public:

@@ -170,7 +170,7 @@ public:
     /** Updates HUD. */
     void updateHUD();
 
-    /** Updates Map. */
+    /** Updates map. */
     void updateMap();
 
     /** Updates OTW. */

@@ -145,7 +145,9 @@ osgText::Font* Fonts::get( const char *fontFile )
         }
     }
 
-    osg::ref_ptr<osgText::Font> font = osgText::readFontFile( fontFile );
+    std::string filePath = Path::get( fontFile );
+
+    osg::ref_ptr<osgText::Font> font = osgText::readFontFile( filePath );
 
     if ( font.valid() )
     {
