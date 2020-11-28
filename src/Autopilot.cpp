@@ -127,13 +127,14 @@
 
 #include <Autopilot.h>
 
-#include <Common.h>
 #include <Data.h>
 
 #include <fdm/fdm_Exception.h>
 #include <fdm/utils/fdm_Units.h>
 
 #include <hid/hid_Manager.h>
+
+#include <sim/Log.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 

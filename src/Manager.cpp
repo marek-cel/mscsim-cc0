@@ -130,7 +130,6 @@
 #include <QApplication>
 #include <QSplashScreen>
 
-#include <Common.h>
 #include <Data.h>
 
 #include <fdm/utils/fdm_Units.h>
@@ -139,6 +138,8 @@
 
 #include <hid/hid_AxisTune.h>
 #include <hid/hid_Manager.h>
+
+#include <sim/Log.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -130,9 +130,9 @@
 #include <cmath>
 #include <cstring>
 
-#include <Common.h>
-
 #include <hid/hid_Joysticks.h>
+
+#include <sim/Log.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 

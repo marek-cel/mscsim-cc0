@@ -127,7 +127,8 @@
 
 #include <cgi/cgi_Fonts.h>
 
-#include <Common.h>
+#include <sim/Log.h>
+#include <sim/Path.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 

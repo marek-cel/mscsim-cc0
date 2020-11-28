@@ -140,13 +140,14 @@
 #include <fdm/xml/fdm_XmlDoc.h>
 #include <fdm/xml/fdm_XmlUtils.h>
 
-#include <Common.h>
 #include <Data.h>
 
 #include <cgi/cgi_Colors.h>
 #include <cgi/cgi_Defines.h>
 #include <cgi/cgi_FindNode.h>
 #include <cgi/cgi_Models.h>
+
+#include <sim/Path.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 

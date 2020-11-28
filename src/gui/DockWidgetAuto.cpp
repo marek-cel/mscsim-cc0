@@ -130,7 +130,6 @@
 
 #include <QSettings>
 
-#include <Common.h>
 #include <Data.h>
 
 #include <fdm/utils/fdm_Units.h>
@@ -139,6 +138,8 @@
 #include <gui/gui_Defines.h>
 
 #include <hid/hid_Manager.h>
+
+#include <sim/Path.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
