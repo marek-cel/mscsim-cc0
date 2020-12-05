@@ -145,7 +145,7 @@ class ManipulatorOrbit : public osgGA::NodeTrackerManipulator
 
 public:
 
-    /** Constructor. */
+    /** @brief Constructor. */
     ManipulatorOrbit();
 
     void setDistanceMin( double distance_min );

@@ -168,7 +168,7 @@ public:
         QVector< Location > locations;  ///< locations
     };
 
-    /** Destructor. */
+    /** @brief Destructor. */
     virtual ~Airports();
 
     inline Airport getAirport( int index ) const

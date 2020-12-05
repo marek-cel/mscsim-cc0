@@ -142,10 +142,10 @@ class ComboUnitsAngle : public ComboUnits
 
 public:
 
-    /** Constructor. */
+    /** @brief Constructor. */
     explicit ComboUnitsAngle( QWidget *parent = NULLPTR );
     
-    /** Destructor. */
+    /** @brief Destructor. */
     virtual ~ComboUnitsAngle();
 };
 

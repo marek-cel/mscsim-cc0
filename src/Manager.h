@@ -152,6 +152,7 @@ public:
 
     Manager();
 
+    /** @brief Destructor. */
     virtual ~Manager();
 
     void init();

@@ -148,10 +148,10 @@ class Thread : public QThread
 
 public:
 
-    /** Constructor. */
+    /** @brief Constructor. */
     Thread();
 
-    /** Destructor. */
+    /** @brief Destructor. */
     virtual ~Thread();
 
     /** */

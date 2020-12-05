@@ -142,10 +142,10 @@ class ComboUnitsLength : public ComboUnits
 
 public:
 
-    /** Constructor. */
+    /** @brief Constructor. */
     explicit ComboUnitsLength( QWidget *parent = NULLPTR );
     
-    /** Destructor. */
+    /** @brief Destructor. */
     virtual ~ComboUnitsLength();
 };
 

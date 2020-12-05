@@ -140,7 +140,7 @@
 namespace fdm
 {
 
-class F35A_Aircraft;    ///< aircraft class forward declaration
+class F35A_Aircraft;    // aircraft class forward declaration
 
 /**
  * @brief F-35A aerodynamics class.

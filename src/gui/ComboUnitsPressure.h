@@ -142,10 +142,10 @@ class ComboUnitsPressure : public ComboUnits
 
 public:
 
-    /** Constructor. */
+    /** @brief Constructor. */
     explicit ComboUnitsPressure( QWidget *parent = NULLPTR );
     
-    /** Destructor. */
+    /** @brief Destructor. */
     virtual ~ComboUnitsPressure();
 };
 

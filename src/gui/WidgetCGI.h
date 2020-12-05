@@ -142,10 +142,10 @@ class WidgetCGI : public WidgetOSG
 
 public:
 
-    /** Constructor. */
+    /** @brief Constructor. */
     WidgetCGI( QWidget *parent = NULLPTR );
 
-    /** Destructor. */
+    /** @brief Destructor. */
     virtual ~WidgetCGI();
 
 private:

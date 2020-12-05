@@ -157,10 +157,10 @@ class DockWidgetProp : public QDockWidget
 
 public:
 
-    /** Constructor. */
+    /** @brief Constructor. */
     explicit DockWidgetProp( QWidget *parent = NULLPTR );
 
-    /** Destructor. */
+    /** @brief Destructor. */
     ~DockWidgetProp();
 
     bool getFuel     ( int index ) const;

@@ -148,10 +148,10 @@ public:
     static const double _zNear;
     static const double _zFar;
 
-    /** Constructor. */
+    /** @brief Constructor. */
     WidgetOTW( QWidget *parent = NULLPTR );
 
-    /** Destructor. */
+    /** @brief Destructor. */
     virtual ~WidgetOTW();
 
     /** */

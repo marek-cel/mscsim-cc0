@@ -154,10 +154,10 @@ class DialogInit : public QDialog
 
 public:
 
-    /** Constructor. */
+    /** @brief Constructor. */
     explicit DialogInit( QWidget *parent = NULLPTR );
     
-    /** Destructor. */
+    /** @brief Destructor. */
     virtual ~DialogInit();
 
     inline QDateTime getDateTime() const { return _dateTime; }

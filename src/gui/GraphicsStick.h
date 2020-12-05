@@ -145,10 +145,10 @@ class GraphicsStick : public QGraphicsView
 
 public:
 
-    /** Constructor. */
+    /** @brief Constructor. */
     explicit GraphicsStick( QWidget *parent = NULLPTR );
 
-    /** Destructor. */
+    /** @brief Destructor. */
     virtual ~GraphicsStick();
 
     /** */

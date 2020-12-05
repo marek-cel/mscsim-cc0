@@ -139,7 +139,7 @@
 namespace fdm
 {
 
-class F16_Aircraft;     ///< aircraft class forward declaration
+class F16_Aircraft;     // aircraft class forward declaration
 
 /**
  * @brief F-16 aerodynamics class.

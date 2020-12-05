@@ -144,10 +144,10 @@ class Sample
 {
 public:
 
-    /** Constructor. */
+    /** @brief Constructor. */
     Sample( const char *file, bool looping = false );
 
-    /** Destructor. */
+    /** @brief Destructor. */
     virtual ~Sample();
 
     void play();

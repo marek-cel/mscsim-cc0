@@ -140,7 +140,7 @@
 namespace fdm
 {
 
-class PW5_Aircraft;    ///< aircraft class forward declaration
+class PW5_Aircraft;    // aircraft class forward declaration
 
 /**
  * @brief PW-5 aerodynamics class.

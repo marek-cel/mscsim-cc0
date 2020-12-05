@@ -140,7 +140,7 @@
 namespace fdm
 {
 
-class P51_Aircraft;    ///< aircraft class forward declaration
+class P51_Aircraft;    // aircraft class forward declaration
 
 /**
  * @brief P-51 aerodynamics class.

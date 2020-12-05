@@ -151,43 +151,46 @@ public:
 
     typedef std::map<std::string,std::string> Attributes;
 
-    /** Constructor. */
+    /** @brief Constructor. */
     XmlNode();
 
-    /** Copy constructor. */
+    /** @brief Copy constructor. */
     XmlNode( const XmlNode &node );
 
-    /** Constructor. */
+
     XmlNode( xmlNodePtr node, const char *file );
 
-    /** Destrcutor. */
+    /** @brief Destructor. */
     virtual ~XmlNode();
 
     /**
+     * @brief Returns the value of the attribute
      * Returns the value of the attribute or an empty string if the attribute
      * has not been specified.
+     * @return value of the attribute or an empty string if the attribute has not been specified
      */
     std::string getAttribute( const char *name ) const;
 
     /**
+     * @brief Returns element attributes list.
      * Returns element attributes list or empty list if the node is not
      * an element or element does not has any attributes.
      */
     Attributes getAttributes() const;
 
     /**
-     * Returns first child node.
+     * @brief Returns first child node.
      */
     XmlNode getFirstChild() const;
 
     /**
-     * Returns first child element node of the given name.
+     * @brief Returns first child element node of the given name.
      * @param name element name
      */
     XmlNode getFirstChildElement( const char *name = "" ) const;
 
     /**
-     * Returns file name.
+     * @brief Returns file name.
      */
     inline std::string getFile() const
     {
@@ -195,12 +198,12 @@ public:
     }
 
     /**
-     * Returns file name and line number.
+     * @brief Returns file name and line number.
      */
     std::string getFileAndLine() const;
 
     /**
-     * Returns line number.
+     * @brief Returns line number.
      */
     inline int getLine() const
     {
@@ -213,7 +216,7 @@ public:
     }
 
     /**
-     * Returns node name.
+     * @brief Returns node name.
      */
     std::string getName() const
     {
@@ -226,12 +229,12 @@ public:
     }
 
     /**
-     * Returns next sibling node.
+     * @brief Returns next sibling node.
      */
     XmlNode getNextSibling() const;
 
     /**
-     * Returns next sibling element node of the given name.
+     * @brief Returns next sibling element node of the given name.
      * @param name element name
      */
     XmlNode getNextSiblingElement( const char *name = "" ) const;
@@ -240,12 +243,12 @@ public:
     std::string getText() const;
 
     /**
-     * Returns true if node has an attribute of a given name.
+     * @brief Returns true if node has an attribute of a given name.
      */
     bool hasAttribute( const char *name ) const;
 
     /**
-     * Returns true if node has attributes.
+     * @brief Returns true if node has attributes.
      */
     inline bool hasAttributes() const
     {
@@ -258,7 +261,7 @@ public:
     }
 
     /**
-     * Returns true if node has children.
+     * @brief Returns true if node has children.
      */
     inline bool hasChildren() const
     {
@@ -271,7 +274,7 @@ public:
     }
 
     /**
-     * Returns true if node is an attribute.
+     * @brief Returns true if node is an attribute.
      */
     inline bool isAttribute() const
     {
@@ -284,7 +287,7 @@ public:
     }
 
     /**
-     * Returns true if node is a comment.
+     * @brief Returns true if node is a comment.
      */
     inline bool isComment() const
     {
@@ -297,7 +300,7 @@ public:
     }
 
     /**
-     * Returns true if node is an element.
+     * @brief Returns true if node is an element.
      */
     inline bool isElement() const
     {
@@ -310,7 +313,7 @@ public:
     }
 
     /**
-     * Returns true if node is a text.
+     * @brief Returns true if node is a text.
      */
     inline bool isText() const
     {
@@ -323,14 +326,14 @@ public:
     }
 
     /**
-     * Returns true if node is valid.
+     * @brief Returns true if node is valid.
      */
     inline bool isValid() const
     {
         return ( _node ) ? true : false;
     }
 
-    /** Assignment operator. */
+    /** @brief Assignment operator. */
     inline const XmlNode& operator= ( const XmlNode &node )
     {
         _file = node._file;

@@ -142,7 +142,7 @@ class Utils
 public:
 
     /**
-     * Creates vector.
+     * @brief Creates vector.
      * @param parent
      * @param b
      * @param v

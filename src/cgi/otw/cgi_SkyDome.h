@@ -161,13 +161,13 @@ public:
     static const float _offsetSunFace;
     static const float _offsetMoon;
 
-    /** Constructor. */
+    /** @brief Constructor. */
     SkyDome( const Module *parent = NULLPTR );
 
-    /** Destructor. */
+    /** @brief Destructor. */
     virtual ~SkyDome();
 
-    /** Updates sky dome. */
+    /** @brief Updates sky dome. */
     void update();
 
 private:

@@ -147,13 +147,13 @@ class LayoutSquare : public QLayout
 
 public:
 
-    /** Constructor. */
+    /** @brief Constructor. */
     explicit LayoutSquare( QWidget *parent, int spacing = -1 );
     
-    /** Constructor. */
+    /** @brief Constructor. */
     explicit LayoutSquare( int spacing = -1 );
     
-    /** Destructor. */
+    /** @brief Destructor. */
     virtual ~LayoutSquare();
 
     /** */

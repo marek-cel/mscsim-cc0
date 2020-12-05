@@ -145,14 +145,14 @@ class FDMEXPORT Environment
 {
 public:
 
-    /** Constructor. */
+    /** @brief Constructor. */
     Environment();
 
-    /** Destructor. */
+    /** @brief Destructor. */
     virtual ~Environment();
 
     /**
-     * Updates environment.
+     * @brief Updates environment.
      * @param altitude_asl [m] altitude above sea level
      */
     virtual void update( double altitude_asl );
@@ -166,7 +166,7 @@ public:
     inline Vector3 getWind_NED() const { return _wind_ned; }
 
     /**
-     * Sets sea level air temperature value.
+     * @brief Sets sea level air temperature value.
      * @param slAirTemperature [K] sea level air temperature
      */
     inline void setTemperatureSL( double temperature_0 )
@@ -175,7 +175,7 @@ public:
     }
 
     /**
-     * Sets sea level air pressure value.
+     * @brief Sets sea level air pressure value.
      * @param slAirPressure [Pa] sea level air pressure
      */
     inline void setPressureSL( double pressure_0 )

@@ -136,7 +136,7 @@
 namespace g1000
 {
 
-class IFD; ///< IFD class forward declaration
+class IFD; // IFD class forward declaration
 
 /**
  * @brief Garmin GRS 77 AHRS class.

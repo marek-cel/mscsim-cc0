@@ -145,10 +145,10 @@ class GraphicsPedals : public QGraphicsView
 
 public:
 
-    /** Constructor. */
+    /** @brief Constructor. */
     explicit GraphicsPedals( QWidget *parent = NULLPTR );
 
-    /** Destructor. */
+    /** @brief Destructor. */
     virtual ~GraphicsPedals();
 
     /** */

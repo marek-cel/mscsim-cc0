@@ -159,7 +159,7 @@ class FDMEXPORT Misc
 public:
 
     /**
-     * Firt order inertia.
+     * @brief Firt order inertia.
      * @param u desired value
      * @param y current value
      * @param dt [s] time step
@@ -172,7 +172,7 @@ public:
     }
 
     /**
-     * Checks if given varaible is Infinite.
+     * @brief Checks if given varaible is Infinite.
      * @param val double precision value to test
      * @return function returns TRUE if tested value is Infinite
      */
@@ -186,7 +186,7 @@ public:
     }
 
     /**
-     * Checks if given varaible is NaN.
+     * @brief Checks if given varaible is NaN.
      * @param val double precision value to test
      * @return function returns TRUE if tested value is NaN
      */
@@ -196,7 +196,7 @@ public:
     }
 
     /**
-     * Checks if given varaible is Infinite or NaN.
+     * @brief Checks if given varaible is Infinite or NaN.
      * @param val double precision value to test
      * @return function returns FALSE if tested value is Infinite or NaN
      */
@@ -206,7 +206,7 @@ public:
     }
 
     /**
-     * Checks if given array is Infinite or NaN.
+     * @brief Checks if given array is Infinite or NaN.
      * @param array double precision array to test
      * @param size the size of given array
      * @return function returns FALSE if tested array is Infinite or NaN
@@ -222,7 +222,7 @@ public:
     }
 
     /**
-     * Checks if value is within the given range.
+     * @brief Checks if value is within the given range.
      * @param min minimum possible value
      * @param max maximum possible value
      * @param val variable to test
@@ -234,7 +234,7 @@ public:
     }
 
     /**
-     * Checks if value is outside the given range.
+     * @brief Checks if value is outside the given range.
      * @param min minimum possible value
      * @param max maximum possible value
      * @param val variable to test
@@ -246,7 +246,7 @@ public:
     }
 
     /**
-     * Maximum.
+     * @brief Maximum.
      * @param v1 first value to compare
      * @param v2 second value to campare
      * @return maximum value
@@ -257,7 +257,7 @@ public:
     }
 
     /**
-     * Minimum.
+     * @brief Minimum.
      * @param v1 first value to compare
      * @param v2 second value to campare
      * @return minimum value
@@ -268,7 +268,7 @@ public:
     }
 
     /**
-     * Power 2 (square) function.
+     * @brief Power 2 (square) function.
      * @param val argument
      * @return power 2 (square)
      */
@@ -278,7 +278,7 @@ public:
     }
 
     /**
-     * Power 3 (cube) function.
+     * @brief Power 3 (cube) function.
      * @param val argument
      * @return power 3 (cube)
      */
@@ -288,7 +288,7 @@ public:
     }
 
     /**
-     * Power 4 function.
+     * @brief Power 4 function.
      * @param val argument
      * @return power 4
      */
@@ -298,7 +298,7 @@ public:
     }
 
     /**
-     * Power 5 function.
+     * @brief Power 5 function.
      * @param val argument
      * @return power 5
      */
@@ -308,7 +308,7 @@ public:
     }
 
     /**
-     * Maximum rate of change.
+     * @brief Maximum rate of change.
      * @param dt [s] time step
      * @param max [1/s] maximum rate of change
      * @param y current value
@@ -322,7 +322,7 @@ public:
     }
 
     /**
-     * Saturation function. Returns value limited to the given range.
+     * @brief Saturation function. Returns value limited to the given range.
      * @param min minimum possible value
      * @param max maximum possible value
      * @param val variable to test
@@ -337,7 +337,7 @@ public:
     }
 
     /**
-     * Deadband function. Returns zero within the given deadband.
+     * @brief Deadband function. Returns zero within the given deadband.
      * @param start deadband start
      * @param end deadband end
      * @param val variable to test
@@ -352,7 +352,7 @@ public:
     }
 
     /**
-     * Returns Pacejka "Magic Formula" coefficient.
+     * @brief Returns Pacejka "Magic Formula" coefficient.
      * @see https://en.wikipedia.org/wiki/Hans_B._Pacejka#The_Pacejka_%22Magic_Formula%22_tire_models
      * @see https://www.mathworks.com/help/physmod/sdl/ref/tireroadinteractionmagicformula.html
      * @param kappa [-] slip parameter (v_slip/v_roll)
@@ -370,7 +370,7 @@ public:
     }
 
     /**
-     * Signum function.
+     * @brief Signum function.
      * @param val input value
      * @return 1 if val is possitive, -1 when val is negative, 0 if val is zero
      */
@@ -383,7 +383,7 @@ public:
     }
 
     /**
-     * Sigmoid (logistic) function.
+     * @brief Sigmoid (logistic) function.
      * @see https://en.wikipedia.org/wiki/Sigmoid_function
      * @see https://en.wikipedia.org/wiki/Logistic_function
      * @param x argument value
@@ -399,7 +399,7 @@ public:
     }
 
     /**
-     * Estimates standard deviation based on a sample.
+     * @brief Estimates standard deviation based on a sample.
      * @see https://en.wikipedia.org/wiki/Standard_deviation
      * @see https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
      * @param sum sum of samples values

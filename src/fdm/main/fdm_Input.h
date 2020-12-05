@@ -143,10 +143,10 @@ class FDMEXPORT Input : public DataNode
 {
 public:
 
-    /** Constructor. */
+    /** @brief Constructor. */
     Input();
 
-    /** Destructor. */
+    /** @brief Destructor. */
     virtual ~Input();
 
 private:

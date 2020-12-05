@@ -162,10 +162,10 @@ public:
     typedef Data::CGI::Environment::Clouds::Data::Layer LayerClouds;
     typedef Data::CGI::Environment::Clouds::Data::Layer::Cover Cover;
 
-    /** Constructor. */
+    /** @brief Constructor. */
     explicit DialogEnvr( QWidget *parent = NULLPTR );
     
-    /** Destructor. */
+    /** @brief Destructor. */
     virtual ~DialogEnvr();
 
     inline double getTemperatureSL() const { return _temperature_0; }

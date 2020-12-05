@@ -145,6 +145,7 @@ namespace Ui
 
 /**
  * @brief Autopilot dock widget class.
+ *
  * Based on Bendix King KMC 321 Mode Controller and KAS 297C Altitude/Vertical
  * Speed Preselect
  */
@@ -154,10 +155,10 @@ class DockWidgetAuto : public QDockWidget
 
 public:
 
-    /** Constructor. */
+    /** @brief Constructor. */
     explicit DockWidgetAuto( QWidget *parent = NULLPTR );
 
-    /** Destructor. */
+    /** @brief Destructor. */
     virtual ~DockWidgetAuto();
 
     /** */

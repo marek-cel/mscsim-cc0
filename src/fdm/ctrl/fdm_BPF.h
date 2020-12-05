@@ -145,6 +145,7 @@ class FDMEXPORT BPF
 {
 public:
 
+    /** @brief Constructor. */
     BPF();
 };
 

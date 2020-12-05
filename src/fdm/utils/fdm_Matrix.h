@@ -140,13 +140,21 @@ namespace fdm
 
 /**
  * @brief Matrix base class template.
+ *
+ * Matrix base class template which is using integer template parameters to
+ * specify matrix size. Such an approach does not allow to perform
+ * mathematical operation between matrices which sizes do not match each other
+ * as they are of different types.
+ *
+ * @tparam ROWS matrix rows count
+ * @tparam COLS matrix columns count
  */
 template < unsigned int ROWS, unsigned int COLS >
 class Matrix
 {
 public:
 
-    /** Constructor. */
+    /** @brief Constructor. */
     Matrix() :
         _rows ( ROWS ),
         _cols ( COLS ),
@@ -158,7 +166,7 @@ public:
         }
     }
 
-    /** Copy constructor. */
+    /** @brief Copy constructor. */
     Matrix( const Matrix< ROWS, COLS > &mtrx ) :
         _rows ( ROWS ),
         _cols ( COLS ),
@@ -167,7 +175,7 @@ public:
         setArray( mtrx._items );
     }
 
-    /** Constructor. */
+    /** @brief Constructor. */
     Matrix( const double items[] ) :
         _rows ( ROWS ),
         _cols ( COLS ),
@@ -182,7 +190,7 @@ public:
         return Misc::isValid( _items, _size );
     }
 
-    /** Puts matrix items into given array. */
+    /** @brief Puts matrix items into given array. */
     virtual void getArray( double items[] ) const
     {
         for ( unsigned int i = 0; i < _size; i++ )
@@ -192,6 +200,7 @@ public:
     }
 
     /**
+     * @brief  Gets matrix item of given indicies.
      * This function is bound-checked which may affect performance.
      * Throws an exception when row or column index is out of range.
      * @return matrix item of given indicies.
@@ -215,7 +224,7 @@ public:
         return std::numeric_limits< double >::quiet_NaN();
     }
 
-    /** Sets matrix items from given array. */
+    /** @brief Sets matrix items from given array. */
     virtual void setArray( const double items[] )
     {
         for ( unsigned int i = 0; i < _size; i++ )
@@ -225,7 +234,7 @@ public:
     }
 
     /**
-     * This function sets matrix item of given indicies.
+     * @brief Sets matrix item of given indicies.
      * This function is bound-checked which may affect performance.
      * Throws an exception when row or column index is out of range.
      */
@@ -246,7 +255,7 @@ public:
         }
     }
 
-    /** Swaps matrix rows. */
+    /** @brief Swaps matrix rows. */
     virtual void swapRows( unsigned int row1, unsigned int row2 )
     {
         if ( ( row1 < _rows ) && ( row2 < _rows ) )
@@ -271,7 +280,7 @@ public:
         }
     }
 
-    /** Returns string representation of the matrix. */
+    /** @brief Returns string representation of the matrix. */
     virtual std::string toString() const
     {
         std::stringstream ss;
@@ -290,7 +299,8 @@ public:
     }
 
     /**
-     * Items accessor. Please notice that this operator is NOT bound-checked.
+     * @brief Items accessor.
+     * Please notice that this operator is NOT bound-checked.
      * If you want bound-checked item accessor use getItem(int,int) or
      * setItem(int,int,double) functions.
      */
@@ -312,7 +322,8 @@ public:
     }
 
     /**
-     * Items accessor. Please notice that this operator is NOT bound-checked.
+     * @brief Items accessor.
+     * Please notice that this operator is NOT bound-checked.
      * If you want bound-checked item accessor use getItem(int,int) or
      * setItem(int,int,double) functions.
      */
@@ -333,7 +344,7 @@ public:
         return _items[ row * _cols + col ];
     }
 
-    /** Assignment operator. */
+    /** @brief Assignment operator. */
     const Matrix< ROWS, COLS >& operator= ( const Matrix< ROWS, COLS > &mtrx )
     {
         setArray( mtrx._items );
@@ -341,7 +352,7 @@ public:
         return (*this);
     }
 
-    /** Addition operator. */
+    /** @brief Addition operator. */
     Matrix< ROWS, COLS > operator+ ( const Matrix< ROWS, COLS > &mtrx ) const
     {
         Matrix< ROWS, COLS > result;
@@ -354,7 +365,7 @@ public:
         return result;
     }
 
-    /** Subtraction operator. */
+    /** @brief Subtraction operator. */
     Matrix< ROWS, COLS > operator- ( const Matrix< ROWS, COLS > &mtrx ) const
     {
         Matrix< ROWS, COLS > result;
@@ -367,7 +378,7 @@ public:
         return result;
     }
 
-    /** Multiplication operator (by scalar). */
+    /** @brief Multiplication operator (by scalar). */
     Matrix< ROWS, COLS > operator* ( double value ) const
     {
         Matrix< ROWS, COLS > result;
@@ -380,28 +391,7 @@ public:
         return result;
     }
 
-    /** Multiplication operator (by matrix). */
-    Matrix< ROWS, COLS > operator* ( const Matrix< ROWS, COLS > &mtrx ) const
-    {
-        Matrix< ROWS, COLS > result;
-
-        for ( unsigned int r = 0; r < _rows; r++ )
-        {
-            for ( unsigned int c = 0; c < _cols; c++ )
-            {
-                result(r,c) = 0.0;
-
-                for ( unsigned int i = 0; i < _cols; i++ )
-                {
-                    result(r,c) += ( _items[ r*_cols + i ] * mtrx(i,c) );
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /** Multiplication operator (by vector). */
+    /** @brief Multiplication operator (by vector). */
     Vector<ROWS> operator* ( const Vector<COLS> &vect ) const
     {
         Vector<ROWS> result;
@@ -419,7 +409,7 @@ public:
         return result;
     }
 
-    /** Division operator (by scalar). */
+    /** @brief Division operator (by scalar). */
     Matrix< ROWS, COLS > operator/ ( double value ) const
     {
         Matrix< ROWS, COLS > result;
@@ -432,7 +422,7 @@ public:
         return result;
     }
 
-    /** Unary addition operator. */
+    /** @brief Unary addition operator. */
     Matrix< ROWS, COLS >& operator+= ( const Matrix< ROWS, COLS > &mtrx )
     {
         for ( unsigned int i = 0; i < _size; i++ )
@@ -443,7 +433,7 @@ public:
         return (*this);
     }
 
-    /** Unary subtraction operator. */
+    /** @brief Unary subtraction operator. */
     Matrix< ROWS, COLS >& operator-= ( const Matrix< ROWS, COLS > &mtrx )
     {
         for ( unsigned int i = 0; i < _size; i++ )
@@ -454,7 +444,7 @@ public:
         return (*this);
     }
 
-    /** Unary multiplication operator (by scalar). */
+    /** @brief Unary multiplication operator (by scalar). */
     Matrix< ROWS, COLS >& operator*= ( double value )
     {
         for ( unsigned int i = 0; i < _size; i++ )
@@ -465,7 +455,7 @@ public:
         return (*this);
     }
 
-    /** Unary division operator (by scalar). */
+    /** @brief Unary division operator (by scalar). */
     Matrix< ROWS, COLS >& operator/= ( double value )
     {
         for ( unsigned int i = 0; i < _size; i++ )
@@ -476,7 +466,7 @@ public:
         return (*this);
     }
 
-    /** Equality operator. */
+    /** @brief Equality operator. */
     bool operator== ( const Matrix< ROWS, COLS > &mtrx ) const
     {
         bool result = true;
@@ -489,7 +479,7 @@ public:
         return result;
     }
 
-    /** Inequality operator. */
+    /** @brief Inequality operator. */
     bool operator!= ( const Matrix< ROWS, COLS > &mtrx ) const
     {
         return !( (*this) == mtrx );
