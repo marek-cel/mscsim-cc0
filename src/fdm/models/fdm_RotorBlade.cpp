@@ -237,10 +237,10 @@ RotorBlade::RotorBlade( bool ccw ) :
 
     _twist = Table1::createOneRecordTable( 0.0 );
 
-    _ras2sra = Matrix3x3::createIdentityMatrix();
-    _sra2ras = Matrix3x3::createIdentityMatrix();
-    //_sra2bsa = Matrix3x3::createIdentityMatrix();
-    //_bsa2sra = Matrix3x3::createIdentityMatrix();
+    _ras2sra = Matrix3x3::identityMatrix();
+    _sra2ras = Matrix3x3::identityMatrix();
+    //_sra2bsa = Matrix3x3::identityMatrix();
+    //_bsa2sra = Matrix3x3::identityMatrix();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
