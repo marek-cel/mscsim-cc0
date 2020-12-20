@@ -140,8 +140,8 @@ using namespace fdm;
 StabilizerVer::StabilizerVer() :
     _area ( 0.0 )
 {
-    _cx = Table1::createOneRecordTable( 0.0 );
-    _cy = Table1::createOneRecordTable( 0.0 );
+    _cx = Table1::oneRecordTable( 0.0 );
+    _cy = Table1::oneRecordTable( 0.0 );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

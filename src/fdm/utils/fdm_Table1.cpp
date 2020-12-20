@@ -140,7 +140,7 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Table1 Table1::createOneRecordTable( double val )
+Table1 Table1::oneRecordTable( double val )
 {
     std::vector< double > keyValues;
     std::vector< double > tableData;
