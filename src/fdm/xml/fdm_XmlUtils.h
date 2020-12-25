@@ -163,7 +163,7 @@ public:
      * @param str destination
      * @return FDM_SUCCESS on success or FDM_FAILURE on failure.
      */
-    static int read( const XmlNode &node, std::string &str );
+    static int read( const XmlNode &node, std::string *str );
 
     /**
      * @brief Reads value from XML file.
@@ -171,7 +171,7 @@ public:
      * @param data destination
      * @return FDM_SUCCESS on success or FDM_FAILURE on failure.
      */
-    static int read( const XmlNode &node, int &data );
+    static int read( const XmlNode &node, int *data );
 
     /**
      * @brief Reads value from XML file.
@@ -185,7 +185,7 @@ public:
      *
      * @see fdm::Units::getConverter(const char *)
      */
-    static int read( const XmlNode &node, double &data );
+    static int read( const XmlNode &node, double *data );
 
     /**
      * @brief Reads matrix data from XML file.
@@ -203,7 +203,7 @@ public:
      *
      * @see fdm::Units::getConverter(const char *)
      */
-    static int read( const XmlNode &node, Matrix3x3 &data );
+    static int read( const XmlNode &node, Matrix3x3 *data );
 
     /**
      * @brief Reads vector data from XML file.
@@ -219,7 +219,7 @@ public:
      *
      * @see fdm::Units::getConverter(const char *)
      */
-    static int read( const XmlNode &node, Vector3 &data );
+    static int read( const XmlNode &node, Vector3 *data );
 
     /**
      * @brief Reads table data from XML file.
@@ -236,7 +236,7 @@ public:
      *
      * @see fdm::Units::getConverter(const char *)
      */
-    static int read( const XmlNode &node, Table1 &table );
+    static int read( const XmlNode &node, Table1 *table );
 
     /**
      * @brief Reads table data from XML file.
@@ -254,7 +254,7 @@ public:
      *
      * @see fdm::Units::getConverter(const char *)
      */
-    static int read( const XmlNode &node, Table2 &table );
+    static int read( const XmlNode &node, Table2 *table );
 
     /**
      * @brief Reads PID controller data from XML file.
@@ -274,7 +274,7 @@ public:
      * </tag_name>
      * @endcode
      */
-    static int read( const XmlNode &node, PID &pid, double min, double max );
+    static int read( const XmlNode &node, PID *pid, double min, double max );
 
     /**
      * @brief Reads value from XML file.
@@ -285,7 +285,7 @@ public:
      * @return FDM_SUCCESS on success or FDM_FAILURE on failure.
      */
     template < class TYPE >
-    static int read( const XmlNode &parent, TYPE &data, const char *name,
+    static int read( const XmlNode &parent, TYPE *data, const char *name,
                      bool optional = false )
     {
         // empty aircraft mass
@@ -295,9 +295,9 @@ public:
         {
             TYPE data_temp;
 
-            if ( FDM_SUCCESS == read( node, data_temp ) )
+            if ( FDM_SUCCESS == read( node, &data_temp ) )
             {
-                data = data_temp;
+                (*data) = data_temp;
                 return FDM_SUCCESS;
             }
         }

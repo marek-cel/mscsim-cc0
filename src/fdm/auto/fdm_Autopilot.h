@@ -267,8 +267,8 @@ protected:
     bool _testing;          ///< specifies if test is active
     bool _engaged;          ///< specifies if autopilot is engaged
 
-    virtual void readChannel( const XmlNode &data_node, double &max_rate,
-                              PID &pid, Table1 &gain_ias );
+    virtual void readChannel( const XmlNode &data_node, double *max_rate,
+                              PID *pid, Table1 *gain_ias );
 };
 
 } // end of fdm namespace
