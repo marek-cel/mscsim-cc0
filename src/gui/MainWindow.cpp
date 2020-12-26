@@ -129,6 +129,7 @@
 #include <ui_MainWindow.h>
 
 #include <QCloseEvent>
+#include <QDesktopServices>
 #include <QFile>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -1605,6 +1606,28 @@ void MainWindow::on_actionTimeSlower_triggered()
 void MainWindow::on_actionTimeNormal_triggered()
 {
     _timeCoef = 1.0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void MainWindow::on_actionAbout_triggered()
+{
+    //QDesktopServices::openUrl( QUrl( "http://marekcel.pl/mscsim" ) );
+
+    QFile aboutHtmlFile( ":/gui/html/about.html" );
+
+    QString aboutWinTitle;
+    QString aboutInfoText;
+
+    aboutWinTitle = tr( "About" );
+
+    if ( aboutHtmlFile.open( QIODevice::ReadOnly ) )
+    {
+        aboutInfoText = aboutHtmlFile.readAll();
+        aboutHtmlFile.close();
+    }
+
+    QMessageBox::about( this, aboutWinTitle, aboutInfoText );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
