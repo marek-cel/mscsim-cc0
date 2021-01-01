@@ -128,7 +128,7 @@
 #include <fdm/models/fdm_StabilizerVer.h>
 
 #include <fdm/main/fdm_Aerodynamics.h>
-#include <fdm/utils/fdm_String.h>
+#include <fdm/utils/fdm_Units.h>
 #include <fdm/xml/fdm_XmlUtils.h>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -163,7 +163,15 @@ void StabilizerVer::readData( XmlNode &dataNode )
         if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, &_cx, "cx" );
         if ( result == FDM_SUCCESS ) result = XmlUtils::read( dataNode, &_cy, "cy" );
 
-        if ( result != FDM_SUCCESS ) XmlUtils::throwError( __FILE__, __LINE__, dataNode );
+        if ( result == FDM_SUCCESS )
+        {
+            _cx.multiplyKeys( Units::deg2rad() );
+            _cy.multiplyKeys( Units::deg2rad() );
+        }
+        else
+        {
+            XmlUtils::throwError( __FILE__, __LINE__, dataNode );
+        }
     }
     else
     {

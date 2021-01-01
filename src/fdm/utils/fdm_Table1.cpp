@@ -265,6 +265,35 @@ double Table1::getKeyOfValueMin() const
 
 ////////////////////////////////////////////////////////////////////////////////
 
+double Table1::getKeyOfValueMin( double key_min, double key_max ) const
+{
+    double result = std::numeric_limits< double >::quiet_NaN();
+    double min_value = std::numeric_limits< double >::max();
+
+    for ( unsigned int i = 1; i < _size; i++ )
+    {
+        if ( _table_data[ i ] < min_value )
+        {
+            if ( _key_values[ i ] <= key_max )
+            {
+                if ( _key_values[ i ] >= key_min )
+                {
+                    result = _key_values[ i ];
+                    min_value = _table_data[ i ];
+                }
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+
+    return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 double Table1::getKeyOfValueMax() const
 {
     double result = std::numeric_limits< double >::quiet_NaN();
@@ -276,6 +305,35 @@ double Table1::getKeyOfValueMax() const
         {
             result = _key_values[ i ];
             max_value = _table_data[ i ];
+        }
+    }
+
+    return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+double Table1::getKeyOfValueMax( double key_min, double key_max ) const
+{
+    double result = std::numeric_limits< double >::quiet_NaN();
+    double min_value = std::numeric_limits< double >::min();
+
+    for ( unsigned int i = 1; i < _size; i++ )
+    {
+        if ( _table_data[ i ] > min_value )
+        {
+            if ( _key_values[ i ] <= key_max )
+            {
+                if ( _key_values[ i ] >= key_min )
+                {
+                    result = _key_values[ i ];
+                    min_value = _table_data[ i ];
+                }
+            }
+            else
+            {
+                break;
+            }
         }
     }
 
@@ -410,6 +468,30 @@ bool Table1::isValid() const
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void Table1::multiplyKeys( double factor )
+{
+    for ( unsigned int i = 0; i < _size; i++ )
+    {
+        _key_values[ i ] *= factor;
+    }
+
+    updateInterpolationData();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Table1::multiplyValues( double factor )
+{
+    for ( unsigned int i = 0; i < _size; i++ )
+    {
+        _table_data[ i ] *= factor;
+    }
+
+    updateInterpolationData();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 std::string Table1::toString()
 {
     std::stringstream ss;
@@ -441,8 +523,8 @@ const Table1& Table1::operator= ( const Table1 &table )
 
         for ( unsigned int i = 0; i < _size; i++ )
         {
-            _key_values[ i ] = table._key_values    [ i ];
-            _table_data[ i ] = table._table_data    [ i ];
+            _key_values[ i ] = table._key_values [ i ];
+            _table_data[ i ] = table._table_data [ i ];
             _inter_data[ i ] = table._inter_data [ i ];
         }
     }
