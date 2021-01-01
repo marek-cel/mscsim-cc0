@@ -1,5 +1,5 @@
 /****************************************************************************//*
- * Copyright (C) 2020 Marek M. Cel
+ * Copyright (C) 2021 Marek M. Cel
  *
  * Creative Commons Legal Code
  *
