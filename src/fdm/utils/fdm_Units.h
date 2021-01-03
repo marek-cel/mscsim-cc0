@@ -185,6 +185,8 @@ public:
      */
     static fptr getConverter( const char *name );
 
+    // ANGLE
+
     /**
      * @brief Converts given angle from degrees to radians.
      * @param ang angle expressed in degrees
@@ -204,6 +206,8 @@ public:
     {
         return ang * 180.0 / M_PI;
     }
+
+    // LENGTH
 
     /**
      * @brief Converts given length from metres to feet.
@@ -405,6 +409,8 @@ public:
         return len * 1.15077945;
     }
 
+    // VOLUME
+
     /**
      * @brief Converts given volume from cubic inches to cubic metres.
      * @param vol volume expressed in cubic inches
@@ -424,6 +430,8 @@ public:
     {
         return vol / 1000.0;
     }
+
+    // VELOCITY
 
     /**
      * @brief Converts given velocity from m/s to ft/min.
@@ -725,6 +733,8 @@ public:
         return vel * 0.44704;
     }
 
+    // ANGULAR VELOCITY
+
     /**
      * @brief Converts given angular velocity from revolutions per minute to radians per second.
      * @param ang_vel angular velocity expressed in revolutions per minute
@@ -744,6 +754,8 @@ public:
     {
         return 30.0 * ang_vel / M_PI;
     }
+
+    // MASS
 
     /**
      * @brief Converts given mass from kilograms to pounds.
@@ -765,6 +777,8 @@ public:
         return mass * 0.45359237;
     }
 
+    // FORCE
+
     /**
      * @brief Converts given force from newtons to pounds.
      * @param force force expressed in newtons
@@ -784,6 +798,8 @@ public:
     {
         return force * 4.4482216152605;
     }
+
+    // PRESSURE
 
     /**
      * @brief Converts given pressure from pascals to psi.
@@ -905,6 +921,8 @@ public:
         return press * 0.0295333727;
     }
 
+    // POWER
+
     /**
      * @brief Converts given power from (metric) horsepower to (mechanical) horsepower.
      * @param pwr power expressed in (metric) horsepower
@@ -1025,6 +1043,8 @@ public:
         return pwr * 1000.0;
     }
 
+    // TEMPERATURE
+
     /**
      * @brief Converts given temperature from degrees Celsius to Fahrenheit.
      * @param temp temperature expressed in degrees Celsius
@@ -1084,6 +1104,8 @@ public:
     {
         return ( 9.0 * ( temp - 273.15 ) / 5.0 ) + 32.0;
     }
+
+    // SPECIFIC FUEL CONSUMPTION
 
     /**
      * @brief Converts given specific fuel consumption from g/kWh to kg/Ws.
