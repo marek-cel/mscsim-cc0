@@ -147,7 +147,7 @@ public:
     XH_MainRotor();
 
     /** Destructor. */
-    ~XH_MainRotor();
+    virtual ~XH_MainRotor();
 };
 
 } // end of fdm namespace

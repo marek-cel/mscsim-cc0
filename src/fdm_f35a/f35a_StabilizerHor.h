@@ -147,7 +147,7 @@ public:
     F35A_StabilizerHor();
 
     /** Destructor. */
-    ~F35A_StabilizerHor();
+    virtual ~F35A_StabilizerHor();
 
     /**
      * Reads data.

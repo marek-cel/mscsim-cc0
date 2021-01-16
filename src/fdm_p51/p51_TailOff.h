@@ -147,7 +147,7 @@ public:
     P51_TailOff();
 
     /** Destructor. */
-    ~P51_TailOff();
+    virtual ~P51_TailOff();
 
     /**
      * Reads data.

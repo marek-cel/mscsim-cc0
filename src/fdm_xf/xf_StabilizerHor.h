@@ -147,7 +147,7 @@ public:
     XF_StabilizerHor();
 
     /** Destructor. */
-    ~XF_StabilizerHor();
+    virtual ~XF_StabilizerHor();
 
     /**
      * Reads data.

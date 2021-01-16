@@ -166,7 +166,7 @@ public:
     P51_LandingGear( const P51_Aircraft *aircraft, Input *input );
 
     /** Destructor. */
-    ~P51_LandingGear();
+    virtual ~P51_LandingGear();
 
     /**
      * Reads data.

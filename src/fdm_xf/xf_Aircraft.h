@@ -153,7 +153,7 @@ public:
     XF_Aircraft( Input *input );
 
     /** Destructor. */
-    ~XF_Aircraft();
+    virtual ~XF_Aircraft();
 
     /**
      * Initializes aircraft.

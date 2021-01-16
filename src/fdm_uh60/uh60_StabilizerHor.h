@@ -147,7 +147,7 @@ public:
     UH60_StabilizerHor();
 
     /** Destructor. */
-    ~UH60_StabilizerHor();
+    virtual ~UH60_StabilizerHor();
 
     /**
      * Computes force and moment.

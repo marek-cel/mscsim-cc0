@@ -147,7 +147,7 @@ public:
     AW101_Fuselage();
 
     /** Destructor. */
-    ~AW101_Fuselage();
+    virtual ~AW101_Fuselage();
 
     /**
      * Reads data.

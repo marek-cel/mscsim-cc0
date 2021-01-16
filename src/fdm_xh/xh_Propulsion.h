@@ -149,7 +149,7 @@ public:
     XH_Propulsion( const XH_Aircraft *aircraft, Input *input );
 
     /** Destructor. */
-    ~XH_Propulsion();
+    virtual ~XH_Propulsion();
 
     /**
      * Reads data.

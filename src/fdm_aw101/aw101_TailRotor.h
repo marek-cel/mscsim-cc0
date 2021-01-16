@@ -147,7 +147,7 @@ public:
     AW101_TailRotor();
 
     /** Destructor. */
-    ~AW101_TailRotor();
+    virtual ~AW101_TailRotor();
 };
 
 } // end of fdm namespace

@@ -147,7 +147,7 @@ public:
     PW5_StabilizerHor();
 
     /** Destructor. */
-    ~PW5_StabilizerHor();
+    virtual ~PW5_StabilizerHor();
 
     /**
      * Reads data.

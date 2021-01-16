@@ -155,7 +155,7 @@ public:
     AW101_Aerodynamics( const AW101_Aircraft *aircraft, Input *input );
 
     /** Destructor. */
-    ~AW101_Aerodynamics();
+    virtual ~AW101_Aerodynamics();
 
     /**
      * Reads data.

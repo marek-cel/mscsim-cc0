@@ -149,7 +149,7 @@ public:
     F35A_Mass( const F35A_Aircraft *aircraft, Input *input );
 
     /** Destructor. */
-    ~F35A_Mass();
+    virtual ~F35A_Mass();
 
 private:
 

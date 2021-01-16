@@ -166,7 +166,7 @@ public:
     F35A_LandingGear( const F35A_Aircraft *aircraft, Input *input );
 
     /** Destructor. */
-    ~F35A_LandingGear();
+    virtual ~F35A_LandingGear();
 
     /**
      * Reads data.

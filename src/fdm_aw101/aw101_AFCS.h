@@ -149,7 +149,7 @@ public:
     AW101_AFCS();
 
     /** Destructor. */
-    ~AW101_AFCS();
+    virtual ~AW101_AFCS();
 
     /**
      * Reads data.

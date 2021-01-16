@@ -166,7 +166,7 @@ public:
     XH_LandingGear( const XH_Aircraft *aircraft, Input *input );
 
     /** Destructor. */
-    ~XH_LandingGear();
+    virtual ~XH_LandingGear();
 
     /**
      * Reads data.

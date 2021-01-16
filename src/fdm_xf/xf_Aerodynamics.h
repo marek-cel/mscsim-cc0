@@ -153,7 +153,7 @@ public:
     XF_Aerodynamics( const XF_Aircraft *aircraft, Input *input );
 
     /** Destructor. */
-    ~XF_Aerodynamics();
+    virtual ~XF_Aerodynamics();
 
     /**
      * Reads data.

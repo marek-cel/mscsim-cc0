@@ -147,7 +147,7 @@ public:
     R44_TailRotor();
 
     /** Destructor. */
-    ~R44_TailRotor();
+    virtual ~R44_TailRotor();
 };
 
 } // end of fdm namespace

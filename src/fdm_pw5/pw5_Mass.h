@@ -149,7 +149,7 @@ public:
     PW5_Mass( const PW5_Aircraft *aircraft, Input *input );
 
     /** Destructor. */
-    ~PW5_Mass();
+    virtual ~PW5_Mass();
 
 private:
 

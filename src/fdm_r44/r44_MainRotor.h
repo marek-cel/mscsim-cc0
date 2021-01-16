@@ -147,7 +147,7 @@ public:
     R44_MainRotor();
 
     /** Destructor. */
-    ~R44_MainRotor();
+    virtual ~R44_MainRotor();
 };
 
 } // end of fdm namespace

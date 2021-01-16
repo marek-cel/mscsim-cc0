@@ -147,7 +147,7 @@ public:
     XF_TailOff();
 
     /** Destructor. */
-    ~XF_TailOff();
+    virtual ~XF_TailOff();
 
     /**
      * Reads data.

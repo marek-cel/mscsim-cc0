@@ -152,7 +152,7 @@ public:
     P51_Propulsion( const P51_Aircraft *aircraft, Input *input );
 
     /** Destructor. */
-    ~P51_Propulsion();
+    virtual ~P51_Propulsion();
 
     /**
      * Reads data.

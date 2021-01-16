@@ -147,7 +147,7 @@ public:
     C172_TailOff();
 
     /** Destructor. */
-    ~C172_TailOff();
+    virtual ~C172_TailOff();
 
     /**
      * Reads data.

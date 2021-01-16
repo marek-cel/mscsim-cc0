@@ -153,7 +153,7 @@ public:
     F35A_Aerodynamics( const F35A_Aircraft *aircraft, Input *input );
 
     /** Destructor. */
-    ~F35A_Aerodynamics();
+    virtual ~F35A_Aerodynamics();
 
     /**
      * Reads data.

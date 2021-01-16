@@ -149,7 +149,7 @@ public:
     XH_Mass( const XH_Aircraft *aircraft, Input *input );
 
     /** Destructor. */
-    ~XH_Mass();
+    virtual ~XH_Mass();
 
 private:
 

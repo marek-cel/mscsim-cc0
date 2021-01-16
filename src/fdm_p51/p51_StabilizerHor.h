@@ -147,7 +147,7 @@ public:
     P51_StabilizerHor();
 
     /** Destructor. */
-    ~P51_StabilizerHor();
+    virtual ~P51_StabilizerHor();
 
     /**
      * Reads data.

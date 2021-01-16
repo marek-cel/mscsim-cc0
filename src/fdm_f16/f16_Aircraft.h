@@ -161,7 +161,7 @@ public:
     F16_Aircraft( Input *input );
 
     /** Destructor. */
-    ~F16_Aircraft();
+    virtual ~F16_Aircraft();
 
     /**
      * Initializes aircraft.

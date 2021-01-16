@@ -147,7 +147,7 @@ public:
     PW5_TailOff();
 
     /** Destructor. */
-    ~PW5_TailOff();
+    virtual ~PW5_TailOff();
 
     /**
      * Reads data.

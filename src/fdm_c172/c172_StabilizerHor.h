@@ -147,7 +147,7 @@ public:
     C172_StabilizerHor();
 
     /** Destructor. */
-    ~C172_StabilizerHor();
+    virtual ~C172_StabilizerHor();
 
     /**
      * Reads data.

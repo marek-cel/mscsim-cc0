@@ -151,7 +151,7 @@ public:
     AW101_Controls( const AW101_Aircraft *aircraft, Input *input );
 
     /** Destructor. */
-    ~AW101_Controls();
+    virtual ~AW101_Controls();
 
     /**
      * Reads data.

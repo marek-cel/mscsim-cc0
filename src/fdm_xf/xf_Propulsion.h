@@ -151,7 +151,7 @@ public:
     XF_Propulsion( const XF_Aircraft *aircraft, Input *input );
 
     /** Destructor. */
-    ~XF_Propulsion();
+    virtual ~XF_Propulsion();
 
     /**
      * Reads data.

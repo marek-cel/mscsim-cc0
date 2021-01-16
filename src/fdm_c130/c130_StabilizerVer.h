@@ -147,7 +147,7 @@ public:
     C130_StabilizerVer();
 
     /** Destructor. */
-    ~C130_StabilizerVer();
+    virtual ~C130_StabilizerVer();
 
     /**
      * Reads data.

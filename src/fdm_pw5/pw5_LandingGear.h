@@ -177,7 +177,7 @@ public:
     PW5_LandingGear( const PW5_Aircraft *aircraft, Input *input );
 
     /** Destructor. */
-    ~PW5_LandingGear();
+    virtual ~PW5_LandingGear();
 
     /**
      * Reads data.

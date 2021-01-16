@@ -149,7 +149,7 @@ public:
     UH60_MainRotor();
 
     /** Destructor. */
-    ~UH60_MainRotor();
+    virtual ~UH60_MainRotor();
 
     /**
      * @brief Updates main rotor model.
