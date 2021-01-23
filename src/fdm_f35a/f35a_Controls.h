@@ -192,6 +192,8 @@ private:
     Channel *_channelBrakeRight;        ///< right brake channel
     Channel *_channelNoseWheel;         ///< nose wheel channel
 
+    DataRef _inputLGH;                  ///< LGH input data reference
+
     F35A_FLCS *_flcs;                   ///< Fligt Control System
 
     double _ailerons_max;               ///< [rad]
