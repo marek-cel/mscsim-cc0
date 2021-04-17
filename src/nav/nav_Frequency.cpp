@@ -137,6 +137,8 @@ using namespace nav;
 
 int Frequency::getFreqDME( const char *chan )
 {
+    // ICAO Annex 10 Volume I: Radio Navigation Aids, Table A, p.3-100-3-109
+
     if ( 0 == fdm::String::icompare( chan, "001X" ) ) return 1025000;
     if ( 0 == fdm::String::icompare( chan, "001Y" ) ) return 1025000;
     if ( 0 == fdm::String::icompare( chan, "002X" ) ) return 1026000;
@@ -396,6 +398,8 @@ int Frequency::getFreqDME( const char *chan )
 
 int Frequency::getFreqDME( int freq_ils )
 {
+    // ICAO Annex 10 Volume I: Radio Navigation Aids, Table A, p.3-100-3-109
+
     if ( freq_ils == 108000 ) return 1041000;
     if ( freq_ils == 108050 ) return 1041000;
     if ( freq_ils == 108100 ) return 1042000;

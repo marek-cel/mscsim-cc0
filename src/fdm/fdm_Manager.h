@@ -219,7 +219,6 @@ private:
     void updateTimeStepStats( double compTime_0 );
 
     void printFlightEndInfo();
-    void printState();
     void printTimeStepStats();
 };
 

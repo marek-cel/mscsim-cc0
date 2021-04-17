@@ -317,6 +317,7 @@ MainWindow::~MainWindow()
     DELPTR( _scFullScreen );
     DELPTR( _scTimeFaster );
     DELPTR( _scTimeSlower );
+    DELPTR( _scTimeNormal );
 
     DELPTR( _ui );
 }
