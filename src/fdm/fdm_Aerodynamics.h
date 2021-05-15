@@ -124,115 +124,161 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm/main/fdm_LandingGear.h>
-#include <fdm/main/fdm_Aircraft.h>
-
-#include <fdm/utils/fdm_String.h>
-#include <fdm/xml/fdm_XmlUtils.h>
+#ifndef FDM_AERODYNAMICS_H
+#define FDM_AERODYNAMICS_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using namespace fdm;
+#include <fdm/fdm_Module.h>
+
+#include <fdm/utils/fdm_Matrix3x3.h>
+#include <fdm/utils/fdm_Vector3.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-LandingGear::LandingGear( const Aircraft *aircraft, Input *input ) :
-    Module ( aircraft, input ),
-
-    _ctrlAngle ( 0.0 ),
-
-    _brake_l ( 0.0 ),
-    _brake_r ( 0.0 ),
-
-    _position ( 0.0 ),
-
-    _antiskid ( false ),
-    _steering ( false ),
-
-    _onGround ( false )
-{}
-
-////////////////////////////////////////////////////////////////////////////////
-
-LandingGear::~LandingGear() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void LandingGear::initialize()
+namespace fdm
 {
-    _inputABS = getDataRef( "input.controls.abs" );
-    _inputNWS = getDataRef( "input.controls.nws" );
 
-    if ( !_inputABS.isValid() || !_inputNWS.isValid() )
-    {
-        Exception e;
+/**
+ * @brief Aerodynamics model base class.
+ *
+ * Aerodynamic Axes System (abbreviated as aero).
+ * Stability Axes System (abbreviated as stab).
+ *
+ * @see Stevens B., Lewis F.: Aircraft Control and Simulation, 1992
+ */
+class FDMEXPORT Aerodynamics : public Module
+{
+public:
 
-        e.setType( Exception::UnknownException );
-        e.setInfo( "Obtaining input data refs in the landing gear module failed." );
+    /**
+     * @brief Returns angle of attack.
+     * @param vel_bas [m/s] airspeed vector
+     * @param vel_min [m/s] minimum airspeed of calculations
+     * @return [rad] angle of attack
+     */
+    static double getAngleOfAttack( const Vector3 &vel_bas, double vel_min = 1.0e-2 );
 
-        FDM_THROW( e );
-    }
-}
+    /**
+     * @brief Returns angle of attack.
+     * @param uv [m/s] airspeed on aircraft xy-plane
+     * @param w  [m/s] airspeed along aircraft z-axis
+     * @param vel_min [m/s] minimum airspeed of calculations
+     * @return [rad] angle of attack
+     */
+    static double getAngleOfAttack( double uv, double w, double vel_min = 1.0e-2 );
+
+    /**
+     * @brief Returns sideslip angle.
+     * It is positive when the aircraft velocity component along the transverse
+     * axis is positive.
+     * @see ISO 1151-1:1988
+     * @param vel_bas [m/s] airspeed vector
+     * @param vel_min [m/s] minimum airspeed of calculations
+     * @return [rad] sideslip angle
+     */
+    static double getSideslipAngle( const Vector3 &vel_bas, double vel_min = 1.0e-2 );
+
+    /**
+     * @brief Returns Prandtl-Glauert coefficient.
+     * @see https://en.wikipedia.org/wiki/Prandtl%E2%80%93Glauert_singularity
+     * @param machNumber Mach number
+     * @param max maximum value
+     * @return Prandtl-Glauert coefficient
+     */
+    static double getPrandtlGlauertCoef( double machNumber, double max = 5.0 );
+
+    /**
+     * @brief Returns rotation matrix from aerodynamic axes system to BAS.
+     * @param alpha [rad] angle of attack cosine
+     * @param beta [rad] sideslip angle cosine
+     * @return rotation matrix from WAS to BAS
+     */
+    static Matrix3x3 getAero2BAS( double alpha, double beta );
+
+    /**
+     * @brief Returns rotation matrix from aerodynamic axes system to BAS.
+     * @param sinAlpha [-] sine of angle of attack cosine
+     * @param cosAlpha [-] cosine of angle of attack cosine
+     * @param sinBeta  [-] sine of sideslip angle cosine
+     * @param cosBeta  [-] cosine of sideslip angle cosine
+     * @return rotation matrix from WAS to BAS
+     */
+    static Matrix3x3 getAero2BAS( double sinAlpha , double cosAlpha,
+                                  double sinBeta  , double cosBeta );
+
+    /**
+     * @brief Returns rotation matrix from stability axes system to BAS.
+     * @param alpha [rad] angle of attack cosine
+     * @return rotation matrix from WAS to BAS
+     */
+    static Matrix3x3 getStab2BAS( double alpha );
+
+    /**
+     * @brief Returns rotation matrix from stability axes system to BAS.
+     * @param sinAlpha [-] sine of angle of attack cosine
+     * @param cosAlpha [-] cosine of angle of attack cosine
+     * @return rotation matrix from WAS to BAS
+     */
+    static Matrix3x3 getStab2BAS( double sinAlpha , double cosAlpha );
+
+    /** @brief Constructor. */
+    Aerodynamics( const Aircraft *aircraft, Input *input );
+
+    /** @brief Destructor. */
+    virtual ~Aerodynamics();
+
+    /**
+     * @brief Reads data.
+     * @param dataNode XML node
+     */
+    virtual void readData( XmlNode &dataNode ) = 0;
+
+    /** @brief Initializes aerodynamics. */
+    virtual void initialize();
+
+    /** @brief Computes force and moment. */
+    virtual void computeForceAndMoment() = 0;
+
+    /** @brief Updates aerodynamics. */
+    virtual void update();
+
+    inline const Vector3& getFor_BAS() const { return _for_bas; }
+    inline const Vector3& getMom_BAS() const { return _mom_bas; }
+
+    inline const Vector3& getFor_aero() const { return _for_aero; }
+    inline const Vector3& getMom_stab() const { return _mom_stab; }
+
+    /**
+     * @brief Returns true if aircraft is stalling, otherwise returns false.
+     * @return true if aircraft is stalling, false otherwise
+     */
+    virtual inline bool getStall() const { return false; }
+
+protected:
+
+    Vector3 _for_bas;           ///< [N] total force vector expressed in BAS
+    Vector3 _mom_bas;           ///< [N*m] total moment vector expressed in BAS
+
+    Vector3 _for_aero;          ///< [N] total force vector expressed in Aerodynamic Axes System
+    Vector3 _mom_stab;          ///< [N*m] total moment vector expressed in Stability Axes System
+
+    Matrix3x3 _aero2bas;        ///< rotation matrix from Aerodynamic Axes System to BAS
+    Matrix3x3 _stab2bas;        ///< rotation matrix from Stability Axes System to BAS
+    Matrix3x3 _bas2aero;        ///< rotation matrix from BAS to Aerodynamic Axes System
+    Matrix3x3 _bas2stab;        ///< rotation matrix from BAS to Stability Axes System
+
+    /** Updates rotation matrices. */
+    virtual void updateMatrices();
+
+private:
+
+    /** Using this constructor is forbidden. */
+    Aerodynamics( const Aerodynamics & ) : Module( FDM_NULLPTR, FDM_NULLPTR ) {}
+};
+
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void LandingGear::update()
-{
-    _onGround = _for_bas.getLength2() > 0.0;
-
-    _antiskid = _inputABS.getDatab();
-    _steering = _inputNWS.getDatab();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-bool LandingGear::getIsect( const Vector3 &r_a_bas, const Vector3 &r_u_bas,
-                            Vector3 *r_c_bas, Vector3 *n_c_bas )
-{
-    (*r_c_bas) = r_u_bas;
-    (*n_c_bas).zeroize();
-
-    Vector3 b_wgs = _aircraft->getBAS2WGS() * r_a_bas + _aircraft->getPos_WGS();
-    Vector3 e_wgs = _aircraft->getBAS2WGS() * r_u_bas + _aircraft->getPos_WGS();
-    Vector3 r_wgs;
-    Vector3 n_wgs;
-
-    if ( FDM_SUCCESS == _aircraft->getIsect()->getIntersection( b_wgs, e_wgs,
-                                                                &r_wgs, &n_wgs,
-                                                                true ) )
-    {
-        (*r_c_bas) = _aircraft->getWGS2BAS() * ( r_wgs - _aircraft->getPos_WGS() );
-        (*n_c_bas) = _aircraft->getWGS2BAS() * n_wgs;
-
-        return true;
-    }
-
-    return false;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-int LandingGear::readWheelsData( XmlNode &dataNode, Wheels &wheels )
-{
-    int result = FDM_SUCCESS;
-
-    XmlNode wheelNode = dataNode.getFirstChildElement( "wheel" );
-
-    while ( result == FDM_SUCCESS && wheelNode.isValid() )
-    {
-        WheelAndInput wheelAndInput;
-
-        std::string name  = wheelNode.getAttribute( "name"  );
-        std::string input = wheelNode.getAttribute( "input" );
-
-        wheelAndInput.input = getDataRef( input );
-        wheelAndInput.wheel.readData( wheelNode );
-
-        result = wheels.addItem( name, wheelAndInput );
-
-        wheelNode = wheelNode.getNextSiblingElement( "wheel" );
-    }
-
-    return result;
-}
+#endif // FDM_AERODYNAMICS_H

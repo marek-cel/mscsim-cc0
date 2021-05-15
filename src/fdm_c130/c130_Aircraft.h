@@ -129,7 +129,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/main/fdm_Aircraft.h>
+#include <fdm/fdm_Aircraft.h>
 
 #include <fdm_c130/c130_Aerodynamics.h>
 #include <fdm_c130/c130_Controls.h>

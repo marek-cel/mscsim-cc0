@@ -129,7 +129,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/main/fdm_Aerodynamics.h>
+#include <fdm/fdm_Aerodynamics.h>
 
 #include <fdm_r44/r44_MainRotor.h>
 #include <fdm_r44/r44_TailRotor.h>

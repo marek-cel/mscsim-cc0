@@ -129,7 +129,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/main/fdm_LandingGear.h>
+#include <fdm/fdm_LandingGear.h>
 
 #include <fdm/models/fdm_WingRunner.h>
 

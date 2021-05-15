@@ -124,173 +124,171 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_FDM_H
-#define FDM_FDM_H
+
+#include <fdm/fdm_Aerodynamics.h>
+#include <fdm/fdm_Aircraft.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/fdm_DataInp.h>
-#include <fdm/fdm_DataOut.h>
-
-#include <fdm/main/fdm_Aircraft.h>
-#include <fdm/main/fdm_Recorder.h>
+using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
+double Aerodynamics::getAngleOfAttack( const Vector3 &vel_bas, double vel_min )
 {
+    double uv = vel_bas.getLengthXY();
 
-/** Fight dynamics model wrapper class. */
-class FDMEXPORT FDM : public Base
+    return getAngleOfAttack( uv, vel_bas.w(), vel_min );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+double Aerodynamics::getAngleOfAttack( double uv, double w, double vel_min )
 {
-public:
+    double angleOfAttack = 0.0;
 
-    /** @brief Constructor. */
-    FDM( const DataInp *dataInpPtr, DataOut *dataOutPtr, bool verbose = false );
-
-    /** @brief Destructor. */
-    virtual ~FDM();
-
-    /** */
-    virtual void initialize();
-
-    /** */
-    virtual void update( double timeStep );
-
-    /** */
-    virtual void printInitialConditions();
-
-    /** */
-    virtual void printState();
-
-    inline DataOut::Crash getCrash() const { return _aircraft->getCrash(); }
-
-    inline bool isReady() const { return _ready; }
-
-    inline bool isReplaying() const { return _recorder->isReplaying(); }
-
-protected:
-
-    /** Data references. */
-    struct DataRefs
+    if ( fabs( uv ) > vel_min || fabs( w ) > vel_min )
     {
-        /** */
-        struct Input
-        {
-            /** */
-            struct Controls
-            {
-                DataRef roll;                       ///< roll controls data reference
-                DataRef pitch;                      ///< pitch control data reference
-                DataRef yaw;                        ///< yaw control data reference
-
-                DataRef trim_roll;                  ///< roll trim data reference
-                DataRef trim_pitch;                 ///< pitch trim data reference
-                DataRef trim_yaw;                   ///< yaw trim data reference
-
-                DataRef brake_l;                    ///< left brake data reference
-                DataRef brake_r;                    ///< right brake data reference
-                DataRef wheel_brake;                ///< wheel brake data reference
-
-                DataRef landing_gear;               ///< landing gear data reference
-                DataRef wheel_nose;                 ///< nose wheel steering data reference
-
-                DataRef flaps;                      ///< flaps data reference
-                DataRef airbrake;                   ///< airbrake data reference
-                DataRef spoilers;                   ///< spoilers data reference
-
-                DataRef collective;                 ///< collective data reference
-
-                DataRef lgh;                        ///< landing gear handle data reference
-                DataRef nws;                        ///< nose wheel steering data reference
-                DataRef abs;                        ///< anti-skid braking system data reference
-            };
-
-            /** */
-            struct Engine
-            {
-                DataRef  throttle;                  ///< throttle data reference
-                DataRef  mixture;                   ///< mixture lever data reference
-                DataRef  propeller;                 ///< propeller lever data reference
-
-                DataRef  fuel;                      ///< fuel state data reference
-                DataRef  ignition;                  ///< ignition state data reference
-                DataRef  starter;                   ///< starter state data reference
-            };
-
-            /** */
-            struct Masses
-            {
-                DataRef pilot [ FDM_MAX_PILOTS ];   ///< pilots data reference
-                DataRef tank  [ FDM_MAX_TANKS ];    ///< fuel tanks data reference
-                DataRef cabin;                      ///< cabin data reference
-                DataRef trunk;                      ///< cargo trunk data reference
-                DataRef slung;                      ///< slung load data reference
-            };
-
-            Controls controls;                      ///< controls data
-            Engine   engine[ FDM_MAX_ENGINES ];     ///< engines data
-            Masses   masses;                        ///< masses data
-        };
-
-        Input  input;                               ///< input data
+        angleOfAttack = atan2( w, uv );
     }
-    _dataRefs;                                      ///< data references
 
-    const DataInp *_dataInpPtr;                     ///< input data pointer
-    DataOut       *_dataOutPtr;                     ///< output data pointer
-
-    DataInp _dataInp;                               ///< input data (internal)
-    DataOut _dataOut;                               ///< output data (internal)
-
-    Input *_input;                                  ///< input data tree root node
-
-    Aircraft *_aircraft;                            ///< aircraft model
-    Recorder *_recorder;                            ///< recorder object
-
-    Vector3    _init_pos_wgs;                       ///< [m] initial position expressed in WGS
-    Quaternion _init_att_wgs;                       ///< initial attitude expressed as quaternion of rotation from WGS to BAS
-
-    UInt32 _initStep;                               ///< initialization step number
-
-    double _init_g_coef_p;                          ///< initialization iteration coefficient
-    double _init_g_coef_q;                          ///< initialization iteration coefficient
-    double _init_g_coef_n;                          ///< initialization iteration coefficient
-
-    double _init_phi;                               ///< [rad] initial roll angle
-    double _init_tht;                               ///< [rad] initial pitch angle
-    double _init_alt;                               ///< [m] initial altitude above ground level
-
-    bool _initialized;                              ///< specifies if flight dynamics model is initialized
-    bool _ready;                                    ///< specifies if flight dynamics model is ready
-    bool _verbose;                                  ///< specifies if extra information should be printed
-
-    virtual void initializeOnGround();
-    virtual void initializeInFlight();
-
-    virtual void initializeRecorder();
-
-    virtual void updateDataInp();
-    virtual void updateDataOut();
-
-    virtual void updateAndSetDataInp();
-    virtual void updateAndSetDataOut();
-
-    virtual void updateEnvironment();
-
-    virtual void updateInitialPositionAndAttitude();
-
-private:
-
-    /** Using this constructor is forbidden. */
-    FDM( const FDM & ) : Base() {}
-
-    /** Initializes basic data tree. */
-    void initDataTreeBasic();
-};
-
-} // end of fdm namespace
+    return angleOfAttack;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // FDM_FDM_H
+double Aerodynamics::getSideslipAngle( const Vector3 &vel_bas, double vel_min )
+{
+    double sideslipAngle = 0.0;
+
+    if ( fabs( vel_bas.u() ) > vel_min || fabs( vel_bas.v() ) > vel_min )
+    {
+        //double vw = vel_bas.getLengthYZ();
+        double vw = vel_bas.getLength();
+        double v_vw = ( vw > vel_min ) ? ( vel_bas.v() / vw ) : 0.0;
+
+        if ( v_vw >  1.0 ) v_vw =  1.0;
+        if ( v_vw < -1.0 ) v_vw = -1.0;
+
+        sideslipAngle = asin( v_vw );
+    }
+
+    return sideslipAngle;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+double Aerodynamics::getPrandtlGlauertCoef( double machNumber, double max )
+{
+    double prandtlGlauertCoef  = 1.0;
+
+    if ( machNumber < 1.0 )
+    {
+        prandtlGlauertCoef = 1.0 / sqrt( fabs( 1.0 - Misc::pow2( machNumber ) ) );
+    }
+    else
+    {
+        prandtlGlauertCoef = 1.0 / sqrt( fabs( Misc::pow2( machNumber ) - 1.0 ) );
+    }
+
+    if ( prandtlGlauertCoef > max || !Misc::isValid( prandtlGlauertCoef ) )
+    {
+        prandtlGlauertCoef = max;
+    }
+
+    return prandtlGlauertCoef;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Matrix3x3 Aerodynamics::getAero2BAS( double alpha, double beta )
+{
+    return getAero2BAS( sin( alpha ), cos( alpha ),
+                        sin( beta ), cos( beta ) );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Matrix3x3 Aerodynamics::getAero2BAS( double sinAlpha , double cosAlpha,
+                                     double sinBeta  , double cosBeta )
+{
+    Matrix3x3 aero2bas;
+
+    aero2bas(0,0) = -cosAlpha * cosBeta;
+    aero2bas(0,1) = -cosAlpha * sinBeta;
+    aero2bas(0,2) =  sinAlpha;
+
+    aero2bas(1,0) = -sinBeta;
+    aero2bas(1,1) =  cosBeta;
+    aero2bas(1,2) =  0.0;
+
+    aero2bas(2,0) = -sinAlpha * cosBeta;
+    aero2bas(2,1) = -sinAlpha * sinBeta;
+    aero2bas(2,2) = -cosAlpha;
+
+    return aero2bas;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Matrix3x3 Aerodynamics::getStab2BAS( double alpha )
+{
+    return getStab2BAS( sin( alpha ), cos( alpha ) );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Matrix3x3 Aerodynamics::getStab2BAS( double sinAlpha, double cosAlpha )
+{
+    Matrix3x3 stab2bas;
+
+    stab2bas(0,0) = -cosAlpha;
+    stab2bas(0,1) =  0.0;
+    stab2bas(0,2) =  sinAlpha;
+
+    stab2bas(1,0) = 0.0;
+    stab2bas(1,1) = 1.0;
+    stab2bas(1,2) = 0.0;
+
+    stab2bas(2,0) = -sinAlpha;
+    stab2bas(2,1) =  0.0;
+    stab2bas(2,2) = -cosAlpha;
+
+    return stab2bas;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Aerodynamics::Aerodynamics( const Aircraft *aircraft, Input *input ) :
+    Module ( aircraft, input )
+{}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Aerodynamics::~Aerodynamics() {}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Aerodynamics::initialize() {}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Aerodynamics::update()
+{
+    updateMatrices();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Aerodynamics::updateMatrices()
+{
+    double sinAlpha = sin( _aircraft->getAngleOfAttack() );
+    double cosAlpha = cos( _aircraft->getAngleOfAttack() );
+    double sinBeta  = sin( _aircraft->getSideslipAngle() );
+    double cosBeta  = cos( _aircraft->getSideslipAngle() );
+
+    _aero2bas = getAero2BAS( sinAlpha, cosAlpha, sinBeta, cosBeta );
+    _stab2bas = getStab2BAS( sinAlpha, cosAlpha );
+    _bas2aero = _aero2bas.getTransposed();
+    _bas2stab = _stab2bas.getTransposed();
+}

@@ -129,7 +129,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/main/fdm_Aircraft.h>
+#include <fdm/fdm_Aircraft.h>
 
 #include <fdm_f35a/f35a_Aerodynamics.h>
 #include <fdm_f35a/f35a_Controls.h>

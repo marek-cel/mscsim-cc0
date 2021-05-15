@@ -124,51 +124,64 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm/main/fdm_Environment.h>
-
-////////////////////////////////////////////////////////////////////////////////
-
-using namespace fdm;
+#ifndef FDM_PROPULSION_H
+#define FDM_PROPULSION_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Environment::Environment() :
-    _atmosphere ( FDM_NULLPTR ),
+#include <fdm/fdm_Module.h>
 
-    _temperature     ( 0.0 ),
-    _pressure        ( 0.0 ),
-    _density         ( 0.0 ),
-    _speedOfSound    ( 0.0 ),
-    _densityAltitude ( 0.0 ),
+#include <fdm/utils/fdm_Vector3.h>
 
-    _wind_direction ( 0.0 ),
-    _wind_speed     ( 0.0 )
+////////////////////////////////////////////////////////////////////////////////
+
+namespace fdm
 {
-    _atmosphere = new Atmosphere();
-}
+
+/**
+ * @brief Propulsion base class.
+ */
+class FDMEXPORT Propulsion : public Module
+{
+public:
+
+    /** @brief Constructor. */
+    Propulsion( const Aircraft *aircraft, Input *input );
+
+    /** @brief Destructor. */
+    virtual ~Propulsion();
+
+    /**
+     * @brief Reads data.
+     * @param dataNode XML node
+     */
+    virtual void readData( XmlNode &dataNode ) = 0;
+
+    /** @brief Initializes propulsion. */
+    virtual void initialize();
+
+    /** @brief Computes force and moment. */
+    virtual void computeForceAndMoment() = 0;
+
+    /** @brief Updates propulsion. */
+    virtual void update() = 0;
+
+    inline const Vector3& getFor_BAS() const { return _for_bas; }
+    inline const Vector3& getMom_BAS() const { return _mom_bas; }
+
+protected:
+
+    Vector3 _for_bas;           ///< [N] total force vector expressed in BAS
+    Vector3 _mom_bas;           ///< [N*m] total moment vector expressed in BAS
+
+private:
+
+    /** Using this constructor is forbidden. */
+    Propulsion( const Propulsion & ) : Module( FDM_NULLPTR, FDM_NULLPTR ) {}
+};
+
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Environment::~Environment()
-{
-    FDM_DELPTR( _atmosphere );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void Environment::update( double altitude_asl )
-{
-    _atmosphere->update( altitude_asl );
-
-    _temperature  = _atmosphere->getTemperature();
-    _pressure     = _atmosphere->getPressure();
-    _density      = _atmosphere->getDensity();
-    _speedOfSound = _atmosphere->getSpeedOfSound();
-
-    _densityAltitude = Atmosphere::getDensityAltitude( _pressure, _temperature,
-                                                       altitude_asl );
-
-    _wind_ned.x() = -cos( _wind_direction ) * _wind_speed;
-    _wind_ned.y() = -sin( _wind_direction ) * _wind_speed;
-}
+#endif // FDM_PROPULSION_H

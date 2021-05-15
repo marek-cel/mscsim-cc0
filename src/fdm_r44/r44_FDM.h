@@ -129,7 +129,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/main/fdm_FDM.h>
+#include <fdm/fdm_FDM.h>
 
 #include <fdm_r44/r44_Aircraft.h>
 

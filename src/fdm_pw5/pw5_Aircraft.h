@@ -129,7 +129,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/main/fdm_Aircraft.h>
+#include <fdm/fdm_Aircraft.h>
 
 #include <fdm_pw5/pw5_Aerodynamics.h>
 #include <fdm_pw5/pw5_Controls.h>

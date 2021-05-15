@@ -125,8 +125,11 @@
  *
  ******************************************************************************/
 
-#include <fdm/main/fdm_Aerodynamics.h>
-#include <fdm/main/fdm_Aircraft.h>
+#include <fdm/fdm_LandingGear.h>
+#include <fdm/fdm_Aircraft.h>
+
+#include <fdm/utils/fdm_String.h>
+#include <fdm/xml/fdm_XmlUtils.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -134,161 +137,102 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double Aerodynamics::getAngleOfAttack( const Vector3 &vel_bas, double vel_min )
-{
-    double uv = vel_bas.getLengthXY();
+LandingGear::LandingGear( const Aircraft *aircraft, Input *input ) :
+    Module ( aircraft, input ),
 
-    return getAngleOfAttack( uv, vel_bas.w(), vel_min );
-}
+    _ctrlAngle ( 0.0 ),
 
-////////////////////////////////////////////////////////////////////////////////
+    _brake_l ( 0.0 ),
+    _brake_r ( 0.0 ),
 
-double Aerodynamics::getAngleOfAttack( double uv, double w, double vel_min )
-{
-    double angleOfAttack = 0.0;
+    _position ( 0.0 ),
 
-    if ( fabs( uv ) > vel_min || fabs( w ) > vel_min )
-    {
-        angleOfAttack = atan2( w, uv );
-    }
+    _antiskid ( false ),
+    _steering ( false ),
 
-    return angleOfAttack;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-double Aerodynamics::getSideslipAngle( const Vector3 &vel_bas, double vel_min )
-{
-    double sideslipAngle = 0.0;
-
-    if ( fabs( vel_bas.u() ) > vel_min || fabs( vel_bas.v() ) > vel_min )
-    {
-        //double vw = vel_bas.getLengthYZ();
-        double vw = vel_bas.getLength();
-        double v_vw = ( vw > vel_min ) ? ( vel_bas.v() / vw ) : 0.0;
-
-        if ( v_vw >  1.0 ) v_vw =  1.0;
-        if ( v_vw < -1.0 ) v_vw = -1.0;
-
-        sideslipAngle = asin( v_vw );
-    }
-
-    return sideslipAngle;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-double Aerodynamics::getPrandtlGlauertCoef( double machNumber, double max )
-{
-    double prandtlGlauertCoef  = 1.0;
-
-    if ( machNumber < 1.0 )
-    {
-        prandtlGlauertCoef = 1.0 / sqrt( fabs( 1.0 - Misc::pow2( machNumber ) ) );
-    }
-    else
-    {
-        prandtlGlauertCoef = 1.0 / sqrt( fabs( Misc::pow2( machNumber ) - 1.0 ) );
-    }
-
-    if ( prandtlGlauertCoef > max || !Misc::isValid( prandtlGlauertCoef ) )
-    {
-        prandtlGlauertCoef = max;
-    }
-
-    return prandtlGlauertCoef;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-Matrix3x3 Aerodynamics::getAero2BAS( double alpha, double beta )
-{
-    return getAero2BAS( sin( alpha ), cos( alpha ),
-                        sin( beta ), cos( beta ) );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-Matrix3x3 Aerodynamics::getAero2BAS( double sinAlpha , double cosAlpha,
-                                     double sinBeta  , double cosBeta )
-{
-    Matrix3x3 aero2bas;
-
-    aero2bas(0,0) = -cosAlpha * cosBeta;
-    aero2bas(0,1) = -cosAlpha * sinBeta;
-    aero2bas(0,2) =  sinAlpha;
-
-    aero2bas(1,0) = -sinBeta;
-    aero2bas(1,1) =  cosBeta;
-    aero2bas(1,2) =  0.0;
-
-    aero2bas(2,0) = -sinAlpha * cosBeta;
-    aero2bas(2,1) = -sinAlpha * sinBeta;
-    aero2bas(2,2) = -cosAlpha;
-
-    return aero2bas;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-Matrix3x3 Aerodynamics::getStab2BAS( double alpha )
-{
-    return getStab2BAS( sin( alpha ), cos( alpha ) );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-Matrix3x3 Aerodynamics::getStab2BAS( double sinAlpha, double cosAlpha )
-{
-    Matrix3x3 stab2bas;
-
-    stab2bas(0,0) = -cosAlpha;
-    stab2bas(0,1) =  0.0;
-    stab2bas(0,2) =  sinAlpha;
-
-    stab2bas(1,0) = 0.0;
-    stab2bas(1,1) = 1.0;
-    stab2bas(1,2) = 0.0;
-
-    stab2bas(2,0) = -sinAlpha;
-    stab2bas(2,1) =  0.0;
-    stab2bas(2,2) = -cosAlpha;
-
-    return stab2bas;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-Aerodynamics::Aerodynamics( const Aircraft *aircraft, Input *input ) :
-    Module ( aircraft, input )
+    _onGround ( false )
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Aerodynamics::~Aerodynamics() {}
+LandingGear::~LandingGear() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Aerodynamics::initialize() {}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void Aerodynamics::update()
+void LandingGear::initialize()
 {
-    updateMatrices();
+    _inputABS = getDataRef( "input.controls.abs" );
+    _inputNWS = getDataRef( "input.controls.nws" );
+
+    if ( !_inputABS.isValid() || !_inputNWS.isValid() )
+    {
+        Exception e;
+
+        e.setType( Exception::UnknownException );
+        e.setInfo( "Obtaining input data refs in the landing gear module failed." );
+
+        FDM_THROW( e );
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Aerodynamics::updateMatrices()
+void LandingGear::update()
 {
-    double sinAlpha = sin( _aircraft->getAngleOfAttack() );
-    double cosAlpha = cos( _aircraft->getAngleOfAttack() );
-    double sinBeta  = sin( _aircraft->getSideslipAngle() );
-    double cosBeta  = cos( _aircraft->getSideslipAngle() );
+    _onGround = _for_bas.getLength2() > 0.0;
 
-    _aero2bas = getAero2BAS( sinAlpha, cosAlpha, sinBeta, cosBeta );
-    _stab2bas = getStab2BAS( sinAlpha, cosAlpha );
-    _bas2aero = _aero2bas.getTransposed();
-    _bas2stab = _stab2bas.getTransposed();
+    _antiskid = _inputABS.getDatab();
+    _steering = _inputNWS.getDatab();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+bool LandingGear::getIsect( const Vector3 &r_a_bas, const Vector3 &r_u_bas,
+                            Vector3 *r_c_bas, Vector3 *n_c_bas )
+{
+    (*r_c_bas) = r_u_bas;
+    (*n_c_bas).zeroize();
+
+    Vector3 b_wgs = _aircraft->getBAS2WGS() * r_a_bas + _aircraft->getPos_WGS();
+    Vector3 e_wgs = _aircraft->getBAS2WGS() * r_u_bas + _aircraft->getPos_WGS();
+    Vector3 r_wgs;
+    Vector3 n_wgs;
+
+    if ( FDM_SUCCESS == _aircraft->getIsect()->getIntersection( b_wgs, e_wgs,
+                                                                &r_wgs, &n_wgs,
+                                                                true ) )
+    {
+        (*r_c_bas) = _aircraft->getWGS2BAS() * ( r_wgs - _aircraft->getPos_WGS() );
+        (*n_c_bas) = _aircraft->getWGS2BAS() * n_wgs;
+
+        return true;
+    }
+
+    return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int LandingGear::readWheelsData( XmlNode &dataNode, Wheels &wheels )
+{
+    int result = FDM_SUCCESS;
+
+    XmlNode wheelNode = dataNode.getFirstChildElement( "wheel" );
+
+    while ( result == FDM_SUCCESS && wheelNode.isValid() )
+    {
+        WheelAndInput wheelAndInput;
+
+        std::string name  = wheelNode.getAttribute( "name"  );
+        std::string input = wheelNode.getAttribute( "input" );
+
+        wheelAndInput.input = getDataRef( input );
+        wheelAndInput.wheel.readData( wheelNode );
+
+        result = wheels.addItem( name, wheelAndInput );
+
+        wheelNode = wheelNode.getNextSiblingElement( "wheel" );
+    }
+
+    return result;
 }

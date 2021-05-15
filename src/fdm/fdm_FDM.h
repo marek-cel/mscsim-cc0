@@ -124,157 +124,109 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_MASS_H
-#define FDM_MASS_H
+#ifndef FDM_WRAPPER_H
+#define FDM_WRAPPER_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <vector>
+#include <fdm/fdm_DataInp.h>
+#include <fdm/fdm_DataOut.h>
 
-#include <fdm/main/fdm_Module.h>
-
-#include <fdm/utils/fdm_Matrix3x3.h>
-#include <fdm/utils/fdm_Matrix6x6.h>
-#include <fdm/utils/fdm_Vector3.h>
+#include <fdm/fdm_Aircraft.h>
+#include <fdm/fdm_Recorder.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace fdm
 {
 
-/**
- * @brief Mass, inertia, balance and gravity class.
- *
- * Input data reference is created for each variable mass component. Name of
- * this data reference is "input/mass/variable_mass_component_name".
- *
- * XML configuration file format:
- * @code
- * <mass>
- *   <empty_mass> { [kg] empty aircraft mass } </empty_mass>
- *   <inertia_tensor>
- *     { [kg*m^2] Ixx } { [kg*m^2] Ixy } { [kg*m^2] Ixz }
- *     { [kg*m^2] Iyx } { [kg*m^2] Iyy } { [kg*m^2] Iyz }
- *     { [kg*m^2] Izx } { [kg*m^2] Izy } { [kg*m^2] Izz }
- *   </inertia_tensor>
- *   <center_of_mass> { [m] x-coordinate } { [m] y-coordinate } { [m] z-coordinate } </center_of_mass>
- *   <variable_mass input="{ variable mass input name }">
- *     <mass_max> { [kg] maximum mass } </mass_max>
- *     <coordinates> { [m] x-coordinate } { [m] y-coordinate } { [m] z-coordinate } </coordinates>
- *   </variable_mass>
- *   ... { more variable masses }
- * </mass>
- * @endcode
- *
- * @see Taylor J.: Classical Mechanics, 2005, p.411
- * @see Sibilski K.: Modelowanie i symulacja dynamiki ruchu obiektow latajacych, 2004, p.40, [in Polish]
- * @see Narkiewicz J,: Tiltrotor Modelling for Simulation in Various Flight Conditions, 2006
- * @see https://en.wikipedia.org/wiki/Parallel_axis_theorem
- */
-class FDMEXPORT Mass : public Module
+/** Fight dynamics model wrapper class. */
+class FDMEXPORT FDM : public Base
 {
 public:
 
-    /** Variable mass component data. */
-    struct VarMass
-    {
-        DataRef dr_input;   ///< mass input data reference
-        double mass;        ///< [kg] mass
-        double mass_max;    ///< [kg] maximum mass
-        Vector3 r_bas;      ///< [m] position expressed in BAS
-    };
-
-    typedef std::map< std::string, VarMass > Masses;
-
     /** @brief Constructor. */
-    Mass( const Aircraft *aircraft, Input *input );
+    FDM( const DataInp *dataInpPtr, DataOut *dataOutPtr, bool verbose = false );
 
     /** @brief Destructor. */
-    virtual ~Mass();
+    virtual ~FDM();
 
-    /**
-     * @brief Reads data.
-     * @param dataNode XML node
-     */
-    virtual void readData( XmlNode &dataNode );
-
-    /** @brief Initializes mass. */
+    /** */
     virtual void initialize();
 
-    /** @brief Computes force and moment. */
-    virtual void computeForceAndMoment();
+    /** */
+    virtual void update( double timeStep );
 
-    /** @brief Updates mass. */
-    virtual void update();
+    /** */
+    virtual void printInitialConditions();
 
-    inline const Vector3& getFor_BAS() const { return _for_bas; }
-    inline const Vector3& getMom_BAS() const { return _mom_bas; }
+    /** */
+    virtual void printState();
 
-    inline const Vector3& getCenterOfMass() const { return _r_cm_t_bas; }
+    inline DataOut::Crash getCrash() const { return _aircraft->getCrash(); }
 
-    /**
-     * @brief Returns total mass.
-     * @return [kg] total mass
-     */
-    inline double getMass() const { return _mass_t; }
+    inline bool isReady() const { return _ready; }
 
-    /**
-     * @brief Returns inertia matrix.
-     * @return inertia matrix
-     */
-    virtual Matrix6x6 getInertiaMatrix() const;
-
-    /**
-     * @brief Returns inertia tensor for total mass.
-     * @return [kg*m^2] inertia tensor
-     */
-    inline Matrix3x3 getInertiaTensor() const { return _i_t_bas; }
-
-    /**
-     * @brief Returns first moment of mass (total).
-     * @return [kg*m] first moment of mass
-     */
-    Vector3 inline getFirstMomentOfMass() const { return _s_t_bas; }
+    inline bool isReplaying() const { return _recorder->isReplaying(); }
 
 protected:
 
-    Vector3 _for_bas;           ///< [N] total force vector expressed in BAS
-    Vector3 _mom_bas;           ///< [N*m] total moment vector expressed in BAS
+    Input::DataRefs _dataRefs;                      ///< data references
 
-    Masses _masses;             ///< variable masses array
+    const DataInp *_dataInpPtr;                     ///< input data pointer
+    DataOut       *_dataOutPtr;                     ///< output data pointer
 
-    double _mass_e;             ///< [kg] empty aircraft mass
-    double _mass_t;             ///< [kg] total aircraft mass
+    DataInp _dataInp;                               ///< input data (internal)
+    DataOut _dataOut;                               ///< output data (internal)
 
-    Vector3 _r_cm_e_bas;        ///< [m] center of mass (empty) expressed in BAS
-    Vector3 _r_cm_t_bas;        ///< [m] center of mass (total) expressed in BAS
+    Input *_input;                                  ///< input data tree root node
 
-    Vector3 _s_t_bas;           ///< [kg*m] first mass moment (total) vector expressed in BAS
+    Aircraft *_aircraft;                            ///< aircraft model
+    Recorder *_recorder;                            ///< recorder object
 
-    Matrix3x3 _i_e_bas;         ///< [kg*m^2] inertia tensor (empty)
-    Matrix3x3 _i_t_bas;         ///< [kg*m^2] inertia tensor (total)
+    Vector3    _init_pos_wgs;                       ///< [m] initial position expressed in WGS
+    Quaternion _init_att_wgs;                       ///< initial attitude expressed as quaternion of rotation from WGS to BAS
 
-    /**
-     * @brief Adds variable mass to the total aircraft mass.
-     * @param variableMass variable mass component
-     */
-    virtual void addVariableMass( const VarMass &varMass );
+    UInt32 _initStep;                               ///< initialization step number
 
-    /**
-     * @brief Returns variable mass by name.
-     * @param name variable mass name
-     * @return channel
-     */
-    virtual VarMass* getVariableMassByName( const char *name );
+    double _init_g_coef_p;                          ///< initialization iteration coefficient
+    double _init_g_coef_q;                          ///< initialization iteration coefficient
+    double _init_g_coef_n;                          ///< initialization iteration coefficient
+
+    double _init_phi;                               ///< [rad] initial roll angle
+    double _init_tht;                               ///< [rad] initial pitch angle
+    double _init_alt;                               ///< [m] initial altitude above ground level
+
+    bool _initialized;                              ///< specifies if flight dynamics model is initialized
+    bool _ready;                                    ///< specifies if flight dynamics model is ready
+    bool _verbose;                                  ///< specifies if extra information should be printed
+
+    virtual void initializeOnGround();
+    virtual void initializeInFlight();
+
+    virtual void initializeRecorder();
+
+    virtual void updateDataInp();
+    virtual void updateDataOut();
+
+    virtual void updateAndSetDataInp();
+    virtual void updateAndSetDataOut();
+
+    virtual void updateEnvironment();
+
+    virtual void updateInitialPositionAndAttitude();
 
 private:
 
     /** Using this constructor is forbidden. */
-    Mass( const Mass & ) : Module( FDM_NULLPTR, FDM_NULLPTR ) {}
+    FDM( const FDM & ) : Base() {}
+
+    /** Initializes basic data tree. */
+    void initDataTreeBasic();
 };
 
 } // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // FDM_MASS_H
+#endif // FDM_WRAPPER_H

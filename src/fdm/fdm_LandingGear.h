@@ -131,7 +131,7 @@
 
 #include <vector>
 
-#include <fdm/main/fdm_Module.h>
+#include <fdm/fdm_Module.h>
 
 #include <fdm/models/fdm_Wheel.h>
 

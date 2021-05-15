@@ -125,13 +125,8 @@
  *
  ******************************************************************************/
 
-#include <fdm/main/fdm_Controls.h>
-#include <fdm/main/fdm_Aircraft.h>
-
-#include <fdm/fdm_Log.h>
-
-#include <fdm/utils/fdm_String.h>
-#include <fdm/xml/fdm_XmlUtils.h>
+#include <fdm/fdm_Propulsion.h>
+#include <fdm/fdm_Aircraft.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -139,74 +134,14 @@ using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Controls::Controls( const Aircraft *aircraft, Input *input ) :
+Propulsion::Propulsion( const Aircraft *aircraft, Input *input ) :
     Module ( aircraft, input )
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Controls::~Controls() {}
+Propulsion::~Propulsion() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Controls::readData( XmlNode &dataNode )
-{
-    if ( dataNode.isValid() )
-    {
-        int result = FDM_SUCCESS;
-
-        XmlNode channelNode = dataNode.getFirstChildElement( "control_channel" );
-
-        while ( result == FDM_SUCCESS && channelNode.isValid() )
-        {
-            Channel channel;
-
-            channel.output = 0.0;
-
-            std::string name  = channelNode.getAttribute( "name"  );
-            std::string input = channelNode.getAttribute( "input" );
-
-            channel.input = getDataRef( input );
-
-            if ( !channel.input.isValid() )
-            {
-                Log::w() << "Wrong control channel input: \"" << input << "\"" << std::endl;
-            }
-
-            if ( result == FDM_SUCCESS ) result = XmlUtils::read( channelNode, &( channel.table ) );
-            if ( result == FDM_SUCCESS ) result = _channels.addItem( name, channel );
-
-            if ( result != FDM_SUCCESS ) XmlUtils::throwError( __FILE__, __LINE__, channelNode );
-
-            channelNode = channelNode.getNextSiblingElement( "control_channel" );
-        }
-
-        if ( result != FDM_SUCCESS ) XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-    }
-    else
-    {
-        XmlUtils::throwError( __FILE__, __LINE__, dataNode );
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void Controls::initialize()
-{
-    update();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void Controls::update()
-{
-    for ( Channels::iterator it = _channels.begin(); it != _channels.end(); ++it )
-    {
-        Channel &ch = (*it).second;
-
-        if ( ch.input.isValid() )
-            ch.output = ch.table.getValue( ch.input.getValue() );
-        else
-            ch.output = ch.table.getValue( 0.0 );
-    }
-}
+void Propulsion::initialize() {}

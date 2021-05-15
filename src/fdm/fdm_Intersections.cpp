@@ -124,161 +124,188 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_AERODYNAMICS_H
-#define FDM_AERODYNAMICS_H
+
+#include <fdm/fdm_Intersections.h>
+
+#ifdef SIM_INTERSECTIONS
+#   include <cgi/cgi_Intersections.h>
+#   include <cgi/cgi_WGS84.h>
+#endif
+
+#include <fdm/utils/fdm_Geom.h>
+#include <fdm/utils/fdm_WGS84.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/main/fdm_Module.h>
-
-#include <fdm/utils/fdm_Matrix3x3.h>
-#include <fdm/utils/fdm_Vector3.h>
+using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
+Intersections::Intersections() :
+    _inited ( false )
+{}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Intersections::~Intersections() {}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Intersections::update( double lat, double lon )
 {
+#   ifdef SIM_INTERSECTIONS
+    cgi::WGS84 wgs_b( lat, lon, 10000.0 );
+    cgi::WGS84 wgs_e( lat, lon, -1000.0 );
 
-/**
- * @brief Aerodynamics model base class.
- *
- * Aerodynamic Axes System (abbreviated as aero).
- * Stability Axes System (abbreviated as stab).
- *
- * @see Stevens B., Lewis F.: Aircraft Control and Simulation, 1992
- */
-class FDMEXPORT Aerodynamics : public Module
-{
-public:
+    osg::Vec3d b = wgs_b.getPosition();
+    osg::Vec3d e = wgs_e.getPosition();
+    osg::Vec3d r;
+    osg::Vec3d n;
 
-    /**
-     * @brief Returns angle of attack.
-     * @param vel_bas [m/s] airspeed vector
-     * @param vel_min [m/s] minimum airspeed of calculations
-     * @return [rad] angle of attack
-     */
-    static double getAngleOfAttack( const Vector3 &vel_bas, double vel_min = 1.0e-2 );
+    if ( cgi::Intersections::instance()->findFirst( b, e, r, n ) )
+    {
+        _inited = true;
 
-    /**
-     * @brief Returns angle of attack.
-     * @param uv [m/s] airspeed on aircraft xy-plane
-     * @param w  [m/s] airspeed along aircraft z-axis
-     * @param vel_min [m/s] minimum airspeed of calculations
-     * @return [rad] angle of attack
-     */
-    static double getAngleOfAttack( double uv, double w, double vel_min = 1.0e-2 );
+        _ground_wgs = Vector3( r.x(), r.y(), r.z() );
+        _normal_wgs = Vector3( n.x(), n.y(), n.z() );
+    }
+#   else
+    WGS84::Geo geo = { lat, lon, 0.0 };
+    WGS84 wgs( geo );
 
-    /**
-     * @brief Returns sideslip angle.
-     * It is positive when the aircraft velocity component along the transverse
-     * axis is positive.
-     * @see ISO 1151-1:1988
-     * @param vel_bas [m/s] airspeed vector
-     * @param vel_min [m/s] minimum airspeed of calculations
-     * @return [rad] sideslip angle
-     */
-    static double getSideslipAngle( const Vector3 &vel_bas, double vel_min = 1.0e-2 );
+    _inited = true;
 
-    /**
-     * @brief Returns Prandtl-Glauert coefficient.
-     * @see https://en.wikipedia.org/wiki/Prandtl%E2%80%93Glauert_singularity
-     * @param machNumber Mach number
-     * @param max maximum value
-     * @return Prandtl-Glauert coefficient
-     */
-    static double getPrandtlGlauertCoef( double machNumber, double max = 5.0 );
-
-    /**
-     * @brief Returns rotation matrix from aerodynamic axes system to BAS.
-     * @param alpha [rad] angle of attack cosine
-     * @param beta [rad] sideslip angle cosine
-     * @return rotation matrix from WAS to BAS
-     */
-    static Matrix3x3 getAero2BAS( double alpha, double beta );
-
-    /**
-     * @brief Returns rotation matrix from aerodynamic axes system to BAS.
-     * @param sinAlpha [-] sine of angle of attack cosine
-     * @param cosAlpha [-] cosine of angle of attack cosine
-     * @param sinBeta  [-] sine of sideslip angle cosine
-     * @param cosBeta  [-] cosine of sideslip angle cosine
-     * @return rotation matrix from WAS to BAS
-     */
-    static Matrix3x3 getAero2BAS( double sinAlpha , double cosAlpha,
-                                  double sinBeta  , double cosBeta );
-
-    /**
-     * @brief Returns rotation matrix from stability axes system to BAS.
-     * @param alpha [rad] angle of attack cosine
-     * @return rotation matrix from WAS to BAS
-     */
-    static Matrix3x3 getStab2BAS( double alpha );
-
-    /**
-     * @brief Returns rotation matrix from stability axes system to BAS.
-     * @param sinAlpha [-] sine of angle of attack cosine
-     * @param cosAlpha [-] cosine of angle of attack cosine
-     * @return rotation matrix from WAS to BAS
-     */
-    static Matrix3x3 getStab2BAS( double sinAlpha , double cosAlpha );
-
-    /** @brief Constructor. */
-    Aerodynamics( const Aircraft *aircraft, Input *input );
-
-    /** @brief Destructor. */
-    virtual ~Aerodynamics();
-
-    /**
-     * @brief Reads data.
-     * @param dataNode XML node
-     */
-    virtual void readData( XmlNode &dataNode ) = 0;
-
-    /** @brief Initializes aerodynamics. */
-    virtual void initialize();
-
-    /** @brief Computes force and moment. */
-    virtual void computeForceAndMoment() = 0;
-
-    /** @brief Updates aerodynamics. */
-    virtual void update();
-
-    inline const Vector3& getFor_BAS() const { return _for_bas; }
-    inline const Vector3& getMom_BAS() const { return _mom_bas; }
-
-    inline const Vector3& getFor_aero() const { return _for_aero; }
-    inline const Vector3& getMom_stab() const { return _mom_stab; }
-
-    /**
-     * @brief Returns true if aircraft is stalling, otherwise returns false.
-     * @return true if aircraft is stalling, false otherwise
-     */
-    virtual inline bool getStall() const { return false; }
-
-protected:
-
-    Vector3 _for_bas;           ///< [N] total force vector expressed in BAS
-    Vector3 _mom_bas;           ///< [N*m] total moment vector expressed in BAS
-
-    Vector3 _for_aero;          ///< [N] total force vector expressed in Aerodynamic Axes System
-    Vector3 _mom_stab;          ///< [N*m] total moment vector expressed in Stability Axes System
-
-    Matrix3x3 _aero2bas;        ///< rotation matrix from Aerodynamic Axes System to BAS
-    Matrix3x3 _stab2bas;        ///< rotation matrix from Stability Axes System to BAS
-    Matrix3x3 _bas2aero;        ///< rotation matrix from BAS to Aerodynamic Axes System
-    Matrix3x3 _bas2stab;        ///< rotation matrix from BAS to Stability Axes System
-
-    /** Updates rotation matrices. */
-    virtual void updateMatrices();
-
-private:
-
-    /** Using this constructor is forbidden. */
-    Aerodynamics( const Aerodynamics & ) : Module( FDM_NULLPTR, FDM_NULLPTR ) {}
-};
-
-} // end of fdm namespace
+    _ground_wgs = wgs.getPos_WGS();
+    _normal_wgs = wgs.getNorm_WGS();
+#   endif
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // FDM_AERODYNAMICS_H
+double Intersections::getElevation( double lat, double lon ) const
+{
+    WGS84::Geo b_geo;
+    WGS84::Geo e_geo;
+
+    b_geo.lat = lat;
+    b_geo.lon = lon;
+    b_geo.alt = 10000.0;
+
+    e_geo.lat = lat;
+    e_geo.lon = lon;
+    e_geo.alt = -1000.0;
+
+    Vector3 b_wgs = WGS84::geo2wgs( b_geo );
+    Vector3 e_wgs = WGS84::geo2wgs( e_geo );
+    Vector3 r_wgs;
+    Vector3 n_wgs;
+
+    if ( FDM_SUCCESS == getIntersection( b_wgs, e_wgs, &r_wgs, &n_wgs ) )
+    {
+        return WGS84::wgs2geo( r_wgs ).alt;
+    }
+
+    return 0.0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int Intersections::getIntersection( const Vector3 &b, const Vector3 &e,
+                                    Vector3 *r, Vector3 *n, bool update ) const
+{
+#   ifdef SIM_INTERSECTIONS
+    if ( update )
+    {
+        osg::Vec3d b_tmp( b.x(), b.y(), b.z() );
+        osg::Vec3d e_tmp( e.x(), e.y(), e.z() );
+        osg::Vec3d r_tmp;
+        osg::Vec3d n_tmp;
+
+        if ( cgi::Intersections::instance()->findFirst( b_tmp, e_tmp, r_tmp, n_tmp ) )
+        {
+            (*r) = Vector3( r_tmp.x(), r_tmp.y(), r_tmp.z() );
+            (*n) = Vector3( n_tmp.x(), n_tmp.y(), n_tmp.z() );
+
+            return FDM_SUCCESS;
+        }
+    }
+    else
+#   endif
+    {
+        if ( _inited )
+        {
+            double num = _normal_wgs * ( _ground_wgs - b );
+            double den = _normal_wgs * ( e - b );
+
+            double u = 0.0;
+
+            if ( fabs( den ) > 10e-15 ) u = num / den;
+
+            if ( 0.0 < u && u < 1.0 )
+            {
+                (*r) = b + u * ( e - b );
+                (*n) = _normal_wgs;
+
+                return FDM_SUCCESS;
+            }
+        }
+    }
+
+    return FDM_FAILURE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+bool Intersections::isIntersection( const Vector3 &b, const Vector3 &e,
+                                    bool update ) const
+{
+    if ( update )
+    {
+        Vector3 r;
+        Vector3 n;
+
+        if ( FDM_SUCCESS == getIntersection( b, e, &r, &n, true ) )
+        {
+            return Geom::isIsect( b, e, r, n );
+        }
+    }
+    else
+    {
+        if ( _inited )
+        {
+            return Geom::isIsect( b, e, _ground_wgs, _normal_wgs );
+        }
+    }
+
+    return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Vector3 Intersections::getNormal( double lat, double lon, bool update ) const
+{
+    WGS84::Geo b_geo;
+    WGS84::Geo e_geo;
+
+    b_geo.lat = lat;
+    b_geo.lon = lon;
+    b_geo.alt = 10000.0;
+
+    e_geo.lat = lat;
+    e_geo.lon = lon;
+    e_geo.alt = -1000.0;
+
+    Vector3 b_wgs = WGS84::geo2wgs( b_geo );
+    Vector3 e_wgs = WGS84::geo2wgs( e_geo );
+    Vector3 r_wgs;
+    Vector3 n_wgs;
+
+    if ( FDM_SUCCESS == getIntersection( b_wgs, e_wgs, &r_wgs, &n_wgs, update ) )
+    {
+        return n_wgs;
+    }
+    else
+    {
+        return WGS84( b_wgs ).getNorm_WGS();
+    }
+}

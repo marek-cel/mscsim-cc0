@@ -124,85 +124,234 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef FDM_CONTROLS_H
-#define FDM_CONTROLS_H
+
+#include <fdm/fdm_Recorder.h>
+
+#include <fdm/fdm_Exception.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/main/fdm_Module.h>
-
-#include <fdm/utils/fdm_Map.h>
-#include <fdm/utils/fdm_Table1.h>
+using namespace fdm;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace fdm
-{
+Recorder::Recorder( double desiredTimeStep ) :
+    _desiredTimeStep ( desiredTimeStep ),
 
-/**
- * @brief Controls model base class.
- *
- * Input data reference is created for each control channel. Name of
- * this data reference is "input/controls/channel_name".
- *
- * XML configuration file format:
- * @code
- * <controls>
- *   <control_channel input="{ channel input }">
- *     { channel input value } { channel output value }
- *     ... { more entries }
- *   </control_channel>
- *   ... { more entries }
- * </controls>
- * @endcode
- *
- * @see ISO 1151-4:1994
- * @see ISO 1151-6:1982
- */
-class FDMEXPORT Controls : public Module
-{
-public:
+    _mode ( DataInp::Recording::Disabled ),
 
-    /** Control channel data. */
-    struct Channel
+    _time      ( 0.0 ),
+    _time_next ( 0.0 ),
+    _time_prev ( 0.0 ),
+    _time_rec  ( 0.0 ),
+
+    _records ( 0 ),
+
+    _recording ( false ),
+    _replaying ( false )
+{}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Recorder::~Recorder()
+{
+    if ( _fstream.is_open() )
     {
-        DataRef input;      ///< channel input data reference
-        Table1  table;      ///< channel input vs output data
-        double  output;     ///< channel output
-    };
+        _fstream.flush();
+        _fstream.close();
+    }
 
-    typedef Map< std::string, Channel > Channels;
-
-    /** @brief Constructor. */
-    Controls( const Aircraft *aircraft, Input *input );
-
-    /** @brief Destructor. */
-    virtual ~Controls();
-
-    /**
-     * @brief Reads data.
-     * @param dataNode XML node
-     */
-    virtual void readData( XmlNode &dataNode );
-
-    /** @brief Initializes controls. */
-    virtual void initialize();
-
-    /** @brief Updates controls. */
-    virtual void update();
-
-protected:
-
-    Channels _channels;         ///< control channels
-
-private:
-
-    /** Using this constructor is forbidden. */
-    Controls( const Controls & ) : Module( FDM_NULLPTR, FDM_NULLPTR ) {}
-};
-
-} // end of fdm namespace
+    Variables::iterator it = _variables.begin();
+    while ( it != _variables.end() )
+    {
+        FDM_DELPTR( (*it) );
+        it = _variables.erase( it );
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // FDM_CONTROLS_H
+void Recorder::addVariable( VariableBase *var )
+{
+    _variables.push_back( var );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Recorder::initialize( Mode mode, const char *file )
+{
+    _mode = mode;
+
+    if ( _mode != DataInp::Recording::Disabled )
+    {
+        _fstream.open( file, getOpenMode( _mode ) );
+
+        if ( _fstream.is_open() )
+        {
+            _recording = _mode == DataInp::Recording::Record;
+            _replaying = _mode == DataInp::Recording::Replay;
+
+            if ( _recording )
+            {
+                headerWrite();
+
+                _fstream.setf( std::ios_base::showpoint );
+                _fstream.setf( std::ios_base::fixed );
+            }
+            else
+            {
+                headerRead();
+                recordRead( _time_next );
+
+                for ( Variables::iterator it = _variables.begin(); it != _variables.end(); ++it )
+                {
+                    (*it)->initialize();
+                }
+            }
+        }
+        else
+        {
+            Exception e;
+
+            e.setType( Exception::FileReadingError );
+            e.setInfo( "Cannot open recording file file \"" + std::string( file ) + "\"." );
+
+            FDM_THROW( e );
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Recorder::step( double timeStep )
+{
+    if ( _fstream.is_open() )
+    {
+        switch ( _mode )
+        {
+        default:
+        case DataInp::Recording::Disabled:
+            // do nothing
+            break;
+
+        case DataInp::Recording::Record:
+            stepRecord();
+            _time_rec += timeStep;
+            break;
+
+        case DataInp::Recording::Replay:
+            stepReplay();
+            break;
+        }
+    }
+
+    _time += timeStep;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+std::ios_base::openmode Recorder::getOpenMode( Mode mode )
+{
+    if ( mode == DataInp::Recording::Record )
+    {
+        return std::ios_base::out;
+    }
+
+    return std::ios_base::in;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Recorder::headerRead()
+{
+    std::string header;
+    getline( _fstream, header );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Recorder::headerWrite()
+{
+    _fstream << "\"time\"";
+
+    for ( Variables::iterator it = _variables.begin(); it != _variables.end(); ++it )
+    {
+        _fstream << ";\"" << (*it)->name() << "\"";
+    }
+
+    _fstream << "\n";
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Recorder::recordRead( double &time )
+{
+    _fstream >> time;
+
+    char separator;
+
+    for ( Variables::iterator it = _variables.begin(); it != _variables.end(); ++it )
+    {
+        _fstream >> separator;
+        (*it)->read( _fstream );
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Recorder::recordWrite( double time )
+{
+    _fstream << std::setprecision( 4 );
+    _fstream << time;
+
+    for ( Variables::iterator it = _variables.begin(); it != _variables.end(); ++it )
+    {
+        _fstream << ";";
+        (*it)->write( _fstream );
+    }
+
+    _fstream << "\n";
+    _records++;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Recorder::stepRecord()
+{
+    if ( _time_rec > _desiredTimeStep || _records == 0 )
+    {
+        if ( _records != 0 ) _time_rec -= _desiredTimeStep;
+
+        recordWrite( _time );
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Recorder::stepReplay()
+{
+    while ( _replaying && _time_next <= _time )
+    {
+        _time_prev = _time_next;
+
+        if ( !_fstream.eof() )
+        {
+            recordRead( _time_next );
+        }
+        else
+        {
+            _replaying = false;
+        }
+    }
+
+    // interpolating
+    if ( _replaying )
+    {
+        double t_coef = ( _time - _time_prev ) / ( _time_next - _time_prev );
+
+        for ( Variables::iterator it = _variables.begin(); it != _variables.end(); ++it )
+        {
+            (*it)->interpolate( t_coef );
+        }
+    }
+}

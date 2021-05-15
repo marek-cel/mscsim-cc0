@@ -129,7 +129,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <fdm/main/fdm_Controls.h>
+#include <fdm/fdm_Controls.h>
 
 #include <fdm_uh60/uh60_AFCS.h>
 

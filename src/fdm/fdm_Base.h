@@ -133,7 +133,7 @@
 #include <fdm/fdm_Path.h>
 #include <fdm/fdm_Types.h>
 
-#include <fdm/main/fdm_Input.h>
+#include <fdm/fdm_Input.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -124,24 +124,85 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-
-#include <fdm/main/fdm_Propulsion.h>
-#include <fdm/main/fdm_Aircraft.h>
-
-////////////////////////////////////////////////////////////////////////////////
-
-using namespace fdm;
+#ifndef FDM_CONTROLS_H
+#define FDM_CONTROLS_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Propulsion::Propulsion( const Aircraft *aircraft, Input *input ) :
-    Module ( aircraft, input )
-{}
+#include <fdm/fdm_Module.h>
+
+#include <fdm/utils/fdm_Map.h>
+#include <fdm/utils/fdm_Table1.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Propulsion::~Propulsion() {}
+namespace fdm
+{
+
+/**
+ * @brief Controls model base class.
+ *
+ * Input data reference is created for each control channel. Name of
+ * this data reference is "input/controls/channel_name".
+ *
+ * XML configuration file format:
+ * @code
+ * <controls>
+ *   <control_channel input="{ channel input }">
+ *     { channel input value } { channel output value }
+ *     ... { more entries }
+ *   </control_channel>
+ *   ... { more entries }
+ * </controls>
+ * @endcode
+ *
+ * @see ISO 1151-4:1994
+ * @see ISO 1151-6:1982
+ */
+class FDMEXPORT Controls : public Module
+{
+public:
+
+    /** Control channel data. */
+    struct Channel
+    {
+        DataRef input;      ///< channel input data reference
+        Table1  table;      ///< channel input vs output data
+        double  output;     ///< channel output
+    };
+
+    typedef Map< std::string, Channel > Channels;
+
+    /** @brief Constructor. */
+    Controls( const Aircraft *aircraft, Input *input );
+
+    /** @brief Destructor. */
+    virtual ~Controls();
+
+    /**
+     * @brief Reads data.
+     * @param dataNode XML node
+     */
+    virtual void readData( XmlNode &dataNode );
+
+    /** @brief Initializes controls. */
+    virtual void initialize();
+
+    /** @brief Updates controls. */
+    virtual void update();
+
+protected:
+
+    Channels _channels;         ///< control channels
+
+private:
+
+    /** Using this constructor is forbidden. */
+    Controls( const Controls & ) : Module( FDM_NULLPTR, FDM_NULLPTR ) {}
+};
+
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Propulsion::initialize() {}
+#endif // FDM_CONTROLS_H
