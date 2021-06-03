@@ -148,9 +148,9 @@ class HUD
 {
 public:
 
-    static const float _charSize;       ///<
-    static const float _angleCoef;      ///<
-    static const float _rollLimit;      ///<
+    static const double _charSize;      ///<
+    static const double _angleCoef;     ///<
+    static const double _rollLimit;     ///<
 
     /** @brief Constructor. */
     HUD();
@@ -205,8 +205,8 @@ private:
 
     osg::Vec4 _color;
 
-    float _sideslipAngleFPM_deg;
-    float _angleOfAttackFPM_deg;
+    double _sideslipAngleFPM_deg;
+    double _angleOfAttackFPM_deg;
 
     bool _validFPM;
 
@@ -226,8 +226,8 @@ private:
 
     void createPitchLadderBar( osg::Geode *geode, int y, int deg );
 
-    void createHeadingScaleBar( osg::Geode *geode, float y_del, int x, int deg10 );
-    void createHeadingScaleBar( osg::Geode *geode, float y_del, int x );
+    void createHeadingScaleBar( osg::Geode *geode, double y_del, int x, int deg10 );
+    void createHeadingScaleBar( osg::Geode *geode, double y_del, int x );
 
     void updateRollIndicator();
     void updatePitchLadder();

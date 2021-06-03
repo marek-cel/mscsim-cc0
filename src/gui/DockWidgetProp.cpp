@@ -378,7 +378,7 @@ void DockWidgetProp::setAB( unsigned int index, bool afterburner )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void DockWidgetProp::setRPM( unsigned int index, float val )
+void DockWidgetProp::setRPM( unsigned int index, double val )
 {
     if ( index < FDM_MAX_ENGINES )
     {
@@ -388,7 +388,7 @@ void DockWidgetProp::setRPM( unsigned int index, float val )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void DockWidgetProp::setPROP( unsigned int index, float val )
+void DockWidgetProp::setPROP( unsigned int index, double val )
 {
     if ( index < FDM_MAX_ENGINES )
     {
@@ -398,7 +398,7 @@ void DockWidgetProp::setPROP( unsigned int index, float val )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void DockWidgetProp::setNG( unsigned int index, float val )
+void DockWidgetProp::setNG( unsigned int index, double val )
 {
     if ( index < FDM_MAX_ENGINES )
     {
@@ -408,7 +408,7 @@ void DockWidgetProp::setNG( unsigned int index, float val )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void DockWidgetProp::setN1( unsigned int index, float val )
+void DockWidgetProp::setN1( unsigned int index, double val )
 {
     if ( index < FDM_MAX_ENGINES )
     {
@@ -418,7 +418,7 @@ void DockWidgetProp::setN1( unsigned int index, float val )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void DockWidgetProp::setN2( unsigned int index, float val )
+void DockWidgetProp::setN2( unsigned int index, double val )
 {
     if ( index < FDM_MAX_ENGINES )
     {
@@ -428,7 +428,7 @@ void DockWidgetProp::setN2( unsigned int index, float val )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void DockWidgetProp::setTRQ( unsigned int index, float val )
+void DockWidgetProp::setTRQ( unsigned int index, double val )
 {
     if ( index < FDM_MAX_ENGINES )
     {
@@ -438,7 +438,7 @@ void DockWidgetProp::setTRQ( unsigned int index, float val )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void DockWidgetProp::setEPR( unsigned int index, float val )
+void DockWidgetProp::setEPR( unsigned int index, double val )
 {
     if ( index < FDM_MAX_ENGINES )
     {
@@ -448,7 +448,7 @@ void DockWidgetProp::setEPR( unsigned int index, float val )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void DockWidgetProp::setMAP( unsigned int index, float val )
+void DockWidgetProp::setMAP( unsigned int index, double val )
 {
     if ( index < FDM_MAX_ENGINES )
     {
@@ -458,7 +458,7 @@ void DockWidgetProp::setMAP( unsigned int index, float val )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void DockWidgetProp::setEGT( unsigned int index, float val )
+void DockWidgetProp::setEGT( unsigned int index, double val )
 {
     if ( index < FDM_MAX_ENGINES )
     {
@@ -468,7 +468,7 @@ void DockWidgetProp::setEGT( unsigned int index, float val )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void DockWidgetProp::setCHT( unsigned int index, float val )
+void DockWidgetProp::setCHT( unsigned int index, double val )
 {
     if ( index < FDM_MAX_ENGINES )
     {
@@ -478,7 +478,7 @@ void DockWidgetProp::setCHT( unsigned int index, float val )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void DockWidgetProp::setTIT( unsigned int index, float val )
+void DockWidgetProp::setTIT( unsigned int index, double val )
 {
     if ( index < FDM_MAX_ENGINES )
     {
@@ -488,7 +488,7 @@ void DockWidgetProp::setTIT( unsigned int index, float val )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void DockWidgetProp::setTOT( unsigned int index, float val )
+void DockWidgetProp::setTOT( unsigned int index, double val )
 {
     if ( index < FDM_MAX_ENGINES )
     {
@@ -498,7 +498,7 @@ void DockWidgetProp::setTOT( unsigned int index, float val )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void DockWidgetProp::setITT( unsigned int index, float val )
+void DockWidgetProp::setITT( unsigned int index, double val )
 {
     if ( index < FDM_MAX_ENGINES )
     {
@@ -508,7 +508,7 @@ void DockWidgetProp::setITT( unsigned int index, float val )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void DockWidgetProp::setFF( unsigned int index, float val )
+void DockWidgetProp::setFF( unsigned int index, double val )
 {
     if ( index < FDM_MAX_ENGINES )
     {

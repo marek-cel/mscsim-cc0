@@ -161,7 +161,7 @@ public:
      * @param lat_segments
      * @param lon_segments
      */
-    static void createDome( osg::Geometry *geom, float radius,
+    static void createDome( osg::Geometry *geom, double radius,
                             bool texCoords = false, Projection projection = Cylindrical,
                             int lat_segments = 18, int lon_segments = 36 );
 
@@ -172,7 +172,7 @@ public:
      * @param texCoords
      * @param segments
      */
-    static void createFace( osg::Geometry *geom, float radius, bool texCoords = false,
+    static void createFace( osg::Geometry *geom, double radius, bool texCoords = false,
                             int segments = 32 );
 
     /**
@@ -208,7 +208,7 @@ public:
      */
     static void createQuad( osg::Geometry *geom, osg::Vec3Array *v,
                             bool texCoords = false, bool color = false,
-                            float alpha = 1.0f );
+                            double alpha = 1.0 );
 
     /**
      * @brief Creates ring.
@@ -218,7 +218,7 @@ public:
      * @param texCoords
      * @param segments
      */
-    static void createRing( osg::Geometry *geom, float radius_i, float radius_o,
+    static void createRing( osg::Geometry *geom, double radius_i, double radius_o,
                             bool texCoords = false, int segments = 32 );
 };
 
