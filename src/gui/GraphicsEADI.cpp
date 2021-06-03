@@ -1907,13 +1907,13 @@ void GraphicsEADI::ASI::updateScaleLabels()
     int tmp = floor( _airspeed + 0.5f );
     int spd = tmp - ( tmp % 20 );
 
-    double spd1 = (double)spd + 60.0;
-    double spd2 = (double)spd + 40.0;
-    double spd3 = (double)spd + 20.0;
-    double spd4 = (double)spd;
-    double spd5 = (double)spd - 20.0;
-    double spd6 = (double)spd - 40.0;
-    double spd7 = (double)spd - 60.0;
+    double spd1 = static_cast< double >( spd ) + 60.0;
+    double spd2 = static_cast< double >( spd ) + 40.0;
+    double spd3 = static_cast< double >( spd ) + 20.0;
+    double spd4 = static_cast< double >( spd );
+    double spd5 = static_cast< double >( spd ) - 20.0;
+    double spd6 = static_cast< double >( spd ) - 40.0;
+    double spd7 = static_cast< double >( spd ) - 60.0;
 
     while ( _labelsDeltaY_new > _scaleY * 15.0 )
     {
