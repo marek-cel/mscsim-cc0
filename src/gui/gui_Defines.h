@@ -127,7 +127,7 @@
 #ifndef GUI_DEFINES_H
 #define GUI_DEFINES_H
 
-#include <Defines.h>
+#include <defs.h>
 #include <cgi/cgi_Defines.h>
 
 ////////////////////////////////////////////////////////////////////////////////

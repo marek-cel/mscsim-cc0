@@ -124,46 +124,90 @@
  *     this CC0 or use of the Work.
  *
  ******************************************************************************/
-#ifndef DEFINES_H
-#define DEFINES_H
+#ifndef FDM_MERCATOR_H
+#define FDM_MERCATOR_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define SIM_APP_NAME    "MScSim"
-#define SIM_APP_VER     "0.4"
-#define SIM_ORG_NAME    "Marek_Cel"
-#define SIM_ORG_DOMAIN  "marekcel.pl"
+#include <fdm/fdm_Defines.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef NULLPTR
-#   if __cplusplus >= 201103L
-#       define NULLPTR nullptr
-#   else
-#       define NULLPTR 0
-#   endif
-#endif
+namespace fdm
+{
+
+/**
+ * @brief Mercator map projection coordinates computation class.
+ *
+ * @see Evenden G.: libproj4: A Comprehensive Library of Cartographic Projection Functions (Preliminary Draft), 2005, p.37
+ * @see Grafarend E., et al.: Map Projections: Carthographic Information Systems, 2006, p.490
+ * @see Deetz C., Adams O.: Elements of Map Projection, US Coast and Geodetic Survery, 1931, p.101
+ */
+class FDMEXPORT Mercator
+{
+public:
+
+    static const double _max_x;     ///< [m] maximum Mercator x-coordinate for longitude 180 deg
+    static const double _max_y;     ///< [m] maximum Mercator y-coordinate for latitude 85 deg
+
+    /**
+     * @brief Computes geodetic latitude.
+     * @param y [m] Mercator y-coordinate
+     * @param max_error maximum error (solve condition)
+     * @param max_iterations maximum number of iterations
+     * @return geodetic latitude [rad]
+     */
+    static double lat( double y, double max_error = 1.0e-9,
+                       unsigned int max_iterations = 10 );
+
+    /**
+     * @brief Computes geodetic longitude.
+     * @param x [m] Mercator x-coordinate
+     * @return geodetic longitude [rad]
+     */
+    static double lon( double x );
+
+    /**
+     * @brief Computes Mercator x-coordinate.
+     * @param lon [rad] geodetic longitude
+     * @return Mercator x-coordinate [m]
+     */
+    static double x( double lon );
+
+    /**
+     * @brief Computes Mercator y-coordinate.
+     * @param lat [rad] geodetic latitude
+     * @return Mercator y-coordinate [m]
+     */
+    static double y( double lat );
+
+    /**
+     * @brief Computes ellipsoid parallel radius.
+     * @param lat_ts [rad] geodetic latitude of true scale
+     * @return parallel radius [m]
+     */
+    static double k0( double lat_ts );
+
+    /**
+     * @brief Computes Isometric Latitude kernel.
+     * @param lat [rad] geodetic latitude
+     * @return Isometric Latitude kernel
+     */
+    static double t( double lat );
+
+    /**
+     * @brief Computes geodetic latitude from the isometric latitude.
+     * @param t isometric latitude
+     * @param max_error maximum error (solve condition)
+     * @param max_iterations maximum number of iterations
+     * @return geodetic latitude [rad]
+     */
+    static double t_inv( double t, double max_error = 1.0e-9,
+                         unsigned int max_iterations = 10 );
+};
+
+} // end of fdm namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DELPTR
-#define DELPTR( ptr ) \
-{ \
-    if ( ptr ) delete ptr; \
-    ptr = NULLPTR; \
-}
-#endif
-
-////////////////////////////////////////////////////////////////////////////////
-
-#ifndef DELTAB
-#define DELTAB( ptr ) \
-{ \
-    if ( ptr ) delete [] ptr; \
-    ptr = NULLPTR; \
-}
-#endif
-
-////////////////////////////////////////////////////////////////////////////////
-
-#endif // DEFINES_H
+#endif // FDM_MERCATOR_H

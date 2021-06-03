@@ -171,7 +171,7 @@ GraphicsEHSI::GraphicsEHSI( QWidget *parent ) :
 
     _heading_sel ( 0.0f ),
 
-    _cdi ( NONE ),
+    _cdi ( CDI::Off ),
 
     _bearingVisible   ( true ),
     _distanceVisible  ( true ),
@@ -480,7 +480,7 @@ void GraphicsEHSI::reset()
 
     _heading_sel = 0.0f;
 
-    _cdi = NONE;
+    _cdi = CDI::Off;
 
     _bearingVisible  = true;
     _distanceVisible = true;
@@ -512,7 +512,7 @@ void GraphicsEHSI::updateView()
         _itemBrgArrow->setVisible( false );
     }
 
-    if ( _cdi != NONE )
+    if ( _cdi != CDI::Off )
     {
         _itemDevBar->setVisible( true );
         _itemDevScale->setVisible( true );
@@ -533,12 +533,12 @@ void GraphicsEHSI::updateView()
         _itemCdiTo    ->setRotation( angle_deg );
         _itemCdiFrom  ->setRotation( angle_deg );
 
-        if ( _cdi == TO )
+        if ( _cdi == CDI::TO )
         {
             _itemCdiTo   ->setVisible( true  );
             _itemCdiFrom ->setVisible( false );
         }
-        else if ( _cdi == FROM )
+        else if ( _cdi == CDI::FROM )
         {
             _itemCdiTo   ->setVisible( false );
             _itemCdiFrom ->setVisible( true  );

@@ -132,7 +132,7 @@
 #include <QGraphicsView>
 #include <QGraphicsSvgItem>
 
-#include <Defines.h>
+#include <defs.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -145,8 +145,13 @@ class GraphicsEHSI : public QGraphicsView
 
 public:
 
-    /** CDI indicator. */
-    enum CDI { NONE = 0, TO, FROM };
+    /** Course Deviation Indicator (CDI). */
+    enum class CDI
+    {
+        Off = 0,
+        TO,
+        FROM
+    };
 
     /** @brief Constructor. */
     explicit GraphicsEHSI( QWidget *parent = NULLPTR );
@@ -167,7 +172,7 @@ public:
     void setBearing( float bearing, bool visible = false );
 
     /** @param deviation [-] */
-    void setDeviation( float deviation, CDI cdi = NONE );
+    void setDeviation( float deviation, CDI cdi = CDI::Off );
 
     /** @param distance [nm] */
     void setDistance( float distance, bool visible = false );

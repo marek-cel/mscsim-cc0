@@ -133,7 +133,7 @@
 #include <AL/alc.h>
 
 #include <Data.h>
-#include <Defines.h>
+#include <defs.h>
 
 #include <sfx/sfx_Sample.h>
 

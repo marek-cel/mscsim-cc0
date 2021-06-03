@@ -135,7 +135,7 @@
 
 #include <AL/alut.h>
 
-#include <Defines.h>
+#include <defs.h>
 
 #include <sim/Log.h>
 
