@@ -334,6 +334,13 @@ void Map::setVisibilityAirports( bool visible )
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void Map::setVisibilityInWaters( bool visible )
+{
+    _layers->setVisibilityInWaters( visible );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void Map::setVisibilitySatellite( bool visible )
 {
     _layers->setVisibilitySatellite( visible );
