@@ -122,7 +122,6 @@
  *  d. Affirmer understands and acknowledges that Creative Commons is not a
  *     party to this document and has no duty or obligation with respect to
  *     this CC0 or use of the Work.
- *
  ******************************************************************************/
 
 #include <gui/ComboUnitsRotation.h>
@@ -135,13 +134,13 @@ ComboUnitsRotation::ComboUnitsRotation( QWidget *parent ) :
     ComboUnits ( parent )
 {
     _coefs.push_back( 1.0 );
-    _names.push_back( QString( "rad/s" ) );
+    _names.push_back( QString( tr("rad/s") ) );
 
     _coefs.push_back( fdm::Units::rad2deg() );
-    _names.push_back( QString( "deg/s" ) );
+    _names.push_back( QString( tr("deg/s") ) );
 
     _coefs.push_back( 60.0 / ( 2.0 * M_PI ) );
-    _names.push_back( QString( "rpm" ) );
+    _names.push_back( QString( tr("rpm") ) );
 
     for ( size_t i = 0; i < _names.size(); i++ ) addItem( _names[ i ] );
 }

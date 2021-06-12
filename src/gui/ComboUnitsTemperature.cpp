@@ -122,7 +122,6 @@
  *  d. Affirmer understands and acknowledges that Creative Commons is not a
  *     party to this document and has no duty or obligation with respect to
  *     this CC0 or use of the Work.
- *
  ******************************************************************************/
 
 #include <gui/ComboUnitsTemperature.h>
@@ -135,13 +134,13 @@ ComboUnitsTemperature::ComboUnitsTemperature( QWidget *parent ) :
     ComboUnits ( parent )
 {
     _coefs.push_back( 1.0 );
-    _names.push_back( QString( "K" ) );
+    _names.push_back( QString( tr("K") ) );
 
     _coefs.push_back( 1.0 );
-    _names.push_back( QString( "deg C" ) );
+    _names.push_back( QString( tr("deg C") ) );
 
     _coefs.push_back( 1.0 );
-    _names.push_back( QString( "deg F" ) );
+    _names.push_back( QString( tr("deg F") ) );
 
     for ( size_t i = 0; i < _names.size(); i++ ) addItem( _names[ i ] );
 }

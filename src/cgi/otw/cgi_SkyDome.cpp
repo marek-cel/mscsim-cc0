@@ -122,7 +122,6 @@
  *  d. Affirmer understands and acknowledges that Creative Commons is not a
  *     party to this document and has no duty or obligation with respect to
  *     this CC0 or use of the Work.
- *
  ******************************************************************************/
 
 #include <cgi/otw/cgi_SkyDome.h>
@@ -132,6 +131,8 @@
 #endif
 
 #include <cmath>
+#include <fstream>
+#include <limits>
 
 #include <osg/Geode>
 #include <osg/Geometry>
@@ -750,17 +751,29 @@ void SkyDome::createStars()
 
     float magLimit = 4.5f;
 
-    FILE *file = fopen( Path::get( "cgi/stars.csv" ).c_str(), "r" );
+    std::fstream file( Path::get( "cgi/stars.csv" ).c_str(), std::ios_base::in );
 
-    if ( file )
+    if ( file.is_open() )
     {
+        char separator;
+
         float alpha = 0.0f;
         float delta = 0.0f;
-        float mag = 0.0f;
+        float mag   = 0.0f;
 
-        while ( !feof( file ) )
+        while ( !file.eof() )
         {
-            if ( fscanf( file, "%f,%f,%f\n", &alpha, &delta, &mag ) == 3 )
+            alpha = std::numeric_limits< float >::quiet_NaN();
+            delta = std::numeric_limits< float >::quiet_NaN();
+            mag   = std::numeric_limits< float >::quiet_NaN();
+
+            file >> alpha;
+            file >> separator;
+            file >> delta;
+            file >> separator;
+            file >> mag;
+
+            if ( !osg::isNaN( alpha ) && !osg::isNaN( delta ) && !osg::isNaN( mag ) )
             {
                 if ( mag < magLimit )
                 {
@@ -777,9 +790,9 @@ void SkyDome::createStars()
             }
         }
 
-        //osg::notify(osg::ALWAYS) << starsCount << " stars brighter than " << magLimit << "mag" << std::endl;
+        //osg::notify(osg::ALWAYS) << _starsCount << " stars brighter than " << magLimit << "mag" << std::endl;
 
-        fclose( file );
+        file.close();
     }
 
     // texture

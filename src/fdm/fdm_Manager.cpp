@@ -122,7 +122,6 @@
  *  d. Affirmer understands and acknowledges that Creative Commons is not a
  *     party to this document and has no duty or obligation with respect to
  *     this CC0 or use of the Work.
- *
  ******************************************************************************/
 
 #include <fdm/fdm_Manager.h>
@@ -539,12 +538,22 @@ void Manager::updateStateInit()
         }
         catch ( Exception &e )
         {
-            Log::e() << e.getInfo() << std::endl;
+            Log::e() << e.getInfo()
+#           ifdef _DEBUG
+            << " " << e.getFile()
+            << "(" << e.getLine() << ")"
+#           endif
+            << std::endl;
 
             while ( e.hasCause() )
             {
                 e = e.getCause();
-                Log::e() << e.getInfo() << std::endl;
+                Log::e() << e.getInfo()
+#               ifdef _DEBUG
+                << " " << e.getFile()
+                << "(" << e.getLine() << ")"
+#               endif
+                << std::endl;
             }
 
             _stateOut = DataOut::Stopped;
@@ -607,12 +616,22 @@ void Manager::updateStateWork()
         }
         catch ( Exception &e )
         {
-            Log::e() << e.getInfo() << std::endl;
+            Log::e() << e.getInfo()
+#           ifdef _DEBUG
+            << " " << e.getFile()
+            << "(" << e.getLine() << ")"
+#           endif
+            << std::endl;
 
             while ( e.hasCause() )
             {
                 e = e.getCause();
-                Log::e() << e.getInfo() << std::endl;
+                Log::e() << e.getInfo()
+#               ifdef _DEBUG
+                << " " << e.getFile()
+                << "(" << e.getLine() << ")"
+#               endif
+                << std::endl;
             }
 
             _stateOut = DataOut::Stopped;

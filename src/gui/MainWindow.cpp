@@ -122,7 +122,6 @@
  *  d. Affirmer understands and acknowledges that Creative Commons is not a
  *     party to this document and has no duty or obligation with respect to
  *     this CC0 or use of the Work.
- *
  ******************************************************************************/
 
 #include <gui/MainWindow.h>
@@ -240,13 +239,13 @@ MainWindow::MainWindow( QWidget *parent ) :
     _dockMap  = new DockWidgetMap  ( this );
     _dockProp = new DockWidgetProp ( this );
 
-    _dockAuto->setObjectName ( "DockAuto" );
-    _dockCtrl->setObjectName ( "DockCtrl" );
-    _dockData->setObjectName ( "DockData" );
-    _dockEFIS->setObjectName ( "DockEFIS" );
-    _dockMain->setObjectName ( "DockMain" );
-    _dockMap->setObjectName  ( "DockMap"  );
-    _dockProp->setObjectName ( "DockProp" );
+    _dockAuto ->setObjectName( "DockAuto" );
+    _dockCtrl ->setObjectName( "DockCtrl" );
+    _dockData ->setObjectName( "DockData" );
+    _dockEFIS ->setObjectName( "DockEFIS" );
+    _dockMain ->setObjectName( "DockMain" );
+    _dockMap  ->setObjectName( "DockMap"  );
+    _dockProp ->setObjectName( "DockProp" );
 
     addDockWidget( Qt::TopDockWidgetArea    , _dockAuto );
     addDockWidget( Qt::BottomDockWidgetArea , _dockCtrl );

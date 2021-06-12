@@ -122,7 +122,6 @@
  *  d. Affirmer understands and acknowledges that Creative Commons is not a
  *     party to this document and has no duty or obligation with respect to
  *     this CC0 or use of the Work.
- *
  ******************************************************************************/
 
 #include <gui/ComboUnitsNumber.h>
@@ -133,10 +132,10 @@ ComboUnitsNumber::ComboUnitsNumber( QWidget *parent ) :
     ComboUnits ( parent )
 {
     _coefs.push_back( 1.0 );
-    _names.push_back( QString( "-" ) );
+    _names.push_back( QString( tr("-") ) );
 
     _coefs.push_back( 100.0 );
-    _names.push_back( QString( "%" ) );
+    _names.push_back( QString( tr("%") ) );
 
     for ( size_t i = 0; i < _names.size(); i++ ) addItem( _names[ i ] );
 }

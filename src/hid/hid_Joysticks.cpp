@@ -122,7 +122,6 @@
  *  d. Affirmer understands and acknowledges that Creative Commons is not a
  *     party to this document and has no duty or obligation with respect to
  *     this CC0 or use of the Work.
- *
  ******************************************************************************/
 
 #include <hid/hid_Joysticks.h>
@@ -130,6 +129,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <sstream>
 #include <string>
 
 #include <sim/Log.h>
@@ -250,11 +250,11 @@ void Joysticks::init()
 #   ifdef HID_LINUX_JOYSTICK
     for ( int i = 0; i < HID_MAX_JOYS; i++ )
     {
-        char tempDev[ 255 ];
+        std::stringstream ss;
 
-        sprintf( tempDev, "/dev/input/js%d", i );
+        ss << "/dev/input/js" << i;
 
-        int joyFD = open( tempDev, O_NONBLOCK );
+        int joyFD = open( ss.str().c_str(), O_NONBLOCK );
 
         if ( joyFD > 0 )
         {

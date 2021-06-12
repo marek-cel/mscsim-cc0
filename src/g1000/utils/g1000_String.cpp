@@ -122,7 +122,6 @@
  *  d. Affirmer understands and acknowledges that Creative Commons is not a
  *     party to this document and has no duty or obligation with respect to
  *     this CC0 or use of the Work.
- *
  ******************************************************************************/
 
 #include <g1000/utils/g1000_String.h>
@@ -130,6 +129,8 @@
 #include <cstdio>
 #include <sstream>
 #include <cstring>
+
+#include <g1000/utils/g1000_Misc.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -205,9 +206,13 @@ std::string String::stripLeadingSpaces( const std::string &str )
 bool String::toBool( const std::string &str, bool def )
 {
     bool result = def;
-    int temp;
+    int temp = std::numeric_limits< int >::quiet_NaN();
 
-    if ( 1 == sscanf( str.c_str(), "%d", &temp ) )
+    std::stringstream ss( str );
+
+    ss >> temp;
+
+    if ( Misc::isValid( temp ) )
     {
         result = temp != 0;
     }
@@ -220,9 +225,13 @@ bool String::toBool( const std::string &str, bool def )
 int String::toInt( const std::string &str, int def )
 {
     int result = def;
-    int temp;
+    int temp = std::numeric_limits< int >::quiet_NaN();
 
-    if ( 1 == sscanf( str.c_str(), "%d", &temp ) )
+    std::stringstream ss( str );
+
+    ss >> temp;
+
+    if ( Misc::isValid( temp ) )
     {
         result = temp;
     }
@@ -235,9 +244,13 @@ int String::toInt( const std::string &str, int def )
 double String::toDouble( const std::string &str, double def )
 {
     double result = def;
-    double temp;
+    double temp = std::numeric_limits< double >::quiet_NaN();
 
-    if ( 1 == sscanf( str.c_str(), "%lf", &temp ) )
+    std::stringstream ss( str );
+
+    ss >> temp;
+
+    if ( Misc::isValid( temp ) )
     {
         result = temp;
     }
@@ -249,33 +262,33 @@ double String::toDouble( const std::string &str, double def )
 
 std::string String::toString( int val )
 {
-    char valueStr[ 255 ];
+    std::stringstream ss;
 
-    sprintf( valueStr, "%d", val );
+    ss << val;
 
-    return std::string( valueStr );
+    return ss.str();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 std::string String::toString( float val )
 {
-    char valueStr[ 255 ];
+    std::stringstream ss;
 
-    sprintf( valueStr, "%f", val );
+    ss << val;
 
-    return std::string( valueStr );
+    return ss.str();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 std::string String::toString( double val )
 {
-    char valueStr[ 255 ];
+    std::stringstream ss;
 
-    sprintf( valueStr, "%lf", val );
+    ss << val;
 
-    return std::string( valueStr );
+    return ss.str();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

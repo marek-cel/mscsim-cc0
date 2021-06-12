@@ -122,7 +122,6 @@
  *  d. Affirmer understands and acknowledges that Creative Commons is not a
  *     party to this document and has no duty or obligation with respect to
  *     this CC0 or use of the Work.
- *
  ******************************************************************************/
 
 #include <fstream>
@@ -147,10 +146,6 @@ int main( int argc, char *argv[] )
 {
     setlocale( LC_ALL, "C" );
 
-#   ifdef _LINUX_
-    setenv( "LC_NUMERIC", "en_US", 1 );
-#   endif
-
 #   ifndef SIM_TEST
 
 #   ifdef _LINUX_
@@ -174,6 +169,8 @@ int main( int argc, char *argv[] )
     Log::out() << SIM_APP_VER  << " ";
     Log::out() << __DATE__ << " ";
     Log::out() << __TIME__ << std::endl;
+
+    QLocale::setDefault( QLocale::system() );
 
     QApplication *app = new QApplication( argc, argv );
 

@@ -122,7 +122,6 @@
  *  d. Affirmer understands and acknowledges that Creative Commons is not a
  *     party to this document and has no duty or obligation with respect to
  *     this CC0 or use of the Work.
- *
  ******************************************************************************/
 
 #include <gui/SpinBoxHighlight.h>
@@ -166,9 +165,9 @@ void SpinBoxHighlight::setHighlighted( bool highlighted )
     if ( _highlighted )
     {
 #       if QT_VERSION >= 0x050000
-        setStyleSheet( "QDoubleSpinBox { background-color: " + _color.name( QColor::HexRgb ) + "; }" );
+        setStyleSheet( "QDoubleSpinBox { background: " + _color.name( QColor::HexRgb ) + "; }" );
 #       else
-        setStyleSheet( "QDoubleSpinBox { background-color: " + _color.name() + "; }" );
+        setStyleSheet( "QDoubleSpinBox { background: " + _color.name() + "; }" );
 #       endif
     }
     else
