@@ -498,7 +498,7 @@ void WidgetMap::settingsRead()
     _viewRailroads = settings.value( "view_railroads" , _viewRailroads ).toBool();
     _viewRoads     = settings.value( "view_roads"     , _viewRoads     ).toBool();
     _viewAirports  = settings.value( "view_airports"  , _viewAirports  ).toBool();
-    _viewCrops     = settings.value( "inland_waters"  , _viewInWaters  ).toBool();
+    _viewInWaters  = settings.value( "inland_waters"  , _viewInWaters  ).toBool();
     _viewSatellite = settings.value( "view_satellite" , _viewSatellite ).toBool();
     _viewBorders   = settings.value( "view_borders"   , _viewBorders   ).toBool();
     _viewTraces    = settings.value( "view_traces"    , _viewTraces    ).toBool();
