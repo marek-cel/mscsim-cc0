@@ -224,7 +224,8 @@ GraphicsWindowQt::GraphicsWindowQt( osg::GraphicsContext::Traits *traits ) :
     }
 
 #   if OPENSCENEGRAPH_SOVERSION < 140
-    getEventQueue()->syncWindowRectangleWithGraphcisContext();
+    //getEventQueue()->syncWindowRectangleWithGraphcisContext();
+    getEventQueue()->syncWindowRectangleWithGraphicsContext();
 #   else
     getEventQueue()->syncWindowRectangleWithGraphicsContext();
 #   endif
@@ -379,7 +380,8 @@ bool GraphicsWindowQt::realizeImplementation()
     _realized = true;
 
 #   if OPENSCENEGRAPH_SOVERSION < 140
-    getEventQueue()->syncWindowRectangleWithGraphcisContext();
+    //getEventQueue()->syncWindowRectangleWithGraphcisContext();
+    getEventQueue()->syncWindowRectangleWithGraphicsContext();
 #   else
     getEventQueue()->syncWindowRectangleWithGraphicsContext();
 #   endif
