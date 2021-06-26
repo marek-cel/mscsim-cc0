@@ -153,7 +153,7 @@ public:
 
     explicit WidgetGDU( QWidget *parent = NULLPTR );
 
-    ~WidgetGDU();
+    virtual ~WidgetGDU();
 
     void update();
 

@@ -168,7 +168,7 @@ public:
 
     explicit DialogAction( QWidget *parent = NULLPTR, short joystickId = -1 );
 
-    ~DialogAction();
+    virtual ~DialogAction();
 
 protected:
 

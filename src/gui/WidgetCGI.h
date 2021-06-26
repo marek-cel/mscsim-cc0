@@ -142,7 +142,7 @@ class WidgetCGI : public WidgetOSG
 public:
 
     /** @brief Constructor. */
-    WidgetCGI( QWidget *parent = NULLPTR );
+    explicit WidgetCGI( QWidget *parent = NULLPTR );
 
     /** @brief Destructor. */
     virtual ~WidgetCGI();
